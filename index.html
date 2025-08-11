@@ -23,20 +23,38 @@
                         electric: '#7e22ce',
                         plasma: '#f472b6',
                         dark: '#020617',
-                        slate: '#0f172a'
+                        slate: '#0f172a',
+                        teal: '#2dd4bf',
+                        amber: '#f59e0b'
                     },
                     fontFamily: {
                         grotesk: ['Space Grotesk', 'sans-serif'],
                     },
                     animation: {
                         'float': 'float 6s ease-in-out infinite',
+                        'float-reverse': 'floatReverse 8s ease-in-out infinite',
+                        'float-delay': 'floatDelay 7s ease-in-out infinite',
                         'gradient': 'gradient 8s ease infinite',
                         'pulse-slow': 'pulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     },
                     keyframes: {
                         float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
+                            '0%, 100%': { transform: 'translateY(0) translateX(0)' },
+                            '25%': { transform: 'translateY(-20px) translateX(10px)' },
+                            '50%': { transform: 'translateY(0) translateX(20px)' },
+                            '75%': { transform: 'translateY(10px) translateX(0)' }
+                        },
+                        floatReverse: {
+                            '0%, 100%': { transform: 'translateY(0) translateX(0)' },
+                            '25%': { transform: 'translateY(15px) translateX(-15px)' },
+                            '50%': { transform: 'translateY(-10px) translateX(-10px)' },
+                            '75%': { transform: 'translateY(0) translateX(15px)' }
+                        },
+                        floatDelay: {
+                            '0%, 100%': { transform: 'translateY(0) translateX(0)' },
+                            '25%': { transform: 'translateY(-15px) translateX(-5px)' },
+                            '50%': { transform: 'translateY(10px) translateX(15px)' },
+                            '75%': { transform: 'translateY(5px) translateX(-10px)' }
                         },
                         gradient: {
                             '0%, 100%': { 'background-position': '0% 50%' },
@@ -55,6 +73,66 @@
                 radial-gradient(at 0% 50%, hsla(355, 100%, 93%, 0.1) 0px, transparent 50%);
             font-family: 'Space Grotesk', sans-serif;
             overflow-x: hidden;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) translateX(0);
+            }
+
+            25% {
+                transform: translateY(-20px) translateX(10px);
+            }
+
+            50% {
+                transform: translateY(0) translateX(20px);
+            }
+
+            75% {
+                transform: translateY(10px) translateX(0);
+            }
+        }
+
+        @keyframes floatReverse {
+
+            0%,
+            100% {
+                transform: translateY(0) translateX(0);
+            }
+
+            25% {
+                transform: translateY(15px) translateX(-15px);
+            }
+
+            50% {
+                transform: translateY(-10px) translateX(-10px);
+            }
+
+            75% {
+                transform: translateY(0) translateX(15px);
+            }
+        }
+
+        @keyframes floatDelay {
+
+            0%,
+            100% {
+                transform: translateY(0) translateX(0);
+            }
+
+            25% {
+                transform: translateY(-15px) translateX(-5px);
+            }
+
+            50% {
+                transform: translateY(10px) translateX(15px);
+            }
+
+            75% {
+                transform: translateY(5px) translateX(-10px);
+            }
         }
 
         .glow-card {
@@ -114,6 +192,16 @@
             animation-delay: calc(var(--order) * 0.2s);
         }
 
+        .tech-bubble-2 {
+            animation: floatReverse 8s ease-in-out infinite;
+            animation-delay: calc(var(--order) * 0.3s);
+        }
+
+        .tech-bubble-3 {
+            animation: floatDelay 7s ease-in-out infinite;
+            animation-delay: calc(var(--order) * 0.4s);
+        }
+
         .neon-text {
             text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
         }
@@ -158,14 +246,25 @@
 </head>
 
 <body class="min-h-screen flex flex-col items-center justify-center p-4 text-gray-100">
-    <!-- Animated Background Elements -->
+    <!-- Enhanced Animated Background Elements -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <!-- Original bubbles with improved movement -->
         <div class="absolute top-20 left-10 w-4 h-4 rounded-full bg-neon opacity-20 tech-bubble" style="--order:1">
         </div>
         <div class="absolute top-1/3 right-20 w-6 h-6 rounded-full bg-electric opacity-20 tech-bubble"
             style="--order:2"></div>
         <div class="absolute bottom-40 left-1/4 w-5 h-5 rounded-full bg-plasma opacity-20 tech-bubble"
             style="--order:3"></div>
+
+        <!-- New bubbles with different colors and movements -->
+        <div class="absolute top-1/4 left-1/5 w-8 h-8 rounded-full bg-teal opacity-15 tech-bubble-2" style="--order:1">
+        </div>
+        <div class="absolute bottom-1/3 right-1/6 w-7 h-7 rounded-full bg-amber opacity-15 tech-bubble-3"
+            style="--order:2"></div>
+        <div class="absolute top-3/4 right-1/4 w-5 h-5 rounded-full bg-purple-500 opacity-20 tech-bubble"
+            style="--order:3"></div>
+        <div class="absolute bottom-1/5 left-3/4 w-6 h-6 rounded-full bg-pink-500 opacity-15 tech-bubble-2"
+            style="--order:4"></div>
     </div>
 
     <div class="w-full max-w-md relative z-10">
@@ -174,8 +273,6 @@
             <!-- Hologram Effect Lines -->
             <div class="hologram-line top-10" style="--order:1"></div>
             <div class="hologram-line top-20" style="--order:2"></div>
-            <!-- <div class="hologram-line bottom-10" style="--order:3"></div>
-            <div class="hologram-line bottom-20" style="--order:4"></div> -->
 
             <div class="flex flex-col items-center text-center relative z-10">
                 <!-- Avatar with Gradient Border -->
@@ -195,8 +292,8 @@
                         class="text-xs px-3 py-1 rounded-full bg-slate-800 bg-opacity-60 border border-slate-700">JavaScript</span>
                     <span
                         class="text-xs px-3 py-1 rounded-full bg-slate-800 bg-opacity-60 border border-slate-700">React.js</span>
-                    <span class="text-xs px-3 py-1 rounded-full bg-slate-800 bg-opacity-60 border border-slate-700">
-                        TypeScript</span>
+                    <span
+                        class="text-xs px-3 py-1 rounded-full bg-slate-800 bg-opacity-60 border border-slate-700">TypeScript</span>
                     <span class="text-xs px-3 py-1 rounded-full bg-slate-800 bg-opacity-60 border border-slate-700">MERN
                         Stack</span>
                 </div>
@@ -220,7 +317,6 @@
                     </div>
                 </div>
             </a> -->
-
             <!-- LinkedIn Link -->
             <a href="https://www.linkedin.com/in/yash-mishra-356280223/" target="_blank"
                 class="link-card block glow-card rounded-xl p-5 group">
@@ -277,7 +373,7 @@
         </div>
 
         <!-- Footer -->
-        <div class="text-center mt-10 text-xs opacity-70 font-mono">
+        <div class="text-center mt-10 text-xs opacity-70 font-mono mb-1">
             <p>Yash.RK.Mishra - Full Stack Developer</p>
         </div>
     </div>
