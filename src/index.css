@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* --- THEME VARIABLES --- */
+  :root {
+    /* === LIGHT MODE (Professional / Corporate Clean) === */
+    --bg-canvas: #f1f5f9; /* Slate 100 */
+    --bg-card: #ffffff; /* Pure White Cards */
+
+    --text-main: #0f172a; /* Slate 900 */
+    --text-sub: #64748b; /* Slate 500 */
+
+    --color-accent: #0ea5e9; /* Sky 500 */
+    --color-border: rgba(0, 0, 0, 0.06);
+
+    /* Icon Specifics for Light Mode */
+    --bg-icon: #f3f4f6;
+    --text-icon: #1f2937;
+
+    --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05),
+      0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --card-hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 8px 10px -6px rgba(0, 0, 0, 0.05);
+
+    --gradient-text-start: #0284c7;
+    --gradient-text-end: #4f46e5;
+  }
+
+  .dark {
+    /* === DARK MODE (Modern SaaS / Developer Aesthetic) === */
+    --bg-canvas: #09090b; /* Zinc 950 */
+    --bg-card: rgba(24, 24, 27, 0.6); /* Zinc 900 with opacity */
+
+    --text-main: #fafafa; /* Zinc 50 */
+    --text-sub: #a1a1aa; /* Zinc 400 */
+
+    --color-accent: #38bdf8; /* Sky 400 */
+    --color-border: rgba(255, 255, 255, 0.08);
+
+    /* Icon Specifics for Dark Mode */
+    --bg-icon: rgba(255, 255, 255, 0.05);
+    --text-icon: #ffffff;
+
+    --bg-gradient: radial-gradient(at top center, #18181b 0%, #09090b 80%);
+
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --card-hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+
+    --gradient-text-start: #38bdf8;
+    --gradient-text-end: #818cf8;
+  }
+
+  body {
+    background-color: var(--bg-canvas);
+    background-image: var(--bg-gradient);
+    min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+}
+
+@layer components {
+  .bento-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .bento-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: var(--card-hover-shadow);
+    border-color: var(--color-accent);
+  }
+
+  .tech-icon {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .tech-icon:hover {
+    transform: scale(1.15);
+  }
+
+  .svg-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .text-gradient {
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(
+      to right,
+      var(--gradient-text-start),
+      var(--gradient-text-end)
+    );
+  }
+
+  .theme-toggle-btn {
+    @apply fixed top-4 right-4 z-50 w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300;
+    background: var(--bg-card);
+    border: 1px solid var(--color-border);
+    color: var(--text-main);
+    box-shadow: var(--card-shadow);
+  }
+
+  .theme-toggle-btn:hover {
+    transform: scale(1.1);
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+}
