@@ -127,7 +127,7 @@ export default function Login() {
             Admin Login
           </h1>
           <p className="text-zinc-500 text-[10px] uppercase tracking-wider mt-1">
-            Authorized Access Only // Secured Environment
+            Authorized Access Only
           </p>
         </div>
 
