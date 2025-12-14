@@ -18,9 +18,15 @@ export default function Visitors() {
       orderBy("timestamp", "desc"),
       limit(500)
     );
-    const unsub = onSnapshot(q, (snapshot) => {
-      setVisits(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-    });
+    const unsub = onSnapshot(
+      q,
+      (snapshot) => {
+        setVisits(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      },
+      (error) => {
+        console.error("Error fetching visitors:", error);
+      }
+    );
     return () => unsub();
   }, []);
 
@@ -30,14 +36,14 @@ export default function Visitors() {
     <div className="space-y-6">
       <div className="flex justify-between items-end border-b border-zinc-800 pb-4">
         <div>
-          <h1 className="tactical-header text-xl">Visitor Logs</h1>
+          <h1 className="tactical-header text-xl">Recent Visitors</h1>
           <p className="text-zinc-600 text-[10px] font-mono uppercase">
-            Real-time Feed
+            Real-time List
           </p>
         </div>
         <div className="flex gap-2 items-center px-2 py-1 bg-emerald-900/10 border border-emerald-900/30 text-emerald-500 text-[10px] font-bold uppercase tracking-widest">
           <div className="w-1.5 h-1.5 bg-emerald-500 animate-pulse"></div>
-          Monitoring Active
+          Tracking Active
         </div>
       </div>
 

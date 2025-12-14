@@ -8,7 +8,6 @@ import Login from "./pages/Login";
 import Layout from "./components/Layout";
 import Summary from "./pages/Summary";
 import Visitors from "./pages/Visitors";
-import Analytics from "./pages/Analytics";
 import Security from "./pages/Security";
 
 // Auth Guard Wrapper
@@ -33,7 +32,6 @@ function App() {
         >
           <Route index element={<Summary />} />
           <Route path="visitors" element={<Visitors />} />
-          <Route path="analytics" element={<Analytics />} />
           <Route path="security" element={<Security />} />
         </Route>
       </Routes>

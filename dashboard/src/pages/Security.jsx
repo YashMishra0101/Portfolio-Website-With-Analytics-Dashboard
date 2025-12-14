@@ -18,9 +18,15 @@ export default function Security() {
       orderBy("timestamp", "desc"),
       limit(100)
     );
-    const unsub = onSnapshot(q, (snapshot) => {
-      setLogs(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-    });
+    const unsub = onSnapshot(
+      q,
+      (snapshot) => {
+        setLogs(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      },
+      (error) => {
+        console.error("Error fetching security logs:", error);
+      }
+    );
     return () => unsub();
   }, []);
 
@@ -29,9 +35,9 @@ export default function Security() {
   return (
     <div className="space-y-6">
       <div className="border-b border-zinc-800 pb-4">
-        <h1 className="tactical-header text-xl">Security Access Log</h1>
+        <h1 className="tactical-header text-xl">Security Log</h1>
         <p className="text-zinc-600 text-[10px] font-mono uppercase">
-          Audit Trail
+          Login History
         </p>
       </div>
 

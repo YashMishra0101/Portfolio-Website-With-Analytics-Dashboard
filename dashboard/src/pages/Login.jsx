@@ -5,8 +5,8 @@ import { db } from "../firebase";
 import { ShieldCheck, Lock, MapPin, AlertTriangle } from "lucide-react";
 
 const ADMIN_CREDS = {
-  id: "yashrkm0101",
-  pass: "123qweASD!@#",
+  id: import.meta.env.VITE_ADMIN_ID,
+  pass: import.meta.env.VITE_ADMIN_PASS,
 };
 
 export default function Login() {
