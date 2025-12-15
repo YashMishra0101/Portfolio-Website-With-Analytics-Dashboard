@@ -13,7 +13,21 @@ import Security from "./pages/Security";
 // Auth Guard Wrapper
 const ProtectedRoute = ({ children }) => {
   const isAuth = localStorage.getItem("isAdmin");
-  return isAuth ? children : <Navigate to="/" />;
+  const sessionExpiry = localStorage.getItem("sessionExpiry");
+
+  if (!isAuth) {
+    return <Navigate to="/" />;
+  }
+
+  // Check if session has expired
+  if (sessionExpiry && Date.now() > parseInt(sessionExpiry, 10)) {
+    localStorage.removeItem("isAdmin");
+    localStorage.removeItem("sessionExpiry");
+    localStorage.removeItem("adminSession");
+    return <Navigate to="/" />;
+  }
+
+  return children;
 };
 
 function App() {

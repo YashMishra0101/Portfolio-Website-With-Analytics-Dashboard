@@ -94,6 +94,12 @@ export default function Login() {
 
     if (isMatch) {
       localStorage.setItem("isAdmin", "true");
+      // Set session expiry to 12 days from now (12 * 24 * 60 * 60 * 1000 ms)
+      const twelveDaysInMs = 12 * 24 * 60 * 60 * 1000;
+      localStorage.setItem(
+        "sessionExpiry",
+        (Date.now() + twelveDaysInMs).toString()
+      );
       localStorage.setItem("adminSession", Date.now().toString());
       navigate("/dashboard");
     } else {
