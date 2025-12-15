@@ -105,9 +105,8 @@ function App() {
           </div>
           <div className="text-center relative z-10">
             <h2 className="text-xl font-bold text-txt mb-1">Resume</h2>
-            <p className="text-xs font-medium text-accent group-hover:text-txt transition-colors ml-4">
-              Download CV{" "}
-              <i className="fas fa-arrow-right text-[10px] ml-1 opacity-0 group-hover:opacity-100 transition-all"></i>
+            <p className="text-xs font-medium text-zinc-500 group-hover:text-zinc-300 transition-colors">
+              Resume not available
             </p>
           </div>
         </a>
