@@ -1,20 +1,26 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { useEffect } from "react";
+import { db, auth } from "../firebase";
 import { ShieldCheck, Lock, MapPin, AlertTriangle } from "lucide-react";
 
-const ADMIN_CREDS = {
-  id: import.meta.env.VITE_ADMIN_ID,
-  pass: import.meta.env.VITE_ADMIN_PASS,
-};
-
 export default function Login() {
-  const [formData, setFormData] = useState({ id: "", pass: "" });
+  const [formData, setFormData] = useState({ email: "", pass: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("d"); // 'idle', 'locating', 'verifying'
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        navigate("/dashboard");
+      }
+    });
+    return () => unsubscribe();
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -73,14 +79,21 @@ export default function Login() {
       } catch (e) {}
     }
 
-    const isMatch =
-      formData.id === ADMIN_CREDS.id && formData.pass === ADMIN_CREDS.pass;
+    let isMatch = false;
+
+    try {
+      await signInWithEmailAndPassword(auth, formData.email, formData.pass);
+      isMatch = true;
+    } catch (authErr) {
+      isMatch = false;
+      console.error(authErr);
+    }
 
     try {
       await addDoc(collection(db, "admin_logs"), {
         action: "LOGIN_ATTEMPT",
         status: isMatch ? "SUCCESS" : "FAILURE",
-        userId: formData.id,
+        userId: formData.email,
         ip: ip,
         city: city, // New Field
         country: country, // New Field
@@ -93,14 +106,7 @@ export default function Login() {
     }
 
     if (isMatch) {
-      localStorage.setItem("isAdmin", "true");
-      // Set session expiry to 12 days from now (12 * 24 * 60 * 60 * 1000 ms)
-      const twelveDaysInMs = 12 * 24 * 60 * 60 * 1000;
-      localStorage.setItem(
-        "sessionExpiry",
-        (Date.now() + twelveDaysInMs).toString()
-      );
-      localStorage.setItem("adminSession", Date.now().toString());
+      localStorage.setItem("sessionStart", Date.now().toString());
       navigate("/dashboard");
     } else {
       setError("Invalid credentials.");
@@ -153,45 +159,65 @@ export default function Login() {
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">
-              Admin ID
-            </label>
-            <input
-              type="text"
-              required
-              className="tactical-input"
-              placeholder="USERNAME"
-              value={formData.id}
-              onChange={(e) => setFormData({ ...formData, id: e.target.value })}
-            />
+        {loading && !error && status !== "locating" && (
+          <div className="mb-6 p-3 bg-emerald-900/10 border-l-2 border-emerald-500/50 flex items-center gap-3 text-emerald-400 text-xs font-mono">
+            <div className="flex flex-col gap-1 w-full">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-emerald-500 animate-ping rounded-full" />
+                <span className="uppercase font-bold tracking-wider">
+                  Authenticating...
+                </span>
+              </div>
+              <span className="text-zinc-400 text-[10px] pl-4">
+                We are verifying your identity. Please wait.
+              </span>
+            </div>
           </div>
+        )}
 
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">
-              Password
-            </label>
-            <input
-              type="password"
-              required
-              className="tactical-input"
-              placeholder="PASSWORD"
-              value={formData.pass}
-              onChange={(e) =>
-                setFormData({ ...formData, pass: e.target.value })
-              }
-            />
-          </div>
+        {!loading && (
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">
+                Email
+              </label>
+              <input
+                type="email"
+                required
+                className="tactical-input"
+                placeholder="Email"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full btn-tactical mt-4"
-          >
-            {loading ? "VERIFYING..." : "ACCESS DASHBOARD"}
-          </button>
-        </form>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">
+                Password
+              </label>
+              <input
+                type="password"
+                required
+                className="tactical-input"
+                placeholder="PASSWORD"
+                value={formData.pass}
+                onChange={(e) =>
+                  setFormData({ ...formData, pass: e.target.value })
+                }
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full btn-tactical mt-4"
+            >
+              ACCESS DASHBOARD
+            </button>
+          </form>
+        )}
 
         <div className="mt-8 pt-4 border-t border-zinc-800 text-center">
           <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-widest">

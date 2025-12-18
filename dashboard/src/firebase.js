@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 // Config from .env file
 // Config - API Key/Secrets from .env, Domains Hardcoded
@@ -15,12 +16,14 @@ const firebaseConfig = {
 // Initialize Firebase
 let app;
 let db;
+let auth;
 
 try {
   app = initializeApp(firebaseConfig);
   db = getFirestore(app);
+  auth = getAuth(app);
 } catch (error) {
   console.error("Dashboard Firebase Init Error. Check .env", error);
 }
 
-export { db };
+export { db, auth };

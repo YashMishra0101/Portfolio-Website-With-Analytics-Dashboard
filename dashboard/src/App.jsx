@@ -8,22 +8,50 @@ import Login from "./pages/Login";
 import Layout from "./components/Layout";
 import Summary from "./pages/Summary";
 import Visitors from "./pages/Visitors";
+
 import Security from "./pages/Security";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "./firebase";
+import { useEffect, useState } from "react";
 
 // Auth Guard Wrapper
 const ProtectedRoute = ({ children }) => {
-  const isAuth = localStorage.getItem("isAdmin");
-  const sessionExpiry = localStorage.getItem("sessionExpiry");
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!isAuth) {
-    return <Navigate to="/" />;
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      // Session Expiry Check (12 days)
+      const sessionStart = localStorage.getItem("sessionStart");
+      const twelveDaysMs = 12 * 24 * 60 * 60 * 1000;
+
+      if (
+        currentUser &&
+        sessionStart &&
+        Date.now() - parseInt(sessionStart, 10) > twelveDaysMs
+      ) {
+        await signOut(auth);
+        localStorage.removeItem("sessionStart");
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-emerald-500 font-mono">
+        INITIALIZING SECURITY LINK...
+      </div>
+    );
   }
 
-  // Check if session has expired
-  if (sessionExpiry && Date.now() > parseInt(sessionExpiry, 10)) {
-    localStorage.removeItem("isAdmin");
-    localStorage.removeItem("sessionExpiry");
-    localStorage.removeItem("adminSession");
+  if (!user) {
     return <Navigate to="/" />;
   }
 

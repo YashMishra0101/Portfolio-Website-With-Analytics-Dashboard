@@ -48,7 +48,7 @@ export default function Security() {
               <th className="px-6 py-3">Timestamp</th>
               <th className="px-6 py-3">Action</th>
               <th className="px-6 py-3">Status</th>
-              <th className="px-6 py-3">User ID</th>
+              <th className="px-6 py-3">Email</th>
               <th className="px-6 py-3">IP Address</th>
               <th className="px-6 py-3">Location</th>
             </tr>

@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Menu } from "lucide-react";
 import Sidebar from "./Sidebar";
-import { db } from "../firebase";
+import { db, auth } from "../firebase";
+import { signOut } from "firebase/auth";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function Layout() {
@@ -20,7 +21,8 @@ export default function Layout() {
       });
     } catch (err) {}
 
-    localStorage.removeItem("isAdmin");
+    localStorage.removeItem("sessionStart");
+    await signOut(auth);
     navigate("/");
   };
 
