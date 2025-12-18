@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MapPin } from "lucide-react";
+import { MapPin, Smartphone, Monitor } from "lucide-react";
 import {
   collection,
   query,
@@ -41,16 +41,104 @@ export default function Security() {
         </p>
       </div>
 
-      <div className="tactical-card overflow-hidden">
-        <table className="w-full text-left text-sm font-mono">
-          <thead className="bg-zinc-950 border-b border-zinc-800 text-zinc-500 font-bold uppercase text-[10px] tracking-wider">
+      <div className="md:hidden space-y-4">
+        {logs.map((log) => (
+          <div
+            key={log.id}
+            className="tactical-card p-4 flex flex-col gap-3 border-l-2 border-l-zinc-700"
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-zinc-500 text-[10px] font-mono mb-1">
+                  {formatTime(log.timestamp)}
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-zinc-100">{log.action}</span>
+                  <span
+                    className={`px-1.5 py-0.5 text-[9px] font-bold uppercase border ${
+                      log.status === "SUCCESS"
+                        ? "bg-emerald-900/10 text-emerald-500 border-emerald-900/30"
+                        : "bg-red-900/10 text-red-500 border-red-900/30"
+                    }`}
+                  >
+                    {log.status}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-zinc-800/50">
+              <div className="overflow-hidden">
+                <p className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">
+                  User
+                </p>
+                <p
+                  className="text-xs text-zinc-300 truncate"
+                  title={log.userId}
+                >
+                  {log.userId}
+                </p>
+              </div>
+              <div className="overflow-hidden">
+                <p className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">
+                  IP Address
+                </p>
+                <p className="text-xs text-zinc-400 font-mono break-all">
+                  {log.ip}
+                </p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">
+                  Device
+                </p>
+                <div className="flex items-center gap-2">
+                  {log.device?.type === "mobile" ? (
+                    <Smartphone size={14} className="text-zinc-500" />
+                  ) : (
+                    <Monitor size={14} className="text-zinc-500" />
+                  )}
+                  <span className="text-xs text-zinc-300">
+                    {log.device?.os} •{" "}
+                    {log.device?.model !== "PC/Mac"
+                      ? log.device?.model
+                      : log.device?.browser}
+                  </span>
+                </div>
+              </div>
+              <div className="col-span-2">
+                <p className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">
+                  Location
+                </p>
+                {log.location ? (
+                  <a
+                    href={`https://www.google.com/maps?q=${log.location.lat},${log.location.lng}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-emerald-500 hover:text-emerald-400 text-xs flex items-center gap-1"
+                  >
+                    <MapPin size={12} />
+                    {log.city ? `${log.city}, ${log.country}` : "View Map"}
+                  </a>
+                ) : (
+                  <span className="text-zinc-600 text-xs">-</span>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="hidden md:block tactical-card overflow-x-auto">
+        <table className="w-full text-left font-mono min-w-[900px]">
+          <thead className="bg-zinc-950 border-b border-zinc-800 text-zinc-500 font-bold uppercase text-[9px] tracking-wider">
             <tr>
-              <th className="px-6 py-3">Timestamp</th>
-              <th className="px-6 py-3">Action</th>
-              <th className="px-6 py-3">Status</th>
-              <th className="px-6 py-3">Email</th>
-              <th className="px-6 py-3">IP Address</th>
-              <th className="px-6 py-3">Location</th>
+              <th className="px-4 py-3">Timestamp</th>
+              <th className="px-4 py-3">Action</th>
+              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Email</th>
+              <th className="px-4 py-3">Device Info</th>
+              <th className="px-4 py-3">IP Address</th>
+              <th className="px-4 py-3">Location (IP Address)</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800">
@@ -59,15 +147,15 @@ export default function Security() {
                 key={log.id}
                 className="hover:bg-zinc-800/50 transition-colors"
               >
-                <td className="px-6 py-2 text-zinc-400 text-xs">
+                <td className="px-4 py-2 text-zinc-400 text-[10px]">
                   {formatTime(log.timestamp)}
                 </td>
-                <td className="px-6 py-2 font-bold text-zinc-200">
+                <td className="px-4 py-2 font-bold text-zinc-200 text-[10px]">
                   {log.action}
                 </td>
-                <td className="px-6 py-2">
+                <td className="px-4 py-2">
                   <span
-                    className={`px-2 py-0.5 text-[10px] font-bold uppercase border ${
+                    className={`px-1.5 py-0.5 text-[9px] font-bold uppercase border ${
                       log.status === "SUCCESS"
                         ? "bg-emerald-900/10 text-emerald-500 border-emerald-900/30"
                         : "bg-red-900/10 text-red-500 border-red-900/30"
@@ -76,9 +164,38 @@ export default function Security() {
                     {log.status}
                   </span>
                 </td>
-                <td className="px-6 py-2 text-zinc-400">{log.userId}</td>
-                <td className="px-6 py-2 text-zinc-500 text-xs">{log.ip}</td>
-                <td className="px-6 py-2 text-xs">
+                <td
+                  className="px-4 py-2 text-zinc-400 text-[10px] truncate max-w-[150px]"
+                  title={log.userId}
+                >
+                  {log.userId}
+                </td>
+                <td className="px-4 py-2">
+                  <div className="flex items-center gap-2">
+                    {log.device?.type === "mobile" ? (
+                      <Smartphone size={12} className="text-zinc-500" />
+                    ) : (
+                      <Monitor size={12} className="text-zinc-500" />
+                    )}
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-zinc-200 font-bold">
+                        {log.device?.os || "Unknown OS"}
+                      </span>
+                      <span className="text-[9px] text-zinc-500 truncate max-w-[120px]">
+                        {log.device?.model !== "PC/Mac"
+                          ? log.device?.model
+                          : log.device?.browser || "Browser"}
+                      </span>
+                    </div>
+                  </div>
+                </td>
+                <td
+                  className="px-4 py-2 text-zinc-500 text-[10px] font-mono whitespace-nowrap"
+                  title={log.ip}
+                >
+                  {log.ip}
+                </td>
+                <td className="px-4 py-2 text-[10px]">
                   {log.location ? (
                     <a
                       href={`https://www.google.com/maps?q=${log.location.lat},${log.location.lng}`}

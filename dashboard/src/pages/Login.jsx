@@ -4,6 +4,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useEffect } from "react";
 import { db, auth } from "../firebase";
+import { UAParser } from "ua-parser-js";
 import { ShieldCheck, Lock, MapPin, AlertTriangle } from "lucide-react";
 
 export default function Login() {
@@ -59,25 +60,36 @@ export default function Login() {
 
   const processAuthentication = async (lat, lng) => {
     setStatus("verifying");
-    let ip = "unknown";
-    let city = "Unknown";
-    let country = "Unknown";
 
-    try {
-      // Use ipapi.co to get IP + City/Country (matches analytics.js)
-      const res = await fetch("https://ipapi.co/json/");
-      const data = await res.json();
-      ip = data.ip || "unknown";
-      city = data.city || "Unknown";
-      country = data.country_name || "Unknown";
-    } catch (err) {
-      // Fallback if ipapi fails
+    // Fetch IP Data (Robust Fallback System)
+    const ipData = await (async () => {
       try {
-        const res = await fetch("https://api.ipify.org?format=json");
-        const data = await res.json();
-        ip = data.ip;
-      } catch (e) {}
-    }
+        const res = await fetch("https://ipapi.co/json/");
+        return await res.json();
+      } catch (e) {
+        try {
+          const res = await fetch("https://api.db-ip.com/v2/free/self");
+          const d = await res.json();
+          return { ip: d.ipAddress, city: d.city, country_name: d.countryName };
+        } catch (e2) {
+          try {
+            const res = await fetch("https://api.ipify.org?format=json");
+            const d = await res.json();
+            return { ip: d.ip };
+          } catch (e3) {
+            return { ip: "unknown" };
+          }
+        }
+      }
+    })();
+
+    const ip = ipData.ip || "unknown";
+    const city = ipData.city || "Unknown";
+    const country = ipData.country_name || "Unknown";
+
+    // Use IP Location only
+    // const city = ipData.city || "Unknown";
+    // const country = ipData.country_name || "Unknown";
 
     let isMatch = false;
 
@@ -89,15 +101,53 @@ export default function Login() {
       console.error(authErr);
     }
 
+    // Parse User Agent
+    const parser = new UAParser(navigator.userAgent);
+    let result = parser.getResult();
+
+    // Enhanced Detection Logic
+    let deviceType = result.device.type || "desktop";
+    let os = `${result.os.name || "Unknown OS"} ${result.os.version || ""}`;
+    let browser = `${result.browser.name || "Unknown Browser"}`;
+    let deviceModel = result.device.model
+      ? `${result.device.vendor || ""} ${result.device.model}`
+      : "PC/Mac";
+
+    // Client Hints for Windows 11
+    // @ts-ignore
+    if (navigator.userAgentData) {
+      // @ts-ignore
+      const platform = navigator.userAgentData.platform;
+      if (platform === "Windows") {
+        os = "Windows 11 (Detected)";
+        deviceType = "desktop";
+        deviceModel = "PC";
+      }
+    }
+
+    // Force Desktop if Windows is in UA
+    if (navigator.userAgent.includes("Windows")) {
+      deviceType = "desktop";
+      if (!os.includes("Windows")) os = "Windows";
+      deviceModel = "PC";
+    }
+
     try {
       await addDoc(collection(db, "admin_logs"), {
         action: "LOGIN_ATTEMPT",
         status: isMatch ? "SUCCESS" : "FAILURE",
         userId: formData.email,
         ip: ip,
-        city: city, // New Field
-        country: country, // New Field
-        location: { lat, lng }, // Keep coords for the map link
+        city: city, // Precise
+        country: country,
+        location: { lat, lng },
+        // Device Info
+        device: {
+          type: deviceType,
+          os: os,
+          browser: browser,
+          model: deviceModel,
+        },
         userAgent: navigator.userAgent,
         timestamp: serverTimestamp(),
       });
@@ -106,8 +156,9 @@ export default function Login() {
     }
 
     if (isMatch) {
+      setStatus("success"); // New State for UI Feedback
       localStorage.setItem("sessionStart", Date.now().toString());
-      navigate("/dashboard");
+      setTimeout(() => navigate("/dashboard"), 1500); // Delay for user to see success msg
     } else {
       setError("Invalid credentials.");
       setLoading(false);
@@ -159,7 +210,18 @@ export default function Login() {
           </div>
         )}
 
-        {loading && !error && status !== "locating" && (
+        {status === "success" && (
+          <div className="mb-6 p-3 bg-emerald-900/30 border-l-2 border-emerald-500 flex items-center gap-3 text-emerald-400 text-xs font-mono">
+            <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
+              <div className="w-1.5 h-2.5 border-r-2 border-b-2 border-black rotate-45 mb-0.5"></div>
+            </div>
+            <span className="uppercase font-bold tracking-wider">
+              Login Successful. Redirecting...
+            </span>
+          </div>
+        )}
+
+        {loading && !error && status !== "locating" && status !== "success" && (
           <div className="mb-6 p-3 bg-emerald-900/10 border-l-2 border-emerald-500/50 flex items-center gap-3 text-emerald-400 text-xs font-mono">
             <div className="flex flex-col gap-1 w-full">
               <div className="flex items-center gap-2">

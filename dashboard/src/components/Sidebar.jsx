@@ -8,7 +8,7 @@ import {
   X,
 } from "lucide-react";
 
-export default function Sidebar({ onLogout, isOpen, onClose }) {
+export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
 
@@ -106,10 +106,14 @@ export default function Sidebar({ onLogout, isOpen, onClose }) {
             </div>
             <button
               onClick={onLogout}
-              className="text-zinc-500 hover:text-red-500 transition-colors p-1"
-              title="Logout"
+              disabled={isLoggingOut}
+              className="text-zinc-500 hover:text-red-500 transition-colors p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              title={isLoggingOut ? "Securing Session..." : "Logout"}
             >
-              <LogOut size={14} />
+              <LogOut
+                size={14}
+                className={isLoggingOut ? "animate-pulse text-red-500" : ""}
+              />
             </button>
           </div>
         </div>
