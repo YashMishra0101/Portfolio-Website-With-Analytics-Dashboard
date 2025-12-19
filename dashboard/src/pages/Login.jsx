@@ -43,17 +43,31 @@ export default function Login() {
         await processAuthentication(latitude, longitude);
       },
       (geoError) => {
-        // Error: Location Denied
         console.error(geoError);
-        setError(
-          "ACCESS DENIED: Location permission is MANDATORY for security logging."
-        );
+        let msg = "Location Access Failed.";
+
+        // Specific Error Handling
+        if (geoError.code === 1) {
+          // PERMISSION_DENIED
+          msg =
+            "ACCESS DENIED: Please enable Location Permissions in your browser settings.";
+        } else if (geoError.code === 2) {
+          // POSITION_UNAVAILABLE
+          msg =
+            "POSITION UNAVAILABLE: Your device cannot determine location. Check GPS/Network.";
+        } else if (geoError.code === 3) {
+          // TIMEOUT
+          msg =
+            "TIMEOUT: Location request took too long. Please ensure GPS is active and try again.";
+        }
+
+        setError(msg);
         setLoading(false);
       },
       {
-        enableHighAccuracy: true, // Use GPS if available
-        timeout: 15000, // Wait up to 15s for best signal
-        maximumAge: 0, // Force fresh reading
+        enableHighAccuracy: true,
+        timeout: 25000, // Increased to 25s for mobile
+        maximumAge: 30000, // Accept cached location from last 30s (Fixes 'fresh fix' loops)
       }
     );
   };

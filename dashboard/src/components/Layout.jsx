@@ -135,8 +135,8 @@ export default function Layout() {
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
+        timeout: 25000, // Increased to 25s for mobile stability
+        maximumAge: 30000, // Allow 30s cached location
       }
     );
   };
