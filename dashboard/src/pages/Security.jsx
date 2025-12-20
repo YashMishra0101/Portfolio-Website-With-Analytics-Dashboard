@@ -53,7 +53,9 @@ export default function Security() {
                   {formatTime(log.timestamp)}
                 </p>
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-zinc-100">{log.action}</span>
+                  <span className="font-bold text-zinc-100">
+                    {log.action.replace("_ATTEMPT", "")}
+                  </span>
                   <span
                     className={`px-1.5 py-0.5 text-[9px] font-bold uppercase border ${
                       log.status === "SUCCESS"
@@ -151,7 +153,7 @@ export default function Security() {
                   {formatTime(log.timestamp)}
                 </td>
                 <td className="px-4 py-2 font-bold text-zinc-200 text-[10px]">
-                  {log.action}
+                  {log.action.replace("_ATTEMPT", "")}
                 </td>
                 <td className="px-4 py-2">
                   <span

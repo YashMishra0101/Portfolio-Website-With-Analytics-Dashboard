@@ -157,10 +157,15 @@ export default function Summary() {
         const sources = {};
         filteredData.forEach((d) => {
           let r = d.referrer || "Direct";
-          if (r.includes("http"))
-            try {
+          try {
+            if (r.startsWith("http")) {
               r = new URL(r).hostname.replace("www.", "");
-            } catch (e) {}
+            } else if (r.startsWith("android-app://")) {
+              r = r.split("//")[1].split("/")[0]; // extract package name
+            }
+          } catch (e) {
+            // keep original if parse fails
+          }
           sources[r] = (sources[r] || 0) + 1;
         });
         const source = Object.entries(sources)
@@ -567,11 +572,11 @@ export default function Summary() {
                   type="category"
                   tick={{
                     fill: "#a1a1aa",
-                    fontSize: 10,
+                    fontSize: 12, // Increased Font Size
                     fontFamily: "monospace",
-                    width: 100,
+                    width: 150,
                   }}
-                  width={100}
+                  width={150}
                   axisLine={false}
                   tickLine={false}
                 />

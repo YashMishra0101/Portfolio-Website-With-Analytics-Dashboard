@@ -6,6 +6,11 @@
   body {
     @apply bg-zinc-950 text-zinc-300 font-['Inter'] antialiased min-h-screen selection:bg-emerald-900 selection:text-emerald-200;
   }
+
+  /* Remove default focus outline globally for a cleaner tactical look */
+  *:focus {
+    outline: none !important;
+  }
 }
 
 @layer components {
@@ -20,5 +25,69 @@
   }
   .tactical-header {
     @apply font-bold uppercase tracking-widest text-zinc-100;
+  }
+}
+
+@layer utilities {
+  .tactical-scroll::-webkit-scrollbar {
+    height: 20px;
+    width: 20px;
+  }
+  .tactical-scroll::-webkit-scrollbar-track {
+    background-color: transparent;
+    /* Horizontal Rail: 4px thick, Emerald-900 color */
+    background-image: linear-gradient(
+      to bottom,
+      transparent calc(50% - 2px),
+      #064e3b calc(50% - 2px),
+      #064e3b calc(50% + 2px),
+      transparent calc(50% + 2px)
+    );
+    border-radius: 100vh; /* Round the rail ends */
+  }
+
+  /* Vertical Rail */
+  .tactical-scroll::-webkit-scrollbar-track:vertical {
+    background-image: linear-gradient(
+      to right,
+      transparent calc(50% - 2px),
+      #064e3b calc(50% - 2px),
+      #064e3b calc(50% + 2px),
+      transparent calc(50% + 2px)
+    );
+  }
+
+  .tactical-scroll::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border: none;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+  }
+
+  .tactical-scroll::-webkit-scrollbar-thumb:horizontal {
+    background-image: radial-gradient(
+      circle,
+      rgba(5, 150, 105, 1) 9px,
+      transparent 9.5px
+    );
+    background-size: 100% 100%;
+  }
+
+  .tactical-scroll::-webkit-scrollbar-thumb:vertical {
+    background-image: radial-gradient(
+      circle,
+      rgba(5, 150, 105, 1) 9px,
+      transparent 9.5px
+    );
+    background-size: 100% 100%;
+  }
+
+  .tactical-scroll::-webkit-scrollbar-thumb:hover {
+    background-image: radial-gradient(
+      circle,
+      rgba(16, 185, 129, 1) 10px,
+      transparent 10.5px
+    );
   }
 }

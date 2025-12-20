@@ -148,7 +148,7 @@ export default function Login() {
 
     try {
       await addDoc(collection(db, "admin_logs"), {
-        action: "LOGIN_ATTEMPT",
+        action: "LOGIN",
         status: isMatch ? "SUCCESS" : "FAILURE",
         userId: formData.email,
         ip: ip,
