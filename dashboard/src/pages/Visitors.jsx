@@ -79,7 +79,7 @@ export default function Visitors() {
                 <p className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">
                   Source
                 </p>
-                <p className="text-xs text-zinc-400 truncate">
+                <p className="text-xs text-zinc-400 break-all">
                   {v.referrer || "Direct"}
                 </p>
               </div>
