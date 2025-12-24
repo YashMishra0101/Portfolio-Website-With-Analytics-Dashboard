@@ -108,8 +108,11 @@ export default function Security() {
                 </div>
               </div>
               <div className="col-span-2">
-                <p className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">
-                  Location
+                <p className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1 flex flex-col items-center">
+                  <span>Location</span>
+                  <span className="text-[7px] opacity-70 whitespace-nowrap">
+                    (BASED ON IP ADDRESS)
+                  </span>
                 </p>
                 {log.location ? (
                   <a
@@ -140,7 +143,14 @@ export default function Security() {
               <th className="px-4 py-3">Email</th>
               <th className="px-4 py-3">Device Info</th>
               <th className="px-4 py-3">IP Address</th>
-              <th className="px-4 py-3">Location (IP Address)</th>
+              <th className="px-4 py-3">
+                <div className="flex flex-col items-center">
+                  <span>Location</span>
+                  <span className="text-[8px] font-normal opacity-70 whitespace-nowrap">
+                    (BASED ON IP ADDRESS)
+                  </span>
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800">

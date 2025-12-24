@@ -60,8 +60,11 @@ export default function Visitors() {
 
             <div className="grid grid-cols-2 gap-3 pt-3 border-t border-zinc-800/50">
               <div>
-                <p className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">
-                  Location
+                <p className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1 flex flex-col items-center">
+                  <span>Location</span>
+                  <span className="text-[7px] opacity-70 whitespace-nowrap">
+                    (BASED ON IP ADDRESS)
+                  </span>
                 </p>
                 <p className="text-xs text-zinc-300 truncate">
                   {v.city}, {v.country}
@@ -102,7 +105,14 @@ export default function Visitors() {
           <thead className="bg-zinc-950 border-b border-zinc-800 text-zinc-500 font-bold uppercase text-[10px] tracking-wider">
             <tr>
               <th className="px-6 py-3">Timestamp</th>
-              <th className="px-6 py-3">Location</th>
+              <th className="px-6 py-3">
+                <div className="flex flex-col items-center">
+                  <span>Location</span>
+                  <span className="text-[8px] font-normal opacity-70 whitespace-nowrap">
+                    (BASED ON IP ADDRESS)
+                  </span>
+                </div>
+              </th>
               <th className="px-6 py-3">Source</th>
               <th className="px-6 py-3">Platform</th>
               <th className="px-6 py-3">IP Address</th>
