@@ -18,7 +18,7 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase only if config is valid
-let db;
+export let db;
 try {
   if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "your_api_key_here") {
     const app = initializeApp(firebaseConfig);

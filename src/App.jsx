@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { logVisit } from "./utils/analytics";
+import { logVisit, db } from "./utils/analytics";
+import { doc, onSnapshot } from "firebase/firestore";
 
 function App() {
   const [theme, setTheme] = useState(() => {
@@ -9,6 +10,31 @@ function App() {
     // Default to dark
     return "dark";
   });
+
+  const [config, setConfig] = useState({
+    name: "Yash.RK.Mishra",
+    specialization: "Full Stack Developer",
+    location: "Based in India",
+    bio: "Full Stack Developer ready to build scalable web applications using the MERN Stack and TypeScript.",
+    status: "Actively seeking new job opportunities",
+    resumeUrl: "/resume.pdf",
+    socials: {
+      github: "https://github.com/YashMishra0101",
+      linkedin: "https://www.linkedin.com/in/yash-mishra-356280223/",
+      twitter: "https://x.com/YashRKMishra1",
+      email: "yashrkm0011@gmail.com",
+    },
+  });
+
+  useEffect(() => {
+    if (!db) return;
+    const unsub = onSnapshot(doc(db, "portfolio", "config"), (docSnap) => {
+      if (docSnap.exists()) {
+        setConfig(docSnap.data());
+      }
+    });
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     // Log visit silently on mount
@@ -66,30 +92,27 @@ function App() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
               </span>
-              Actively seeking new job opportunities
+              {config.status}
             </div>
 
             <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-txt">
-              Yash.RK.Mishra
+              {config.name}
             </h1>
 
             <p className="text-sub text-sm leading-relaxed max-w-md mb-4">
-              Full Stack Developer ready to build scalable web applications
-              using the{" "}
-              <span className="font-semibold text-txt">MERN Stack</span> and{" "}
-              <span className="font-semibold text-txt"> TypeScript</span>.
+              {config.bio}
             </p>
 
             <div className="flex items-center justify-center sm:justify-start gap-2 text-sm font-medium text-sub/80">
               <i className="fas fa-map-marker-alt text-accent"></i>
-              <span>Based in India </span>
+              <span>{config.location}</span>
             </div>
           </div>
         </div>
 
         {/* Resume Card */}
         <a
-          href="/resume.pdf"
+          href={config.resumeUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="bento-card rounded-[2rem] p-6 flex flex-col justify-center items-center gap-4 group animate-fade-in cursor-pointer relative overflow-hidden"
@@ -106,7 +129,7 @@ function App() {
           <div className="text-center relative z-10">
             <h2 className="text-xl font-bold text-txt mb-1">Resume</h2>
             <p className="text-xs font-medium text-zinc-500 group-hover:text-zinc-300 transition-colors">
-              Resume not available
+              Download CV
             </p>
           </div>
         </a>
@@ -194,7 +217,7 @@ function App() {
 
         {/* Email Card */}
         <a
-          href="mailto:yashrkm0011@gmail.com"
+          href={`mailto:${config.socials.email}`}
           className="bento-card rounded-[2rem] p-6 flex flex-col justify-center items-center gap-3 group animate-fade-in hover:bg-zinc-100 dark:hover:bg-zinc-800"
           style={{ animationDelay: "600ms" }}
         >
@@ -211,7 +234,7 @@ function App() {
 
         {/* LinkedIn Card */}
         <a
-          href="https://www.linkedin.com/in/yash-mishra-356280223/"
+          href={config.socials.linkedin}
           target="_blank"
           rel="noopener noreferrer"
           className="bento-card rounded-[2rem] p-6 flex flex-col justify-center items-center gap-3 group animate-fade-in hover:bg-zinc-100 dark:hover:bg-zinc-800"
@@ -230,7 +253,7 @@ function App() {
 
         {/* GitHub Card */}
         <a
-          href="https://github.com/YashMishra0101"
+          href={config.socials.github}
           target="_blank"
           rel="noopener noreferrer"
           className="bento-card rounded-[2rem] p-6 flex flex-col justify-center items-center gap-3 group animate-fade-in hover:bg-zinc-100 dark:hover:bg-zinc-800"
@@ -249,7 +272,7 @@ function App() {
 
         {/* Twitter Card */}
         <a
-          href="https://x.com/YashRKMishra1"
+          href={config.socials.twitter}
           target="_blank"
           rel="noopener noreferrer"
           className="bento-card rounded-[2rem] p-6 flex flex-col justify-center items-center gap-3 group animate-fade-in hover:bg-zinc-100 dark:hover:bg-zinc-800"

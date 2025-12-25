@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Layout from "./components/Layout";
 import Summary from "./pages/Summary";
 import Visitors from "./pages/Visitors";
+import ContentManager from "./pages/ContentManager";
 
 import Security from "./pages/Security";
 import { onAuthStateChanged, signOut } from "firebase/auth";
@@ -72,8 +73,10 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Summary />} />
+          <Route index element={<Navigate to="analytics" replace />} />
+          <Route path="analytics" element={<Summary />} />
           <Route path="visitors" element={<Visitors />} />
+          <Route path="content" element={<ContentManager />} />
           <Route path="security" element={<Security />} />
         </Route>
       </Routes>

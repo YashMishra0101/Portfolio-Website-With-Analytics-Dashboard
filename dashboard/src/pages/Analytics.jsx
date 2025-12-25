@@ -22,7 +22,23 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
-import { Monitor, Smartphone, Globe, Activity } from "lucide-react";
+import {
+  Monitor,
+  Smartphone,
+  Globe,
+  Activity,
+  Map as MapIcon,
+} from "lucide-react";
+import {
+  ComposableMap,
+  Geographies,
+  Geography,
+  Marker,
+  Sphere,
+  Graticule,
+} from "react-simple-maps";
+
+const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 // Tactical Palette
 const COLORS = {
@@ -56,12 +72,11 @@ export default function Analytics() {
     const q = query(
       collection(db, "visits"),
       orderBy("timestamp", "desc"),
-      limit(500) // Increase sample size
+      limit(500)
     );
     const unsub = onSnapshot(q, (snapshot) => {
       const raw = snapshot.docs.map((doc) => doc.data());
 
-      // 1. Geography
       const countries = {};
       raw.forEach((d) => {
         const c = d.country || "Unknown";
@@ -72,7 +87,6 @@ export default function Analytics() {
         .slice(0, 8)
         .map(([name, value]) => ({ name, value }));
 
-      // 2. Sources
       const sources = {};
       raw.forEach((d) => {
         let r = d.referrer || "Direct";
@@ -87,7 +101,6 @@ export default function Analytics() {
         .slice(0, 5)
         .map(([name, value]) => ({ name, value }));
 
-      // 3. OS / Devices
       const osCount = {};
       let mobileCount = 0;
       let windowsCount = 0;
@@ -101,18 +114,13 @@ export default function Analytics() {
         .sort((a, b) => b[1] - a[1])
         .map(([name, value]) => ({ name, value }));
 
-      // 4. Trend (Last 7 Days estimate or Sessions by Hour)
-      // For simplicity, let's group by "Day" if data spans days, or "Hour" if recent.
-      // Let's just do sequential index for "Recent Activity Wave"
       const trend = raw
         .slice(0, 20)
         .reverse()
         .map((_, i) => ({
           name: `T-${20 - i}`,
-          value: Math.floor(Math.random() * 10) + 1 + (i % 5), // Mocking 'intensity' for visual wave if simpler
+          value: Math.floor(Math.random() * 10) + 1 + (i % 5),
         }));
-      // BETTER: actually use timestamps if enough data.
-      // Keeping it simple "Activity Pulse" for now as raw chart.
 
       setData({
         geo,
@@ -143,10 +151,9 @@ export default function Analytics() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-end justify-between border-b border-zinc-800 pb-4">
         <div>
-          <h1 className="tactical-header text-2xl">Analytics Report</h1>
+          <h1 className="tactical-header text-2xl">Testing & Simulation</h1>
           <p className="text-zinc-500 text-[10px] font-mono uppercase tracking-wider mt-1">
             Detailed Traffic Statistics
           </p>
@@ -161,9 +168,7 @@ export default function Analytics() {
         </div>
       </div>
 
-      {/* KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Device Ratio Card */}
         <div className="tactical-card p-5 relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
             <Smartphone size={40} />
@@ -183,7 +188,6 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* Windows Ratio Card */}
         <div className="tactical-card p-5 relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
             <Monitor size={40} />
@@ -203,7 +207,6 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* Top Region Card */}
         <div className="tactical-card p-5 relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
             <Globe size={40} />
@@ -220,9 +223,112 @@ export default function Analytics() {
         </div>
       </div>
 
-      {/* Main Charts Grid */}
+      <div className="tactical-card p-6 border-l-4 border-l-blue-500 bg-zinc-950/40 relative overflow-hidden group">
+        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+          <MapIcon size={120} />
+        </div>
+        <div className="flex items-center justify-between mb-8 relative z-10">
+          <div>
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-2">
+              <Globe size={14} className="text-blue-500 animate-spin-slow" />{" "}
+              Global Activity Radar
+            </h3>
+            <p className="text-[10px] text-zinc-600 font-mono mt-1">
+              Satellite Visualization
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-500">
+            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+            <span>Live Intercepts</span>
+          </div>
+        </div>
+
+        <div className="h-[400px] w-full bg-zinc-900/40 border border-zinc-800/50 rounded-sm relative overflow-hidden">
+          <ComposableMap
+            projectionConfig={{
+              rotate: [-10, 0, 0],
+              scale: 147,
+            }}
+            className="w-full h-full"
+          >
+            <Sphere stroke="#27272a" strokeWidth={0.5} />
+            <Graticule stroke="#27272a" strokeWidth={0.5} />
+            <Geographies geography={geoUrl}>
+              {({ geographies }) =>
+                geographies.map((geo) => (
+                  <Geography
+                    key={geo.rsmKey}
+                    geography={geo}
+                    fill="#18181b"
+                    stroke="#27272a"
+                    strokeWidth={0.5}
+                    style={{
+                      default: { outline: "none" },
+                      hover: { fill: "#1f1f23", outline: "none" },
+                      pressed: { outline: "none" },
+                    }}
+                  />
+                ))
+              }
+            </Geographies>
+            {data.geo.map((country, i) => {
+              const coordsMap = {
+                India: [78.9629, 20.5937],
+                USA: [-95.7129, 37.0902],
+                Germany: [10.4515, 51.1657],
+                UK: [-3.436, 55.3781],
+                France: [2.2137, 46.2276],
+                Canada: [-106.3468, 56.1304],
+                Australia: [133.7751, -25.2744],
+                Brazil: [-51.9253, -14.235],
+                China: [104.1954, 35.8617],
+              };
+              const coords = coordsMap[country.name];
+              if (!coords) return null;
+
+              return (
+                <Marker key={country.name} coordinates={coords}>
+                  <circle
+                    r={2 + Math.sqrt(country.value)}
+                    fill="#3b82f6"
+                    fillOpacity={0.6}
+                  />
+                  <circle r={1} fill="#fff" />
+                  <g className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <text
+                      textAnchor="middle"
+                      y={-10}
+                      style={{
+                        fontFamily: "monospace",
+                        fill: "#71717a",
+                        fontSize: "8px",
+                      }}
+                    >
+                      {country.name}
+                    </text>
+                  </g>
+                </Marker>
+              );
+            })}
+          </ComposableMap>
+
+          <div className="absolute bottom-4 left-4 flex flex-col gap-1">
+            {data.geo.slice(0, 3).map((c, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-2 bg-zinc-950/80 border border-zinc-800 px-2 py-1 rounded-sm"
+              >
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                <span className="text-[8px] font-mono text-zinc-400 uppercase tracking-tighter">
+                  {c.name}: {c.value} SIGS
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* OS Ecosystem (Donut) */}
         <div className="tactical-card p-6 lg:col-span-1 flex flex-col">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-2">
@@ -261,7 +367,6 @@ export default function Analytics() {
                 />
               </PieChart>
             </ResponsiveContainer>
-            {/* Center Text */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none pb-8">
               <span className="text-xs font-mono text-zinc-600 uppercase">
                 Systems
@@ -270,7 +375,6 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* Geo Distribution (Bar) */}
         <div className="tactical-card p-6 lg:col-span-2">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-2">
@@ -320,7 +424,6 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* Traffic Sources (Horizontal Bar) */}
         <div className="tactical-card p-6 lg:col-span-2">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-2">
@@ -368,7 +471,6 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* Decorative / Info Panel */}
         <div className="tactical-card p-6 lg:col-span-1 bg-zinc-900/50 flex flex-col justify-center text-center">
           <div className="text-emerald-900 mb-4 flex justify-center">
             <Activity size={48} className="animate-pulse" />

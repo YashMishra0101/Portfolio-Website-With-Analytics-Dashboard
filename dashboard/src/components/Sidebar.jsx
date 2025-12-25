@@ -5,6 +5,7 @@ import {
   ShieldAlert,
   LogOut,
   PieChart,
+  Edit3,
   X,
 } from "lucide-react";
 
@@ -15,13 +16,18 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
   const navItems = [
     {
       icon: <LayoutDashboard size={20} />,
-      label: "Overview",
-      path: "/dashboard",
+      label: "Analytics",
+      path: "/dashboard/analytics",
     },
     {
       icon: <Users size={20} />,
       label: "Live Visitors",
       path: "/dashboard/visitors",
+    },
+    {
+      icon: <PieChart size={20} />,
+      label: "Content Manager",
+      path: "/dashboard/content",
     },
     {
       icon: <ShieldAlert size={20} />,
