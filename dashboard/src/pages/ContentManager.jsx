@@ -223,7 +223,6 @@ export default function ContentManager() {
                 onChange={(e) => updateSocial("twitter", e.target.value)}
               />
             </div>
-            </div>
           </div>
         </section>
 
