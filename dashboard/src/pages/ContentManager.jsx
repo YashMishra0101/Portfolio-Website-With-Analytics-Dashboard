@@ -223,16 +223,6 @@ export default function ContentManager() {
                 onChange={(e) => updateSocial("twitter", e.target.value)}
               />
             </div>
-            <div className="space-y-1">
-              <label className="text-[10px] text-zinc-500 uppercase font-bold font-mono">
-                Admin Email
-              </label>
-              <input
-                type="email"
-                className="tactical-input"
-                value={content.socials.email}
-                onChange={(e) => updateSocial("email", e.target.value)}
-              />
             </div>
           </div>
         </section>
