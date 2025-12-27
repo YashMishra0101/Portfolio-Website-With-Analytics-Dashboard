@@ -35,9 +35,9 @@ export default function Security() {
   return (
     <div className="space-y-6">
       <div className="border-b border-zinc-800 pb-4">
-        <h1 className="tactical-header text-xl">Security Log</h1>
+        <h1 className="tactical-header text-xl">Activity Audit</h1>
         <p className="text-zinc-600 text-[10px] font-mono uppercase">
-          Login History
+          User Activity History
         </p>
       </div>
 
@@ -111,7 +111,7 @@ export default function Security() {
                 <p className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1 flex flex-col items-center">
                   <span>Location</span>
                   <span className="text-[7px] opacity-70 whitespace-nowrap">
-                    (BASED ON IP ADDRESS)
+                    (ESTIMATED LOCATION)
                   </span>
                 </p>
                 {log.location ? (

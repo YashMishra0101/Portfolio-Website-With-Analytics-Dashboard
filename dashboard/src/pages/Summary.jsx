@@ -259,7 +259,7 @@ export default function Summary() {
       <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-zinc-800 pb-4 gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="tactical-header text-xl">ANALYTICS COMMAND</h1>
+            <h1 className="tactical-header text-xl">ANALYTICS DASHBOARD</h1>
             <div
               className={`flex items-center gap-2 px-2 py-0.5 rounded-full border transition-colors ${
                 error

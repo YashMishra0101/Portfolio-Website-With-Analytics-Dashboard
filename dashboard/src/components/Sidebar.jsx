@@ -34,7 +34,7 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
     },
     {
       icon: <ShieldAlert size={20} />,
-      label: "Security",
+      label: "Activity Audit",
       path: "/dashboard/security",
     },
   ];
@@ -106,12 +106,18 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
               AD
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-zinc-300 uppercase truncate">
+              <p className="text-xs font-bold text-zinc-100 uppercase truncate tracking-wide">
                 {role === "admin" ? "Administrator" : "Viewer (Read Only)"}
               </p>
-              <p className="text-[9px] text-emerald-600 uppercase truncate">
-                {role === "admin" ? "Full Access" : "Restricted Access"}
-              </p>
+              <div
+                className={`mt-1.5 px-2 py-0.5 border font-mono text-[9px] font-bold uppercase tracking-widest w-fit ${
+                  role === "admin"
+                    ? "bg-emerald-950/40 border-emerald-500/30 text-emerald-500"
+                    : "bg-blue-950/40 border-blue-500/30 text-blue-400"
+                }`}
+              >
+                {role === "admin" ? "FULL ACCESS" : "READ ONLY"}
+              </div>
             </div>
             <button
               onClick={onLogout}

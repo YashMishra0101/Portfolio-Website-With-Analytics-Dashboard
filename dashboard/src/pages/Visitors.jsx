@@ -23,8 +23,8 @@ export default function Visitors() {
   const formatTime = (ts) => (ts?.toDate ? ts.toDate().toLocaleString() : "");
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-end border-b border-zinc-800 pb-4">
+    <div className="space-y-0">
+      <div className="flex justify-between items-end pb-2">
         <div>
           <h1 className="tactical-header text-xl">Recent Visitors</h1>
           <p className="text-zinc-600 text-[10px] font-mono uppercase">
@@ -33,7 +33,7 @@ export default function Visitors() {
         </div>
         <div className="flex gap-2 items-center px-2 py-1 bg-emerald-900/10 border border-emerald-900/30 text-emerald-500 text-[10px] font-bold uppercase tracking-widest">
           <div className="w-1.5 h-1.5 bg-emerald-500 animate-pulse"></div>
-          Tracking Active
+          Monitoring Active
         </div>
       </div>
 
@@ -100,8 +100,8 @@ export default function Visitors() {
       </div>
 
       {/* Desktop: Table View */}
-      <div className="hidden md:block tactical-card overflow-x-auto tactical-scroll pb-2">
-        <table className="w-full text-left text-sm font-mono min-w-[1200px]">
+      <div className="hidden md:block tactical-card overflow-x-auto tactical-scroll pb-2 [transform:rotateX(180deg)]">
+        <table className="w-full text-left text-sm font-mono min-w-[1200px] [transform:rotateX(180deg)]">
           <thead className="bg-zinc-950 border-b border-zinc-800 text-zinc-500 font-bold uppercase text-[10px] tracking-wider">
             <tr>
               <th className="px-6 py-3">Timestamp</th>
@@ -109,7 +109,7 @@ export default function Visitors() {
                 <div className="flex flex-col items-center">
                   <span>Location</span>
                   <span className="text-[8px] font-normal opacity-70 whitespace-nowrap">
-                    (BASED ON IP ADDRESS)
+                    (ESTIMATED LOCATION)
                   </span>
                 </div>
               </th>

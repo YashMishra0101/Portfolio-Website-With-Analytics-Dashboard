@@ -18,8 +18,8 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-emerald-500 font-mono">
-        INITIALIZING SECURITY LINK...
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-emerald-500 font-mono text-xs tracking-widest">
+        LOADING DASHBOARD...
       </div>
     );
   }

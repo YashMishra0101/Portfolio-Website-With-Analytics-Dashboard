@@ -40,17 +40,24 @@ export const AuthProvider = ({ children }) => {
 
       if (currentUser) {
         setUser(currentUser);
-        // Fetch role from Firestore
-        try {
-          const userDoc = await getDoc(doc(db, "users", currentUser.email));
-          if (userDoc.exists()) {
-            setRole(userDoc.data().role || "viewer");
-          } else {
+        // Hardcoded Admin Fallback for safety
+        const ADMIN_EMAIL = "yashrkm0101@gmail.com";
+
+        if (currentUser.email === ADMIN_EMAIL) {
+          setRole("admin");
+        } else {
+          // Fetch role from Firestore for other users
+          try {
+            const userDoc = await getDoc(doc(db, "users", currentUser.email));
+            if (userDoc.exists()) {
+              setRole(userDoc.data().role || "viewer");
+            } else {
+              setRole("viewer");
+            }
+          } catch (error) {
+            console.error("Error fetching user role:", error);
             setRole("viewer");
           }
-        } catch (error) {
-          console.error("Error fetching user role:", error);
-          setRole("viewer");
         }
       } else {
         setUser(null);
