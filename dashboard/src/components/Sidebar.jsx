@@ -9,7 +9,10 @@ import {
   X,
 } from "lucide-react";
 
+import { useAuth } from "../context/AuthProvider";
+
 export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
+  const { role } = useAuth();
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
 
@@ -104,10 +107,10 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-bold text-zinc-300 uppercase truncate">
-                Administrator
+                {role === "admin" ? "Administrator" : "Viewer (Read Only)"}
               </p>
               <p className="text-[9px] text-emerald-600 uppercase truncate">
-                Secure Session
+                {role === "admin" ? "Full Access" : "Restricted Access"}
               </p>
             </div>
             <button

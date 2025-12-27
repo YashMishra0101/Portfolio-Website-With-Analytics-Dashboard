@@ -6,8 +6,10 @@ import { db, auth } from "../firebase";
 import { signOut } from "firebase/auth";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { UAParser } from "ua-parser-js";
+import { useAuth } from "../context/AuthProvider";
 
 export default function Layout() {
+  const { role } = useAuth();
   const navigate = useNavigate();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
@@ -226,7 +228,32 @@ export default function Layout() {
       )}
 
       <main className="flex-1 md:ml-64 p-4 md:p-8 overflow-y-auto h-[calc(100vh-60px)] md:h-screen">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto space-y-4">
+          {/* Role Status Banner */}
+          <div
+            className={`p-2 border font-mono text-[10px] uppercase tracking-widest flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-500 ${
+              role === "admin"
+                ? "bg-emerald-950/20 border-emerald-900/40 text-emerald-500"
+                : "bg-blue-950/20 border-blue-900/40 text-blue-400"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <div
+                className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+                  role === "admin" ? "bg-emerald-500" : "bg-blue-500"
+                }`}
+              ></div>
+              <span>
+                Session Logged as:{" "}
+                <span className="font-bold">
+                  {role === "admin" ? "ADMINISTRATOR" : "VIEWER (READ-ONLY)"}
+                </span>
+              </span>
+            </div>
+            <span className="opacity-50 hidden sm:inline">
+              Secure Connection Established
+            </span>
+          </div>
           <Outlet />
         </div>
       </main>

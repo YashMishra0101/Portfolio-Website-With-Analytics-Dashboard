@@ -10,8 +10,11 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
+import { useAuth } from "../context/AuthProvider";
 
 export default function ContentManager() {
+  const { role } = useAuth();
+  const isReadOnly = role === "viewer";
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
@@ -26,7 +29,7 @@ export default function ContentManager() {
       github: "https://github.com/YashMishra0101",
       linkedin: "https://www.linkedin.com/in/yash-mishra-356280223/",
       twitter: "https://x.com/YashRKMishra1",
-      email: "yashrkm0011@gmail.com",
+      email: "",
     },
   });
 
@@ -121,6 +124,7 @@ export default function ContentManager() {
               </label>
               <input
                 type="text"
+                readOnly={isReadOnly}
                 className="tactical-input"
                 value={content.name}
                 onChange={(e) => updateField("name", e.target.value)}
@@ -132,6 +136,7 @@ export default function ContentManager() {
               </label>
               <input
                 type="text"
+                readOnly={isReadOnly}
                 className="tactical-input"
                 value={content.specialization}
                 onChange={(e) => updateField("specialization", e.target.value)}
@@ -143,6 +148,7 @@ export default function ContentManager() {
               </label>
               <input
                 type="text"
+                readOnly={isReadOnly}
                 className="tactical-input"
                 value={content.status}
                 onChange={(e) => updateField("status", e.target.value)}
@@ -154,6 +160,7 @@ export default function ContentManager() {
               </label>
               <textarea
                 rows={3}
+                readOnly={isReadOnly}
                 className="tactical-input resize-none"
                 value={content.bio}
                 onChange={(e) => updateField("bio", e.target.value)}
@@ -165,6 +172,7 @@ export default function ContentManager() {
               </label>
               <input
                 type="text"
+                readOnly={isReadOnly}
                 className="tactical-input"
                 value={content.location}
                 onChange={(e) => updateField("location", e.target.value)}
@@ -176,6 +184,7 @@ export default function ContentManager() {
               </label>
               <input
                 type="text"
+                readOnly={isReadOnly}
                 className="tactical-input"
                 value={content.resumeUrl}
                 onChange={(e) => updateField("resumeUrl", e.target.value)}
@@ -196,6 +205,7 @@ export default function ContentManager() {
               </label>
               <input
                 type="text"
+                readOnly={isReadOnly}
                 className="tactical-input"
                 value={content.socials.github}
                 onChange={(e) => updateSocial("github", e.target.value)}
@@ -207,6 +217,7 @@ export default function ContentManager() {
               </label>
               <input
                 type="text"
+                readOnly={isReadOnly}
                 className="tactical-input"
                 value={content.socials.linkedin}
                 onChange={(e) => updateSocial("linkedin", e.target.value)}
@@ -218,6 +229,7 @@ export default function ContentManager() {
               </label>
               <input
                 type="text"
+                readOnly={isReadOnly}
                 className="tactical-input"
                 value={content.socials.twitter}
                 onChange={(e) => updateSocial("twitter", e.target.value)}
@@ -230,8 +242,10 @@ export default function ContentManager() {
         <div className="flex justify-end pt-6 border-t border-zinc-900">
           <button
             type="submit"
-            disabled={saving}
-            className="btn-tactical flex items-center gap-2 px-10 group"
+            disabled={saving || isReadOnly}
+            className={`btn-tactical flex items-center gap-2 px-10 group ${
+              isReadOnly ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
             <Save
               size={16}
@@ -241,7 +255,11 @@ export default function ContentManager() {
                   : "group-hover:scale-110 transition-transform"
               }
             />
-            {saving ? "TRANSMITTING..." : "SAVE CONFIGURATION"}
+            {saving
+              ? "TRANSMITTING..."
+              : isReadOnly
+              ? "READ ONLY MODE"
+              : "SAVE CONFIGURATION"}
           </button>
         </div>
       </form>
