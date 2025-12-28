@@ -176,7 +176,7 @@ export default function Security() {
                 </td>
                 <td className="px-4 py-2 font-bold text-zinc-200 text-[10px]">
                   <div className="flex flex-col">
-                    <span className="italic">
+                    <span className="text-[10px]">
                       {log.action.replace("_ATTEMPT", "")}
                     </span>
                     <span className="text-[8px] text-zinc-500 font-mono font-normal tracking-tighter">
