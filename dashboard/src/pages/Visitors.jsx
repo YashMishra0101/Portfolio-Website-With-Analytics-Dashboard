@@ -63,7 +63,7 @@ export default function Visitors() {
                 <p className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1 flex flex-col items-center">
                   <span>Location</span>
                   <span className="text-[7px] opacity-70 whitespace-nowrap">
-                    (BASED ON IP ADDRESS)
+                    (ESTIMATED LOCATION)
                   </span>
                 </p>
                 <p className="text-xs text-zinc-300 truncate">

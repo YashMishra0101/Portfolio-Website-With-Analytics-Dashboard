@@ -86,7 +86,7 @@ export default function Layout() {
           // @ts-ignore
           const platform = navigator.userAgentData.platform;
           if (platform === "Windows") {
-            os = "Windows 11 (Detected)";
+            os = "Windows 11";
             deviceType = "desktop";
             deviceModel = "PC";
           }
@@ -104,6 +104,7 @@ export default function Layout() {
           await addDoc(collection(db, "admin_logs"), {
             action: "LOGOUT",
             status: "SUCCESS",
+            role: role,
             userId: auth.currentUser?.email || "admin",
             ip: ip,
             city: city,

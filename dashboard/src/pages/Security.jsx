@@ -53,9 +53,21 @@ export default function Security() {
                   {formatTime(log.timestamp)}
                 </p>
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-zinc-100">
-                    {log.action.replace("_ATTEMPT", "")}
-                  </span>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-zinc-100 italic">
+                      {log.action.replace("_ATTEMPT", "")}
+                    </span>
+                    <span className="text-[8px] text-zinc-500 font-mono tracking-tighter">
+                      (
+                      {(
+                        log.role ||
+                        (log.userId === "yashrkm0101@gmail.com"
+                          ? "ADMIN"
+                          : "VIEWER")
+                      ).toUpperCase()}
+                      )
+                    </span>
+                  </div>
                   <span
                     className={`px-1.5 py-0.5 text-[9px] font-bold uppercase border ${
                       log.status === "SUCCESS"
@@ -100,7 +112,7 @@ export default function Security() {
                     <Monitor size={14} className="text-zinc-500" />
                   )}
                   <span className="text-xs text-zinc-300">
-                    {log.device?.os} •{" "}
+                    {log.device?.os?.replace(" (Detected)", "")} •{" "}
                     {log.device?.model !== "PC/Mac"
                       ? log.device?.model
                       : log.device?.browser}
@@ -147,7 +159,7 @@ export default function Security() {
                 <div className="flex flex-col items-center">
                   <span>Location</span>
                   <span className="text-[8px] font-normal opacity-70 whitespace-nowrap">
-                    (BASED ON IP ADDRESS)
+                    (ESTIMATED LOCATION)
                   </span>
                 </div>
               </th>
@@ -163,7 +175,21 @@ export default function Security() {
                   {formatTime(log.timestamp)}
                 </td>
                 <td className="px-4 py-2 font-bold text-zinc-200 text-[10px]">
-                  {log.action.replace("_ATTEMPT", "")}
+                  <div className="flex flex-col">
+                    <span className="italic">
+                      {log.action.replace("_ATTEMPT", "")}
+                    </span>
+                    <span className="text-[8px] text-zinc-500 font-mono font-normal tracking-tighter">
+                      (
+                      {(
+                        log.role ||
+                        (log.userId === "yashrkm0101@gmail.com"
+                          ? "ADMIN"
+                          : "VIEWER")
+                      ).toUpperCase()}
+                      )
+                    </span>
+                  </div>
                 </td>
                 <td className="px-4 py-2">
                   <span
@@ -191,7 +217,8 @@ export default function Security() {
                     )}
                     <div className="flex flex-col">
                       <span className="text-[10px] text-zinc-200 font-bold">
-                        {log.device?.os || "Unknown OS"}
+                        {log.device?.os?.replace(" (Detected)", "") ||
+                          "Unknown OS"}
                       </span>
                       <span className="text-[9px] text-zinc-500 truncate max-w-[120px]">
                         {log.device?.model !== "PC/Mac"

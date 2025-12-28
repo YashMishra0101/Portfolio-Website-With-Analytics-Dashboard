@@ -133,7 +133,7 @@ export default function Login() {
       // @ts-ignore
       const platform = navigator.userAgentData.platform;
       if (platform === "Windows") {
-        os = "Windows 11 (Detected)";
+        os = "Windows 11";
         deviceType = "desktop";
         deviceModel = "PC";
       }
@@ -150,6 +150,7 @@ export default function Login() {
       await addDoc(collection(db, "admin_logs"), {
         action: "LOGIN",
         status: isMatch ? "SUCCESS" : "FAILURE",
+        role: formData.email === "yashrkm0101@gmail.com" ? "admin" : "viewer",
         userId: formData.email,
         ip: ip,
         city: city, // Precise
