@@ -32,6 +32,17 @@ export default function Security() {
 
   const formatTime = (ts) => (ts?.toDate ? ts.toDate().toLocaleString() : "");
 
+  const formatOS = (osName) => {
+    if (!osName) return "Unknown OS";
+    const lower = osName.toLowerCase();
+    if (lower.includes("android")) return "Android";
+    if (lower.includes("windows")) return "Windows";
+    if (lower.includes("ios")) return "iOS";
+    if (lower.includes("mac")) return "Mac";
+    if (lower.includes("linux")) return "Linux";
+    return osName.replace(" (Detected)", "");
+  };
+
   return (
     <div className="space-y-6">
       <div className="border-b border-zinc-800 pb-4">
@@ -112,7 +123,7 @@ export default function Security() {
                     <Monitor size={14} className="text-zinc-500" />
                   )}
                   <span className="text-xs text-zinc-300">
-                    {log.device?.os?.replace(" (Detected)", "")} •{" "}
+                    {formatOS(log.device?.os)} •{" "}
                     {log.device?.model !== "PC/Mac"
                       ? log.device?.model
                       : log.device?.browser}
@@ -217,8 +228,7 @@ export default function Security() {
                     )}
                     <div className="flex flex-col">
                       <span className="text-[10px] text-zinc-200 font-bold">
-                        {log.device?.os?.replace(" (Detected)", "") ||
-                          "Unknown OS"}
+                        {formatOS(log.device?.os)}
                       </span>
                       <span className="text-[9px] text-zinc-500 truncate max-w-[120px]">
                         {log.device?.model !== "PC/Mac"
