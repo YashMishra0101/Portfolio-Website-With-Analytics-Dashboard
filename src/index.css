@@ -80,10 +80,12 @@
 
   .tech-icon {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .tech-icon:hover {
-    transform: scale(1.15);
+    transform: scale(1.08);
   }
 
   .svg-icon {
@@ -103,7 +105,18 @@
   }
 
   .theme-toggle-btn {
-    @apply fixed top-4 right-4 z-50 w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300;
+    position: fixed !important;
+    top: 1rem;
+    right: 1rem;
+    z-index: 9999;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
     background: var(--bg-card);
     border: 1px solid var(--color-border);
     color: var(--text-main);
