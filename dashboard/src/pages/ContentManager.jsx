@@ -55,7 +55,7 @@ export default function ContentManager() {
       {
         role: "Freelancer",
         company: "Self-Employed",
-        location: "Work From Home",
+        location: "Work From Home, India",
         duration: "3 months",
         type: "Remote"
       }
