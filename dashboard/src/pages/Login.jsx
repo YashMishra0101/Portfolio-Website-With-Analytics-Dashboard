@@ -250,7 +250,7 @@ export default function Login() {
     setUserRole(null);
     setSecurityKeyError("");
     setKeyAttempts(0);
-    setFormData({ email: "", pass: "" });
+    // formData is NOT cleared here, allowing persistence
     setLoginData(null);
   };
 
