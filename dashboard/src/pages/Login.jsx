@@ -21,9 +21,12 @@ export default function Login() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        // Check if security key was verified in this session
-        const securityVerified = sessionStorage.getItem("securityKeyVerified");
-        if (securityVerified === "true") {
+        // Check if security key was verified in this session and if session is valid
+        const securityVerified = localStorage.getItem("securityKeyVerified");
+        const sessionExpiry = localStorage.getItem("sessionExpiry");
+        const now = Date.now();
+
+        if (securityVerified === "true" && sessionExpiry && now < parseInt(sessionExpiry)) {
           navigate("/dashboard");
         }
       }
@@ -186,8 +189,6 @@ export default function Login() {
 
         localStorage.setItem("sessionExpiry", expiryTime.toString());
         localStorage.setItem("securityKeyVerified", "true"); // Persist across tabs
-        // Clear old sessionStorage just in case
-        sessionStorage.removeItem("securityKeyVerified");
 
         setStatus("success");
         setLoading(false);
@@ -244,7 +245,6 @@ export default function Login() {
     await signOut(auth);
     localStorage.removeItem("securityKeyVerified");
     localStorage.removeItem("sessionExpiry");
-    sessionStorage.removeItem("securityKeyVerified");
     setStatus("idle");
     setSecurityKey("");
     setUserRole(null);

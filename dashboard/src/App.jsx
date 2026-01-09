@@ -43,7 +43,6 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
     signOut(auth).then(() => {
       localStorage.removeItem("securityKeyVerified");
       localStorage.removeItem("sessionExpiry");
-      sessionStorage.removeItem("securityKeyVerified"); // Checking legacy
     }).catch(console.error);
 
     return <Navigate to="/" />;

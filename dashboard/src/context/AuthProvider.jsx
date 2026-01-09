@@ -20,23 +20,7 @@ export const AuthProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setLoading(true);
 
-      // Session Expiry Check (12 days)
-      const sessionStart = localStorage.getItem("sessionStart");
-      const twelveDaysMs = 12 * 24 * 60 * 60 * 1000;
 
-      if (
-        currentUser &&
-        sessionStart &&
-        Date.now() - parseInt(sessionStart, 10) > twelveDaysMs
-      ) {
-        const { signOut } = await import("firebase/auth");
-        await signOut(auth);
-        localStorage.removeItem("sessionStart");
-        setUser(null);
-        setRole(null);
-        setLoading(false);
-        return;
-      }
 
       if (currentUser) {
         setUser(currentUser);
