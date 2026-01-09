@@ -178,7 +178,7 @@ export default function Login() {
         // Set Session Expiry based on Role
         const now = Date.now();
         const expiryDuration =
-          role === "admin"
+          userRole === "admin"
             ? 30 * 24 * 60 * 60 * 1000 // 30 Days for Admin
             : 24 * 60 * 60 * 1000; // 24 Hours for Viewer
 
