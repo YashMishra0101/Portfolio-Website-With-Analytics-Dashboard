@@ -227,6 +227,12 @@ export default function OwnerActivity() {
                                             </span>
                                         </div>
 
+                                        {/* Source (Referrer) */}
+                                        <div className="mt-2 text-xs text-zinc-500">
+                                            <span className="text-zinc-600">Source: </span>
+                                            <span className="text-zinc-400">{activity.referrer || "Direct"}</span>
+                                        </div>
+
                                         {/* IP & Page */}
                                         <div className="mt-2 text-[10px] text-zinc-600 font-mono">
                                             IP: {activity.ip} • Page: {activity.page || "/"}
