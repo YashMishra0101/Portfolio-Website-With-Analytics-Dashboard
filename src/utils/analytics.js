@@ -110,6 +110,20 @@ const getOS = () => {
 export const logVisit = async () => {
   if (!db) return;
 
+  // Deduplication: Prevent logging the same visit multiple times within 5 seconds
+  // This handles React StrictMode double-calling in development
+  const lastVisitKey = "last_visit_logged";
+  const lastVisitTime = sessionStorage.getItem(lastVisitKey);
+  const now = Date.now();
+  
+  if (lastVisitTime && (now - parseInt(lastVisitTime)) < 5000) {
+    console.log("Analytics: Visit already logged recently, skipping duplicate");
+    return;
+  }
+  
+  // Mark this visit as logged
+  sessionStorage.setItem(lastVisitKey, now.toString());
+
   const visitorId = getVisitorId();
   const geo = await getGeoInfo();
   const os = getOS();
