@@ -8,8 +8,10 @@ import {
   limit,
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { useAuth } from "../context/AuthProvider";
 
 export default function Security() {
+  const { role } = useAuth();
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
@@ -43,6 +45,72 @@ export default function Security() {
     return osName.replace(" (Detected)", "");
   };
 
+  // Get action color based on action type
+  const getActionColor = (action) => {
+    const actionLower = action.toLowerCase();
+    if (actionLower.includes("login")) return "text-emerald-500";
+    if (actionLower.includes("logout")) return "text-red-500";
+    return "text-zinc-200";
+  };
+
+  // Get role color
+  const getRoleColor = (logRole) => {
+    const roleLower = logRole?.toLowerCase() || "";
+    if (roleLower === "admin") return "text-sky-400";
+    if (roleLower === "viewer") return "text-yellow-400";
+    return "text-zinc-500";
+  };
+
+  // Get display role
+  const getDisplayRole = (log) => {
+    return (log.role || (log.userId === "yashrkm0101@gmail.com" ? "ADMIN" : "VIEWER")).toUpperCase();
+  };
+
+  // Check if log entry is for admin
+  const isAdminLog = (log) => {
+    return log.userId === "yashrkm0101@gmail.com";
+  };
+
+  // Mask email for viewers (hide admin email)
+  const getDisplayEmail = (log) => {
+    if (role !== "admin" && isAdminLog(log)) {
+      return "Admin Email (Hidden)";
+    }
+    return log.userId;
+  };
+
+  // Mask IP for viewers (hide admin IP)
+  const getDisplayIP = (log) => {
+    if (role !== "admin" && isAdminLog(log)) {
+      return "Admin IP (Hidden)";
+    }
+    return log.ip;
+  };
+
+  // Mask Location for viewers (hide admin location)
+  const getDisplayLocation = (log) => {
+    if (role !== "admin" && isAdminLog(log)) {
+      return { hidden: true };
+    }
+    return { hidden: false, city: log.city, country: log.country, location: log.location };
+  };
+
+  // Format status display for better UX
+  const getStatusDisplay = (status) => {
+    if (status === "FAILED - SECURITY KEY") {
+      return "KEY FAILED";
+    }
+    return status;
+  };
+
+  // Get status color class
+  const getStatusClass = (status) => {
+    if (status === "SUCCESS") {
+      return "bg-emerald-900/10 text-emerald-500 border-emerald-900/30";
+    }
+    return "bg-red-900/10 text-red-500 border-red-900/30";
+  };
+
   return (
     <div className="space-y-6">
       <div className="border-b border-zinc-800 pb-4">
@@ -65,27 +133,17 @@ export default function Security() {
                 </p>
                 <div className="flex items-center gap-2">
                   <div className="flex flex-col">
-                    <span className="font-bold text-zinc-100 italic">
+                    <span className={`font-bold italic ${getActionColor(log.action)}`}>
                       {log.action.replace("_ATTEMPT", "")}
                     </span>
-                    <span className="text-[8px] text-zinc-500 font-mono tracking-tighter">
-                      (
-                      {(
-                        log.role ||
-                        (log.userId === "yashrkm0101@gmail.com"
-                          ? "ADMIN"
-                          : "VIEWER")
-                      ).toUpperCase()}
-                      )
+                    <span className={`text-[8px] font-mono tracking-tighter ${getRoleColor(getDisplayRole(log))}`}>
+                      ({getDisplayRole(log)})
                     </span>
                   </div>
                   <span
-                    className={`px-1.5 py-0.5 text-[9px] font-bold uppercase border ${log.status === "SUCCESS"
-                        ? "bg-emerald-900/10 text-emerald-500 border-emerald-900/30"
-                        : "bg-red-900/10 text-red-500 border-red-900/30"
-                      }`}
+                    className={`px-1.5 py-0.5 text-[9px] font-bold uppercase border ${getStatusClass(log.status)}`}
                   >
-                    {log.status}
+                    {getStatusDisplay(log.status)}
                   </span>
                 </div>
               </div>
@@ -98,9 +156,9 @@ export default function Security() {
                 </p>
                 <p
                   className="text-xs text-zinc-300 truncate"
-                  title={log.userId}
+                  title={role === "admin" ? log.userId : undefined}
                 >
-                  {log.userId}
+                  {getDisplayEmail(log)}
                 </p>
               </div>
               <div className="overflow-hidden">
@@ -108,7 +166,7 @@ export default function Security() {
                   IP Address
                 </p>
                 <p className="text-xs text-zinc-400 font-mono break-all">
-                  {log.ip}
+                  {getDisplayIP(log)}
                 </p>
               </div>
               <div className="col-span-2">
@@ -136,19 +194,25 @@ export default function Security() {
                     (ESTIMATED LOCATION)
                   </span>
                 </p>
-                {log.location ? (
-                  <a
-                    href={`https://www.google.com/maps?q=${log.location.lat},${log.location.lng}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-emerald-500 hover:text-emerald-400 text-xs flex items-center gap-1"
-                  >
-                    <MapPin size={12} />
-                    {log.city ? `${log.city}, ${log.country}` : "View Map"}
-                  </a>
-                ) : (
-                  <span className="text-zinc-600 text-xs">-</span>
-                )}
+                {(() => {
+                  const locData = getDisplayLocation(log);
+                  if (locData.hidden) {
+                    return <span className="text-zinc-600 text-xs">Admin Location (Hidden)</span>;
+                  }
+                  return locData.location ? (
+                    <a
+                      href={`https://www.google.com/maps?q=${locData.location.lat},${locData.location.lng}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-emerald-500 hover:text-emerald-400 text-xs flex items-center gap-1"
+                    >
+                      <MapPin size={12} />
+                      {locData.city ? `${locData.city}, ${locData.country}` : "View Map"}
+                    </a>
+                  ) : (
+                    <span className="text-zinc-600 text-xs">-</span>
+                  );
+                })()}
               </div>
             </div>
           </div>
@@ -184,38 +248,28 @@ export default function Security() {
                 <td className="px-4 py-2 text-zinc-400 text-[10px]">
                   {formatTime(log.timestamp)}
                 </td>
-                <td className="px-4 py-2 font-bold text-zinc-200 text-[10px]">
+                <td className="px-4 py-2 font-bold text-[10px]">
                   <div className="flex flex-col">
-                    <span className="text-[10px]">
+                    <span className={`text-[10px] ${getActionColor(log.action)}`}>
                       {log.action.replace("_ATTEMPT", "")}
                     </span>
-                    <span className="text-[8px] text-zinc-500 font-mono font-normal tracking-tighter">
-                      (
-                      {(
-                        log.role ||
-                        (log.userId === "yashrkm0101@gmail.com"
-                          ? "ADMIN"
-                          : "VIEWER")
-                      ).toUpperCase()}
-                      )
+                    <span className={`text-[8px] font-mono font-normal tracking-tighter ${getRoleColor(getDisplayRole(log))}`}>
+                      ({getDisplayRole(log)})
                     </span>
                   </div>
                 </td>
                 <td className="px-4 py-2">
                   <span
-                    className={`px-1.5 py-0.5 text-[9px] font-bold uppercase border ${log.status === "SUCCESS"
-                        ? "bg-emerald-900/10 text-emerald-500 border-emerald-900/30"
-                        : "bg-red-900/10 text-red-500 border-red-900/30"
-                      }`}
+                    className={`px-1.5 py-0.5 text-[9px] font-bold uppercase border ${getStatusClass(log.status)}`}
                   >
-                    {log.status}
+                    {getStatusDisplay(log.status)}
                   </span>
                 </td>
                 <td
                   className="px-4 py-2 text-zinc-400 text-[10px] truncate max-w-[150px]"
-                  title={log.userId}
+                  title={role === "admin" ? log.userId : undefined}
                 >
-                  {log.userId}
+                  {getDisplayEmail(log)}
                 </td>
                 <td className="px-4 py-2">
                   <div className="flex items-center gap-2">
@@ -238,26 +292,32 @@ export default function Security() {
                 </td>
                 <td
                   className="px-4 py-2 text-zinc-500 text-[10px] font-mono whitespace-nowrap"
-                  title={log.ip}
+                  title={role === "admin" ? log.ip : undefined}
                 >
-                  {log.ip}
+                  {getDisplayIP(log)}
                 </td>
                 <td className="px-4 py-2 text-[10px]">
-                  {log.location ? (
-                    <a
-                      href={`https://www.google.com/maps?q=${log.location.lat},${log.location.lng}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-emerald-600 hover:text-emerald-500 hover:underline flex items-center gap-1"
-                    >
-                      <MapPin size={12} />
-                      {log.city
-                        ? `${log.city}, ${log.country}`
-                        : "View Map (GPS)"}
-                    </a>
-                  ) : (
-                    <span className="text-zinc-700">-</span>
-                  )}
+                  {(() => {
+                    const locData = getDisplayLocation(log);
+                    if (locData.hidden) {
+                      return <span className="text-zinc-600">Admin Location (Hidden)</span>;
+                    }
+                    return locData.location ? (
+                      <a
+                        href={`https://www.google.com/maps?q=${locData.location.lat},${locData.location.lng}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-emerald-600 hover:text-emerald-500 hover:underline flex items-center gap-1"
+                      >
+                        <MapPin size={12} />
+                        {locData.city
+                          ? `${locData.city}, ${locData.country}`
+                          : "View Map (GPS)"}
+                      </a>
+                    ) : (
+                      <span className="text-zinc-700">-</span>
+                    );
+                  })()}
                 </td>
               </tr>
             ))}

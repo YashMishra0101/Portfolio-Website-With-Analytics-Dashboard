@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import { Menu, AlertTriangle, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Sidebar from "./Sidebar";
 import { db, auth } from "../firebase";
 import { signOut } from "firebase/auth";
@@ -12,22 +12,13 @@ export default function Layout() {
   const { role } = useAuth();
   const navigate = useNavigate();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [showSecurityAlert, setShowSecurityAlert] = useState(false);
 
-  // Helper: Reverse Geocoding
-  // eslint-disable-next-line no-unused-vars
   const handleLogout = async () => {
-    if (!navigator.geolocation) {
-      setShowSecurityAlert(true);
-      return;
-    }
-
     setIsLoggingOut(true);
 
-    // 1. IP Fetch (Robust)
-    const ipFetchPromise = (async () => {
+    // Fetch IP Data (No location permission needed)
+    const ipData = await (async () => {
       try {
         const res = await fetch("https://ipapi.co/json/");
         if (!res.ok) throw new Error("ipapi failed");
@@ -55,93 +46,75 @@ export default function Layout() {
       }
     })();
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
+    const ip = ipData?.ip || "unknown";
+    const city = ipData?.city || "Unknown";
+    const country = ipData?.country_name || "Unknown";
+    // Get lat/lng from IP API if available
+    const lat = ipData?.latitude || null;
+    const lng = ipData?.longitude || null;
 
-        // Wait for IP data
-        const ipData = await ipFetchPromise;
+    // Parse Device Info
+    const parser = new UAParser(navigator.userAgent);
+    let result = parser.getResult();
+    let deviceType = result.device.type || "desktop";
+    let os = `${result.os.name || "Unknown OS"} ${result.os.version || ""}`;
+    let browser = `${result.browser.name || "Unknown Browser"}`;
+    let deviceModel = result.device.model
+      ? `${result.device.vendor || ""} ${result.device.model}`
+      : "PC/Mac";
 
-        const ip = ipData?.ip || "unknown";
-        const city = ipData?.city || "Unknown";
-        const country = ipData?.country_name || "Unknown";
-
-        // Use IP Location only
-        // const city = ipData?.city || "Unknown";
-        // const country = ipData?.country_name || "Unknown";
-
-        // 2. Parse Device Info
-        const parser = new UAParser(navigator.userAgent);
-        let result = parser.getResult();
-        let deviceType = result.device.type || "desktop";
-        let os = `${result.os.name || "Unknown OS"} ${result.os.version || ""}`;
-        let browser = `${result.browser.name || "Unknown Browser"}`;
-        let deviceModel = result.device.model
-          ? `${result.device.vendor || ""} ${result.device.model}`
-          : "PC/Mac";
-
-        // Client Hints for Windows 11
-        // @ts-ignore
-        if (navigator.userAgentData) {
-          // @ts-ignore
-          const platform = navigator.userAgentData.platform;
-          if (platform === "Windows") {
-            os = "Windows 11";
-            deviceType = "desktop";
-            deviceModel = "PC";
-          }
-        }
-
-        // Force Desktop if Windows is in UA
-        if (navigator.userAgent.includes("Windows")) {
-          deviceType = "desktop";
-          if (!os.includes("Windows")) os = "Windows";
-          deviceModel = "PC";
-        }
-
-        // 3. Log & SignOut
-        try {
-          await addDoc(collection(db, "admin_logs"), {
-            action: "LOGOUT",
-            status: "SUCCESS",
-            role: role,
-            userId: auth.currentUser?.email || "admin",
-            ip: ip,
-            city: city,
-            country: country,
-            location: { lat: latitude, lng: longitude },
-            device: {
-              type: deviceType,
-              os: os,
-              browser: browser,
-              model: deviceModel,
-            },
-            userAgent: navigator.userAgent,
-            timestamp: serverTimestamp(),
-          });
-        } catch (err) {
-          console.error("Logout Log Failed", err);
-        }
-
-        localStorage.removeItem("sessionStart");
-        // Delay SignOut to show "Logout Successful" message (handled via UI prop)
-        setTimeout(async () => {
-          await signOut(auth);
-          navigate("/");
-          setIsLoggingOut(false);
-        }, 1500);
-      },
-      (error) => {
-        console.error(error);
-        setShowSecurityAlert(true);
-        setIsLoggingOut(false);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 25000, // Increased to 25s for mobile stability
-        maximumAge: 30000, // Allow 30s cached location
+    // Client Hints for Windows 11
+    // @ts-ignore
+    if (navigator.userAgentData) {
+      // @ts-ignore
+      const platform = navigator.userAgentData.platform;
+      if (platform === "Windows") {
+        os = "Windows 11";
+        deviceType = "desktop";
+        deviceModel = "PC";
       }
-    );
+    }
+
+    // Force Desktop if Windows is in UA
+    if (navigator.userAgent.includes("Windows")) {
+      deviceType = "desktop";
+      if (!os.includes("Windows")) os = "Windows";
+      deviceModel = "PC";
+    }
+
+    // Log & SignOut
+    try {
+      await addDoc(collection(db, "admin_logs"), {
+        action: "LOGOUT",
+        status: "SUCCESS",
+        role: role,
+        userId: auth.currentUser?.email || "admin",
+        ip: ip,
+        city: city,
+        country: country,
+        location: lat && lng ? { lat, lng } : null,
+        device: {
+          type: deviceType,
+          os: os,
+          browser: browser,
+          model: deviceModel,
+        },
+        userAgent: navigator.userAgent,
+        timestamp: serverTimestamp(),
+      });
+    } catch (err) {
+      console.error("Logout Log Failed", err);
+    }
+
+    localStorage.removeItem("sessionStart");
+    sessionStorage.removeItem("securityKeyVerified");
+
+    // Delay SignOut to show "Logout Successful" message
+    setTimeout(async () => {
+      await signOut(auth);
+      navigate("/");
+      setIsLoggingOut(false);
+    }, 1500);
   };
 
   return (
@@ -182,48 +155,6 @@ export default function Layout() {
             <p className="text-zinc-500 text-xs mt-2 font-mono">
               Securing session data & clearing cache.
             </p>
-          </div>
-        </div>
-      )}
-
-      {/* Security Alert Modal */}
-      {showSecurityAlert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-zinc-900 border-2 border-red-600 w-full max-w-md p-8 shadow-2xl relative">
-            <button
-              onClick={() => setShowSecurityAlert(false)}
-              className="absolute top-4 right-4 text-white hover:text-red-500 transition-colors"
-            >
-              <X size={20} />
-            </button>
-            <div className="flex items-start gap-5">
-              <div className="bg-red-900/20 p-3 rounded-none border border-red-500/30">
-                <AlertTriangle className="text-red-500" size={24} />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-red-500 uppercase tracking-widest font-mono">
-                  Logout Blocked
-                </h3>
-                <p className="text-zinc-400 text-xs mt-2 font-mono leading-relaxed">
-                  We cannot verify your location.
-                  <br />
-                  <br />
-                  <span className="text-white">
-                    Location access is mandatory
-                  </span>{" "}
-                  for secure session termination and audit logging. Please
-                  enable location permissions to proceed.
-                </p>
-              </div>
-            </div>
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={() => setShowSecurityAlert(false)}
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 text-xs font-bold uppercase tracking-widest transition-colors"
-              >
-                Understand
-              </button>
-            </div>
           </div>
         </div>
       )}

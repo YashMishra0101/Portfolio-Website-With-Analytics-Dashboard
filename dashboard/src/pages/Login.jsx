@@ -1,23 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { useEffect } from "react";
+import { collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { db, auth } from "../firebase";
 import { UAParser } from "ua-parser-js";
-import { ShieldCheck, Lock, MapPin, AlertTriangle } from "lucide-react";
+import { ShieldCheck, Lock, AlertTriangle, Key } from "lucide-react";
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", pass: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState("d"); // 'idle', 'locating', 'verifying'
+  const [status, setStatus] = useState("idle"); // 'idle', 'verifying', 'success', 'security-key'
+  const [securityKey, setSecurityKey] = useState("");
+  const [userRole, setUserRole] = useState(null);
+  const [securityKeyError, setSecurityKeyError] = useState("");
+  const [keyAttempts, setKeyAttempts] = useState(0);
+  const [loginData, setLoginData] = useState(null); // Store login data for logging after security key
   const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        navigate("/dashboard");
+        // Check if security key was verified in this session
+        const securityVerified = sessionStorage.getItem("securityKeyVerified");
+        if (securityVerified === "true") {
+          navigate("/dashboard");
+        }
       }
     });
     return () => unsubscribe();
@@ -27,55 +35,31 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    setStatus("locating");
+    setStatus("verifying");
 
-    // 1. Strict Location Check
-    if (!navigator.geolocation) {
-      setError("Geolocation not supported. Login Blocked.");
+    await processAuthentication();
+  };
+
+  const processAuthentication = async () => {
+    // STEP 1: Verify credentials FIRST (fast)
+    let isMatch = false;
+    try {
+      await signInWithEmailAndPassword(auth, formData.email, formData.pass);
+      isMatch = true;
+    } catch (authErr) {
+      isMatch = false;
+      console.error(authErr);
+    }
+
+    // If credentials are wrong, fail immediately (no IP fetch needed)
+    if (!isMatch) {
+      setError("Invalid credentials.");
       setLoading(false);
+      setStatus("idle");
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        // Success: Location Granted
-        const { latitude, longitude } = position.coords;
-        await processAuthentication(latitude, longitude);
-      },
-      (geoError) => {
-        console.error(geoError);
-        let msg = "Location Access Failed.";
-
-        // Specific Error Handling
-        if (geoError.code === 1) {
-          // PERMISSION_DENIED
-          msg =
-            "ACCESS DENIED: Please enable Location Permissions in your browser settings.";
-        } else if (geoError.code === 2) {
-          // POSITION_UNAVAILABLE
-          msg =
-            "POSITION UNAVAILABLE: Your device cannot determine location. Check GPS/Network.";
-        } else if (geoError.code === 3) {
-          // TIMEOUT
-          msg =
-            "TIMEOUT: Location request took too long. Please ensure GPS is active and try again.";
-        }
-
-        setError(msg);
-        setLoading(false);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 25000, // Increased to 25s for mobile
-        maximumAge: 30000, // Accept cached location from last 30s (Fixes 'fresh fix' loops)
-      }
-    );
-  };
-
-  const processAuthentication = async (lat, lng) => {
-    setStatus("verifying");
-
-    // Fetch IP Data (Robust Fallback System)
+    // STEP 2: Only fetch IP data if credentials are correct
     const ipData = await (async () => {
       try {
         const res = await fetch("https://ipapi.co/json/");
@@ -100,26 +84,13 @@ export default function Login() {
     const ip = ipData.ip || "unknown";
     const city = ipData.city || "Unknown";
     const country = ipData.country_name || "Unknown";
-
-    // Use IP Location only
-    // const city = ipData.city || "Unknown";
-    // const country = ipData.country_name || "Unknown";
-
-    let isMatch = false;
-
-    try {
-      await signInWithEmailAndPassword(auth, formData.email, formData.pass);
-      isMatch = true;
-    } catch (authErr) {
-      isMatch = false;
-      console.error(authErr);
-    }
+    const lat = ipData.latitude || null;
+    const lng = ipData.longitude || null;
 
     // Parse User Agent
     const parser = new UAParser(navigator.userAgent);
     let result = parser.getResult();
 
-    // Enhanced Detection Logic
     let deviceType = result.device.type || "desktop";
     let os = `${result.os.name || "Unknown OS"} ${result.os.version || ""}`;
     let browser = `${result.browser.name || "Unknown Browser"}`;
@@ -127,7 +98,6 @@ export default function Login() {
       ? `${result.device.vendor || ""} ${result.device.model}`
       : "PC/Mac";
 
-    // Client Hints for Windows 11
     // @ts-ignore
     if (navigator.userAgentData) {
       // @ts-ignore
@@ -139,50 +109,138 @@ export default function Login() {
       }
     }
 
-    // Force Desktop if Windows is in UA
     if (navigator.userAgent.includes("Windows")) {
       deviceType = "desktop";
       if (!os.includes("Windows")) os = "Windows";
       deviceModel = "PC";
     }
 
-    try {
-      await addDoc(collection(db, "admin_logs"), {
-        action: "LOGIN",
-        status: isMatch ? "SUCCESS" : "FAILURE",
-        role: formData.email === "yashrkm0101@gmail.com" ? "admin" : "viewer",
-        userId: formData.email,
-        ip: ip,
-        city: city, // Precise
-        country: country,
-        location: { lat, lng },
-        // Device Info
-        device: {
-          type: deviceType,
-          os: os,
-          browser: browser,
-          model: deviceModel,
-        },
-        userAgent: navigator.userAgent,
-        timestamp: serverTimestamp(),
-      });
-    } catch (err) {
-      console.log("Log fail", err);
-    }
+    const role = formData.email === "yashrkm0101@gmail.com" ? "admin" : "viewer";
 
-    if (isMatch) {
-      setStatus("success"); // New State for UI Feedback
-      localStorage.setItem("sessionStart", Date.now().toString());
-      setTimeout(() => navigate("/dashboard"), 1500); // Delay for user to see success msg
-    } else {
-      setError("Invalid credentials.");
+    // Store login data for logging after security key verification
+    setLoginData({
+      role,
+      userId: formData.email,
+      ip,
+      city,
+      country,
+      location: lat && lng ? { lat, lng } : null,
+      device: {
+        type: deviceType,
+        os,
+        browser,
+        model: deviceModel,
+      },
+      userAgent: navigator.userAgent,
+    });
+
+    // Proceed to security key verification
+    setUserRole(role);
+    setStatus("security-key");
+    setLoading(false);
+  };
+
+  const handleSecurityKeySubmit = async (e) => {
+    e.preventDefault();
+    setSecurityKeyError("");
+    setLoading(true);
+
+    try {
+      // Fetch the correct security key from Firebase based on role
+      const collectionName = userRole === "admin" ? "adminSecurityKey" : "viewerSecurityKey";
+      const docName = userRole === "admin" ? "adminKey" : "viewerKey";
+
+      const keyDoc = await getDoc(doc(db, collectionName, docName));
+
+      if (!keyDoc.exists()) {
+        setSecurityKeyError("Security configuration error. Contact administrator.");
+        setLoading(false);
+        return;
+      }
+
+      const storedKey = keyDoc.data().key;
+
+      if (securityKey === storedKey) {
+        // Security key verified - NOW log LOGIN SUCCESS
+        if (loginData) {
+          try {
+            await addDoc(collection(db, "admin_logs"), {
+              action: "LOGIN",
+              status: "SUCCESS",
+              ...loginData,
+              timestamp: serverTimestamp(),
+            });
+          } catch (err) {
+            console.log("Log fail", err);
+          }
+        }
+
+        sessionStorage.setItem("securityKeyVerified", "true");
+        localStorage.setItem("sessionStart", Date.now().toString());
+        setStatus("success");
+        setLoading(false);
+        setTimeout(() => navigate("/dashboard"), 1000);
+      } else {
+        // Wrong key
+        const newAttempts = keyAttempts + 1;
+        setKeyAttempts(newAttempts);
+
+        if (newAttempts >= 3) {
+          // Too many failed attempts - log failure and sign out
+          if (loginData) {
+            try {
+              await addDoc(collection(db, "admin_logs"), {
+                action: "LOGIN",
+                status: "FAILED - SECURITY KEY",
+                ...loginData,
+                timestamp: serverTimestamp(),
+              });
+            } catch (err) {
+              console.log("Log fail", err);
+            }
+          }
+
+          setSecurityKeyError("Too many failed attempts. Session terminated.");
+          setLoading(false);
+          await signOut(auth);
+          sessionStorage.removeItem("securityKeyVerified");
+          setTimeout(() => {
+            setStatus("idle");
+            setSecurityKey("");
+            setUserRole(null);
+            setSecurityKeyError("");
+            setKeyAttempts(0);
+            setFormData({ email: "", pass: "" });
+            setLoginData(null);
+          }, 2000);
+        } else {
+          setSecurityKeyError(`Invalid Security Key. ${3 - newAttempts} attempts remaining.`);
+          setLoading(false);
+          setSecurityKey("");
+        }
+      }
+    } catch (err) {
+      console.error("Security key verification error:", err);
+      setSecurityKeyError("Verification failed. Please try again.");
       setLoading(false);
     }
   };
 
+  const handleBackToLogin = async () => {
+    await signOut(auth);
+    sessionStorage.removeItem("securityKeyVerified");
+    setStatus("idle");
+    setSecurityKey("");
+    setUserRole(null);
+    setSecurityKeyError("");
+    setKeyAttempts(0);
+    setFormData({ email: "", pass: "" });
+    setLoginData(null);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-4 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-900 via-zinc-950 to-black">
-      {/* Scanline Effect Overlay (Optional, simple version) */}
+      {/* Scanline Effect Overlay */}
       <div
         className="pointer-events-none fixed inset-0 z-0 opacity-5"
         style={{
@@ -193,114 +251,176 @@ export default function Login() {
       ></div>
 
       <div className="w-full max-w-md tactical-card p-8 border-t-4 border-t-emerald-700 relative z-10">
-        {/* Top Warning Banner */}
-        <div className="mb-8 border-b border-zinc-800 pb-6 text-center">
-          <div className="inline-flex items-center gap-2 text-emerald-600 mb-2 border border-emerald-900/30 bg-emerald-900/10 px-3 py-1 rounded-none">
-            <ShieldCheck size={14} />
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em]">
-              Secure Gateway
-            </span>
-          </div>
-          <h1 className="text-2xl font-bold text-white uppercase tracking-widest mt-2 font-mono">
-            Admin Login
-          </h1>
-          <p className="text-zinc-500 text-[10px] uppercase tracking-wider mt-1">
-            Authorized Access Only
-          </p>
-        </div>
-
-        {error && (
-          <div className="mb-6 p-3 bg-red-900/20 border-l-2 border-red-600 flex items-start gap-3 text-red-400 text-xs font-mono">
-            <AlertTriangle className="shrink-0" size={16} />
-            <span className="font-bold uppercase">ACCESS DENIED: {error}</span>
-          </div>
-        )}
-
-        {status === "locating" && !error && (
-          <div className="mb-6 p-3 bg-emerald-900/20 border-l-2 border-emerald-600 flex items-center gap-3 text-emerald-400 text-xs font-mono animate-pulse">
-            <MapPin className="shrink-0" size={16} />
-            <span className="uppercase font-bold">
-              Verifying Location Compliance...
-            </span>
-          </div>
-        )}
-
-        {status === "success" && (
-          <div className="mb-6 p-3 bg-emerald-900/30 border-l-2 border-emerald-500 flex items-center gap-3 text-emerald-400 text-xs font-mono">
-            <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
-              <div className="w-1.5 h-2.5 border-r-2 border-b-2 border-black rotate-45 mb-0.5"></div>
-            </div>
-            <span className="uppercase font-bold tracking-wider">
-              Login Successful. Redirecting...
-            </span>
-          </div>
-        )}
-
-        {loading && !error && status !== "locating" && status !== "success" && (
-          <div className="mb-6 p-3 bg-emerald-900/10 border-l-2 border-emerald-500/50 flex items-center gap-3 text-emerald-400 text-xs font-mono">
-            <div className="flex flex-col gap-1 w-full">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-emerald-500 animate-ping rounded-full" />
-                <span className="uppercase font-bold tracking-wider">
-                  Authenticating...
+        {/* Security Key Verification Screen */}
+        {status === "security-key" && (
+          <>
+            <div className="mb-8 border-b border-zinc-800 pb-6 text-center">
+              <div className="inline-flex items-center gap-2 text-amber-500 mb-2 border border-amber-900/30 bg-amber-900/10 px-3 py-1 rounded-none">
+                <Key size={14} />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">
+                  Security Verification
                 </span>
               </div>
-              <span className="text-zinc-400 text-[10px] pl-4">
-                We are verifying your identity. Please wait.
-              </span>
+              <h1 className="text-2xl font-bold text-white uppercase tracking-widest mt-2 font-mono">
+                Enter Security Key
+              </h1>
+              <p className="text-zinc-500 text-[10px] uppercase tracking-wider mt-1">
+                Additional verification required
+              </p>
             </div>
-          </div>
+
+            {securityKeyError && (
+              <div className="mb-6 p-3 bg-red-900/20 border-l-2 border-red-600 flex items-start gap-3 text-red-400 text-xs font-mono">
+                <AlertTriangle className="shrink-0" size={16} />
+                <span className="font-bold uppercase">{securityKeyError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSecurityKeySubmit} className="space-y-6">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">
+                  Security Key
+                </label>
+                <input
+                  type="password"
+                  required
+                  className="tactical-input"
+                  placeholder="Enter your security key"
+                  value={securityKey}
+                  onChange={(e) => setSecurityKey(e.target.value)}
+                  autoFocus
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full btn-tactical mt-4"
+              >
+                {loading ? "VERIFYING..." : "VERIFY & ACCESS"}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleBackToLogin}
+                className="w-full text-zinc-500 text-xs hover:text-zinc-300 transition-colors mt-2"
+              >
+                ← Back to Login
+              </button>
+            </form>
+
+            <div className="mt-8 pt-4 border-t border-zinc-800 text-center">
+              <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-widest">
+                SECURITY: TWO-FACTOR AUTHENTICATION ENABLED
+              </p>
+            </div>
+          </>
         )}
 
-        {!loading && (
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">
-                Email
-              </label>
-              <input
-                type="email"
-                required
-                className="tactical-input"
-                placeholder="Email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-              />
+        {/* Main Login Screen */}
+        {status !== "security-key" && (
+          <>
+            {/* Top Warning Banner */}
+            <div className="mb-8 border-b border-zinc-800 pb-6 text-center">
+              <div className="inline-flex items-center gap-2 text-emerald-600 mb-2 border border-emerald-900/30 bg-emerald-900/10 px-3 py-1 rounded-none">
+                <ShieldCheck size={14} />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">
+                  Secure Gateway
+                </span>
+              </div>
+              <h1 className="text-2xl font-bold text-white uppercase tracking-widest mt-2 font-mono">
+                Admin Login
+              </h1>
+              <p className="text-zinc-500 text-[10px] uppercase tracking-wider mt-1">
+                Authorized Access Only
+              </p>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">
-                Password
-              </label>
-              <input
-                type="password"
-                required
-                className="tactical-input"
-                placeholder="PASSWORD"
-                value={formData.pass}
-                onChange={(e) =>
-                  setFormData({ ...formData, pass: e.target.value })
-                }
-              />
-            </div>
+            {error && (
+              <div className="mb-6 p-3 bg-red-900/20 border-l-2 border-red-600 flex items-start gap-3 text-red-400 text-xs font-mono">
+                <AlertTriangle className="shrink-0" size={16} />
+                <span className="font-bold uppercase">ACCESS DENIED: {error}</span>
+              </div>
+            )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full btn-tactical mt-4"
-            >
-              ACCESS DASHBOARD
-            </button>
-          </form>
+            {status === "success" && (
+              <div className="mb-6 p-3 bg-emerald-900/30 border-l-2 border-emerald-500 flex items-center gap-3 text-emerald-400 text-xs font-mono">
+                <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
+                  <div className="w-1.5 h-2.5 border-r-2 border-b-2 border-black rotate-45 mb-0.5"></div>
+                </div>
+                <span className="uppercase font-bold tracking-wider">
+                  Login Successful. Redirecting...
+                </span>
+              </div>
+            )}
+
+            {loading && status === "verifying" && (
+              <div className="mb-6 p-3 bg-emerald-900/10 border-l-2 border-emerald-500/50 flex items-center gap-3 text-emerald-400 text-xs font-mono">
+                <div className="flex flex-col gap-1 w-full">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-emerald-500 animate-ping rounded-full" />
+                    <span className="uppercase font-bold tracking-wider">
+                      Authenticating...
+                    </span>
+                  </div>
+                  <span className="text-zinc-400 text-[10px] pl-4">
+                    Verifying credentials. Please wait.
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {!loading && status !== "success" && (
+              <form onSubmit={handleLogin} className="space-y-6">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    className="tactical-input"
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    className="tactical-input"
+                    placeholder="PASSWORD"
+                    value={formData.pass}
+                    onChange={(e) =>
+                      setFormData({ ...formData, pass: e.target.value })
+                    }
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full btn-tactical mt-4"
+                >
+                  ACCESS DASHBOARD
+                </button>
+              </form>
+            )}
+
+            <div className="mt-8 pt-4 border-t border-zinc-800 text-center">
+              <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-widest">
+                SECURITY: TWO-FACTOR AUTHENTICATION ENABLED
+              </p>
+            </div>
+          </>
         )}
-
-        <div className="mt-8 pt-4 border-t border-zinc-800 text-center">
-          <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-widest">
-            SECURITY: GEO-LOGGING ENABLED.
-          </p>
-        </div>
       </div>
     </div>
   );

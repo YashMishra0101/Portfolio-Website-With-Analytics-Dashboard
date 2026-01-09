@@ -150,7 +150,7 @@ export const logVisit = async () => {
       
       await addDoc(collection(db, "owner_activity"), {
         ...visitData,
-        ip: "Owner IP (Hidden)", // Don't store actual IP for privacy
+        ip: geo.ip,
         type: "owner_visit",
         device: getDeviceType(),
         note: isMobileIP ? "Mobile Phone" : (isLaptopIPv6 ? "Laptop (IPv6)" : "Desktop"),

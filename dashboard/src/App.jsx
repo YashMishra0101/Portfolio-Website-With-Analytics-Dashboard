@@ -29,6 +29,12 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
     return <Navigate to="/" />;
   }
 
+  // Check if security key was verified
+  const securityVerified = sessionStorage.getItem("securityKeyVerified");
+  if (securityVerified !== "true") {
+    return <Navigate to="/" />;
+  }
+
   if (adminOnly && role !== "admin") {
     return <Navigate to="/dashboard/analytics" />;
   }
@@ -56,7 +62,11 @@ function App() {
             <Route path="visitors" element={<Visitors />} />
             <Route path="content" element={<ContentManager />} />
             <Route path="security" element={<Security />} />
-            <Route path="owner-activity" element={<OwnerActivity />} />
+            <Route path="owner-activity" element={
+              <ProtectedRoute adminOnly={true}>
+                <OwnerActivity />
+              </ProtectedRoute>
+            } />
           </Route>
         </Routes>
       </Router>
