@@ -242,10 +242,9 @@ export default function Summary() {
       onClick={() => setTimeRange(range)}
       className={`
         px-3 py-1 text-[10px] font-mono uppercase transition-all whitespace-nowrap border
-        ${
-          timeRange === range
-            ? "bg-emerald-600/90 text-white font-bold border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
-            : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 border-transparent hover:border-zinc-700"
+        ${timeRange === range
+          ? "bg-emerald-600/90 text-white font-bold border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+          : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 border-transparent hover:border-zinc-700"
         }
       `}
     >
@@ -261,16 +260,14 @@ export default function Summary() {
           <div className="flex items-center gap-3">
             <h1 className="tactical-header text-xl">ANALYTICS DASHBOARD</h1>
             <div
-              className={`flex items-center gap-2 px-2 py-0.5 rounded-full border transition-colors ${
-                error
-                  ? "bg-red-950/30 border-red-900/50 text-red-500"
-                  : "bg-emerald-950/30 border-emerald-900/50 text-emerald-500 animate-pulse"
-              }`}
+              className={`flex items-center gap-2 px-2 py-0.5 rounded-full border transition-colors ${error
+                ? "bg-red-950/30 border-red-900/50 text-red-500"
+                : "bg-emerald-950/30 border-emerald-900/50 text-emerald-500 animate-pulse"
+                }`}
             >
               <div
-                className={`w-1.5 h-1.5 rounded-full ${
-                  error ? "bg-red-500" : "bg-emerald-500"
-                }`}
+                className={`w-1.5 h-1.5 rounded-full ${error ? "bg-red-500" : "bg-emerald-500"
+                  }`}
               ></div>
               <span className="text-[10px] uppercase font-bold tracking-widest">
                 {error ? "Offline" : "Live"}
@@ -310,7 +307,7 @@ export default function Summary() {
           delay={0}
         />
         <TacticalCard
-          title="Desktop Users"
+          title="Desktop & Laptop Users"
           value={`${stats.desktop}%`}
           icon={<Monitor size={20} className="text-emerald-500" />}
           sub="Workstations"
@@ -378,28 +375,6 @@ export default function Summary() {
           <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2 font-mono">
             <Radar size={14} className="text-emerald-500" /> Visitor Trend
           </h3>
-
-          {/* Chart Filter Controls (Duplicate as requested) */}
-          <div className="flex bg-zinc-900 border border-zinc-800 rounded-sm p-1 overflow-x-auto max-w-full gap-0.5">
-            {["Total", "24h", "7d", "15d", "30d", "3m", "6m", "1y"].map(
-              (range) => (
-                <button
-                  key={`chart-${range}`}
-                  onClick={() => setTimeRange(range)}
-                  className={`
-                          px-2 py-0.5 text-[8px] font-mono uppercase transition-colors whitespace-nowrap
-                          ${
-                            timeRange === range
-                              ? "bg-emerald-600 text-white font-bold"
-                              : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900"
-                          }
-                      `}
-                >
-                  {range}
-                </button>
-              )
-            )}
-          </div>
         </div>
 
         <div className="h-[350px] w-full">

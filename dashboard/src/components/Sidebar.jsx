@@ -7,6 +7,7 @@ import {
   PieChart,
   Edit3,
   X,
+  Shield,
 } from "lucide-react";
 
 import { useAuth } from "../context/AuthProvider";
@@ -19,12 +20,12 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
   const navItems = [
     {
       icon: <LayoutDashboard size={20} />,
-      label: "Analytics",
+      label: "Analytics Dashboard",
       path: "/dashboard/analytics",
     },
     {
       icon: <Users size={20} />,
-      label: "Live Visitors",
+      label: "Recent Visitors",
       path: "/dashboard/visitors",
     },
     {
@@ -34,8 +35,13 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
     },
     {
       icon: <ShieldAlert size={20} />,
-      label: "Activity Audit",
+      label: "Session History",
       path: "/dashboard/security",
+    },
+    {
+      icon: <Shield size={20} />,
+      label: "My Visits",
+      path: "/dashboard/owner-activity",
     },
   ];
 
@@ -81,16 +87,14 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
               key={item.path}
               to={item.path}
               onClick={() => onClose && onClose()} // Close on navigation (mobile)
-              className={`flex items-center gap-3 px-6 py-3 transition-colors uppercase text-xs tracking-wider border-l-2 ${
-                isActive(item.path)
-                  ? "bg-zinc-900 border-emerald-500 text-emerald-400"
-                  : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/30"
-              }`}
+              className={`flex items-center gap-3 px-6 py-3 transition-colors uppercase text-xs tracking-wider border-l-2 ${isActive(item.path)
+                ? "bg-zinc-900 border-emerald-500 text-emerald-400"
+                : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/30"
+                }`}
             >
               <div
-                className={`${
-                  isActive(item.path) ? "text-emerald-500" : "text-zinc-600"
-                }`}
+                className={`${isActive(item.path) ? "text-emerald-500" : "text-zinc-600"
+                  }`}
               >
                 {item.icon}
               </div>
@@ -110,11 +114,10 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
                 {role === "admin" ? "Administrator" : "Viewer (Read Only)"}
               </p>
               <div
-                className={`mt-1.5 px-2 py-0.5 border font-mono text-[9px] font-bold uppercase tracking-widest w-fit ${
-                  role === "admin"
-                    ? "bg-emerald-950/40 border-emerald-500/30 text-emerald-500"
-                    : "bg-blue-950/40 border-blue-500/30 text-blue-400"
-                }`}
+                className={`mt-1.5 px-2 py-0.5 border font-mono text-[9px] font-bold uppercase tracking-widest w-fit ${role === "admin"
+                  ? "bg-emerald-950/40 border-emerald-500/30 text-emerald-500"
+                  : "bg-blue-950/40 border-blue-500/30 text-blue-400"
+                  }`}
               >
                 {role === "admin" ? "FULL ACCESS" : "READ ONLY"}
               </div>

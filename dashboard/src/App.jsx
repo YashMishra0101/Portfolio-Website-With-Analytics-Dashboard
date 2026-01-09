@@ -10,6 +10,7 @@ import Summary from "./pages/Summary";
 import Visitors from "./pages/Visitors";
 import ContentManager from "./pages/ContentManager";
 import Security from "./pages/Security";
+import OwnerActivity from "./pages/OwnerActivity";
 import { AuthProvider, useAuth } from "./context/AuthProvider";
 
 // Auth Guard Wrapper
@@ -55,6 +56,7 @@ function App() {
             <Route path="visitors" element={<Visitors />} />
             <Route path="content" element={<ContentManager />} />
             <Route path="security" element={<Security />} />
+            <Route path="owner-activity" element={<OwnerActivity />} />
           </Route>
         </Routes>
       </Router>

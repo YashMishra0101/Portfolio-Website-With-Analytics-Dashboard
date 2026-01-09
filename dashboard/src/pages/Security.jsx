@@ -46,9 +46,9 @@ export default function Security() {
   return (
     <div className="space-y-6">
       <div className="border-b border-zinc-800 pb-4">
-        <h1 className="tactical-header text-xl">Activity Audit</h1>
+        <h1 className="tactical-header text-xl">Session History</h1>
         <p className="text-zinc-600 text-[10px] font-mono uppercase">
-          User Activity History
+          Activity History
         </p>
       </div>
 
@@ -80,11 +80,10 @@ export default function Security() {
                     </span>
                   </div>
                   <span
-                    className={`px-1.5 py-0.5 text-[9px] font-bold uppercase border ${
-                      log.status === "SUCCESS"
+                    className={`px-1.5 py-0.5 text-[9px] font-bold uppercase border ${log.status === "SUCCESS"
                         ? "bg-emerald-900/10 text-emerald-500 border-emerald-900/30"
                         : "bg-red-900/10 text-red-500 border-red-900/30"
-                    }`}
+                      }`}
                   >
                     {log.status}
                   </span>
@@ -204,11 +203,10 @@ export default function Security() {
                 </td>
                 <td className="px-4 py-2">
                   <span
-                    className={`px-1.5 py-0.5 text-[9px] font-bold uppercase border ${
-                      log.status === "SUCCESS"
+                    className={`px-1.5 py-0.5 text-[9px] font-bold uppercase border ${log.status === "SUCCESS"
                         ? "bg-emerald-900/10 text-emerald-500 border-emerald-900/30"
                         : "bg-red-900/10 text-red-500 border-red-900/30"
-                    }`}
+                      }`}
                   >
                     {log.status}
                   </span>

@@ -186,7 +186,7 @@ export default function ContentManager() {
   return (
     <div className="max-w-4xl space-y-6">
       <div className="border-b border-zinc-800 pb-4">
-        <h1 className="tactical-header text-xl">Content Infrastructure</h1>
+        <h1 className="tactical-header text-xl">Content Manager</h1>
         <p className="text-zinc-600 text-[10px] font-mono uppercase mt-1">
           Manage Live Portfolio Identity
         </p>

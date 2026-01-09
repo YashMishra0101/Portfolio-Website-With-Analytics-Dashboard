@@ -17,6 +17,12 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+// IP addresses to exclude from tracking (owner's IPs)
+const EXCLUDED_IPS = [
+  "152.56.13.0",
+  "2409:40c2:400c:2d74:f987:a6b6:ae9:49f9"
+];
+
 // Initialize Firebase only if config is valid
 export let db;
 try {
@@ -63,6 +69,33 @@ const getGeoInfo = async () => {
   }
 };
 
+// Check if IP should be excluded from tracking
+const isExcludedIP = (ip) => {
+  if (!ip || ip === "unknown") return false;
+  
+  // Check for exact match or prefix match
+  // For IPv4: match first 3 octets (e.g., 152.56.13.x)
+  // For IPv6: match first 4 segments
+  return EXCLUDED_IPS.some(excludedIP => {
+    if (ip === excludedIP) return true;
+    
+    // IPv4 prefix match (match first 3 octets)
+    if (!excludedIP.includes(':') && !ip.includes(':')) {
+      const excludedPrefix = excludedIP.split('.').slice(0, 3).join('.');
+      const ipPrefix = ip.split('.').slice(0, 3).join('.');
+      return excludedPrefix === ipPrefix;
+    }
+    
+    // IPv6 prefix match (match first 4 segments)
+    if (excludedIP.includes(':') && ip.includes(':')) {
+      const excludedPrefix = excludedIP.split(':').slice(0, 4).join(':');
+      return ip.startsWith(excludedPrefix);
+    }
+    
+    return false;
+  });
+};
+
 const getOS = () => {
   const userAgent = window.navigator.userAgent;
   let platform = "Unknown";
@@ -84,31 +117,53 @@ export const logVisit = async () => {
   const screenRes = `${window.screen.width}x${window.screen.height}`;
   const referrer = document.referrer || "Direct";
 
+  // Determine device type for owner visits
+  const getDeviceType = () => {
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
+      return "Mobile";
+    }
+    return "Desktop";
+  };
+
+  const visitData = {
+    visitorId,
+    timestamp: serverTimestamp(),
+    ip: geo.ip,
+    city: geo.city,
+    country: geo.country,
+    countryCode: geo.countryCode,
+    isp: geo.isp,
+    os,
+    userAgent,
+    screenRes,
+    referrer,
+    page: window.location.pathname,
+    sessionStart: Date.now(),
+  };
+
   try {
-    // 1. Log the Visit Start
-    const docRef = await addDoc(collection(db, "visits"), {
-      visitorId,
-      timestamp: serverTimestamp(),
-      ip: geo.ip,
-      city: geo.city,
-      country: geo.country,
-      countryCode: geo.countryCode,
-      isp: geo.isp,
-      os,
-      userAgent,
-      screenRes,
-      referrer,
-      page: window.location.pathname,
-      sessionStart: Date.now(),
-      type: "visit", // Distinguish from 'ping' or 'exit' if needed later
+    // Check if this is owner's IP - log to separate collection
+    if (isExcludedIP(geo.ip)) {
+      // Determine which device based on IP
+      const isMobileIP = geo.ip === "152.56.13.0";
+      const isLaptopIPv6 = geo.ip.includes(":");
+      
+      await addDoc(collection(db, "owner_activity"), {
+        ...visitData,
+        ip: "Owner IP (Hidden)", // Don't store actual IP for privacy
+        type: "owner_visit",
+        device: getDeviceType(),
+        note: isMobileIP ? "Mobile Phone" : (isLaptopIPv6 ? "Laptop (IPv6)" : "Desktop"),
+      });
+      console.log("Analytics: Owner activity logged to separate collection");
+      return;
+    }
+
+    // Regular visitor - log to visits collection
+    await addDoc(collection(db, "visits"), {
+      ...visitData,
+      type: "visit",
     });
-
-    // 2. Setup Session heartbeat (Optional but good for "Live" status)
-    // For now, we will just log the initial hit rich data.
-
-    // 3. Store docId to update session duration on exit?
-    // Complexity warning: Unload events are unreliable.
-    // Better strategy: Simple "Ping" every 30s or just rely on start time for now.
   } catch (error) {
     // Silent fail
   }
