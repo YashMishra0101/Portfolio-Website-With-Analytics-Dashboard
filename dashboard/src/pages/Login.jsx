@@ -175,8 +175,20 @@ export default function Login() {
           }
         }
 
-        sessionStorage.setItem("securityKeyVerified", "true");
-        localStorage.setItem("sessionStart", Date.now().toString());
+        // Set Session Expiry based on Role
+        const now = Date.now();
+        const expiryDuration =
+          role === "admin"
+            ? 30 * 24 * 60 * 60 * 1000 // 30 Days for Admin
+            : 24 * 60 * 60 * 1000; // 24 Hours for Viewer
+
+        const expiryTime = now + expiryDuration;
+
+        localStorage.setItem("sessionExpiry", expiryTime.toString());
+        localStorage.setItem("securityKeyVerified", "true"); // Persist across tabs
+        // Clear old sessionStorage just in case
+        sessionStorage.removeItem("securityKeyVerified");
+
         setStatus("success");
         setLoading(false);
         setTimeout(() => navigate("/dashboard"), 1000);
@@ -203,6 +215,8 @@ export default function Login() {
           setSecurityKeyError("Too many failed attempts. Session terminated.");
           setLoading(false);
           await signOut(auth);
+          localStorage.removeItem("securityKeyVerified");
+          localStorage.removeItem("sessionExpiry");
           sessionStorage.removeItem("securityKeyVerified");
           setTimeout(() => {
             setStatus("idle");
@@ -228,6 +242,8 @@ export default function Login() {
 
   const handleBackToLogin = async () => {
     await signOut(auth);
+    localStorage.removeItem("securityKeyVerified");
+    localStorage.removeItem("sessionExpiry");
     sessionStorage.removeItem("securityKeyVerified");
     setStatus("idle");
     setSecurityKey("");

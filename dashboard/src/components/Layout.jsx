@@ -107,6 +107,8 @@ export default function Layout() {
     }
 
     localStorage.removeItem("sessionStart");
+    localStorage.removeItem("securityKeyVerified");
+    localStorage.removeItem("sessionExpiry");
     sessionStorage.removeItem("securityKeyVerified");
 
     // Delay SignOut to show "Logout Successful" message

@@ -4,6 +4,8 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "./firebase";
 import Login from "./pages/Login";
 import Layout from "./components/Layout";
 import Summary from "./pages/Summary";
@@ -29,9 +31,21 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
     return <Navigate to="/" />;
   }
 
-  // Check if security key was verified
-  const securityVerified = sessionStorage.getItem("securityKeyVerified");
-  if (securityVerified !== "true") {
+  // Check Security Key & Session Expiry
+  const securityVerified = localStorage.getItem("securityKeyVerified");
+  const sessionExpiry = localStorage.getItem("sessionExpiry");
+  const now = Date.now();
+
+  const isSessionExpired = !sessionExpiry || now > parseInt(sessionExpiry);
+
+  if (securityVerified !== "true" || isSessionExpired) {
+    // Session invalid or expired - cleanup and redirect
+    signOut(auth).then(() => {
+      localStorage.removeItem("securityKeyVerified");
+      localStorage.removeItem("sessionExpiry");
+      sessionStorage.removeItem("securityKeyVerified"); // Checking legacy
+    }).catch(console.error);
+
     return <Navigate to="/" />;
   }
 
