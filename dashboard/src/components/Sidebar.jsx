@@ -41,12 +41,6 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
       label: "Session History",
       path: "/dashboard/security",
     },
-    {
-      icon: <Shield size={20} />,
-      label: "My Visits",
-      path: "/dashboard/owner-activity",
-      adminOnly: true,
-    },
   ];
 
   const handleNavClick = (item, e) => {

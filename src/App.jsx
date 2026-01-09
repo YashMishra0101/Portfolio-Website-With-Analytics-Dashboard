@@ -67,10 +67,13 @@ function App() {
     return () => unsub();
   }, []);
 
+  // Log visit ONCE on mount (separate from theme logic)
   useEffect(() => {
-    // Log visit silently on mount
     logVisit();
+  }, []); // Empty dependency array = runs only once
 
+  // Handle theme changes separately
+  useEffect(() => {
     const html = document.documentElement;
     if (theme === "dark") {
       html.classList.add("dark");

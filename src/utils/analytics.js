@@ -17,11 +17,6 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// IP addresses to exclude from tracking (owner's IPs)
-const EXCLUDED_IPS = [
-  "152.56.13.0",
-  "2409:40c2:400c:2d74:f987:a6b6:ae9:49f9"
-];
 
 // Initialize Firebase only if config is valid
 export let db;
@@ -48,9 +43,18 @@ const getVisitorId = () => {
 
 // Helper to get IP and Geo Info
 const getGeoInfo = async () => {
+  // Try primary API
   try {
     const response = await fetch("https://ipapi.co/json/");
+    if (!response.ok) throw new Error("Primary API failed");
     const data = await response.json();
+    
+    // Check if we got rate limited
+    if (data.error) {
+      console.warn("ipapi.co rate limited, trying fallback...");
+      throw new Error("Rate limited");
+    }
+    
     return {
       ip: data.ip || "unknown",
       city: data.city || "Unknown",
@@ -59,41 +63,50 @@ const getGeoInfo = async () => {
       isp: data.org || "Unknown",
     };
   } catch (e) {
-    return {
-      ip: "unknown",
-      city: "Unknown",
-      country: "Unknown",
-      countryCode: "UN",
-      isp: "Unknown",
-    };
+    console.warn("Primary IP API failed, trying fallback 1...", e.message);
+    
+    // Fallback 1: ipify + ip-api.com
+    try {
+      const ipRes = await fetch("https://api.ipify.org?format=json");
+      const ipData = await ipRes.json();
+      const ip = ipData.ip;
+      
+      const geoRes = await fetch(`http://ip-api.com/json/${ip}`);
+      const geoData = await geoRes.json();
+      
+      return {
+        ip: ip || "unknown",
+        city: geoData.city || "Unknown",
+        country: geoData.country || "Unknown",
+        countryCode: geoData.countryCode || "UN",
+        isp: geoData.isp || "Unknown",
+      };
+    } catch (e2) {
+      console.warn("Fallback 1 failed, using minimal data...", e2.message);
+      
+      // Last resort: Just get IP
+      try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        const data = await res.json();
+        return {
+          ip: data.ip || "unknown",
+          city: "Unknown",
+          country: "Unknown",
+          countryCode: "UN",
+          isp: "Unknown",
+        };
+      } catch (e3) {
+        console.error("All IP APIs failed", e3);
+        return {
+          ip: "unknown",
+          city: "Unknown",
+          country: "Unknown",
+          countryCode: "UN",
+          isp: "Unknown",
+        };
+      }
+    }
   }
-};
-
-// Check if IP should be excluded from tracking
-const isExcludedIP = (ip) => {
-  if (!ip || ip === "unknown") return false;
-  
-  // Check for exact match or prefix match
-  // For IPv4: match first 3 octets (e.g., 152.56.13.x)
-  // For IPv6: match first 4 segments
-  return EXCLUDED_IPS.some(excludedIP => {
-    if (ip === excludedIP) return true;
-    
-    // IPv4 prefix match (match first 3 octets)
-    if (!excludedIP.includes(':') && !ip.includes(':')) {
-      const excludedPrefix = excludedIP.split('.').slice(0, 3).join('.');
-      const ipPrefix = ip.split('.').slice(0, 3).join('.');
-      return excludedPrefix === ipPrefix;
-    }
-    
-    // IPv6 prefix match (match first 4 segments)
-    if (excludedIP.includes(':') && ip.includes(':')) {
-      const excludedPrefix = excludedIP.split(':').slice(0, 4).join(':');
-      return ip.startsWith(excludedPrefix);
-    }
-    
-    return false;
-  });
 };
 
 const getOS = () => {
@@ -156,29 +169,19 @@ export const logVisit = async () => {
   };
 
   try {
-    // Check if this is owner's IP - log to separate collection
-    if (isExcludedIP(geo.ip)) {
-      // Determine which device based on IP
-      const isMobileIP = geo.ip === "152.56.13.0";
-      const isLaptopIPv6 = geo.ip.includes(":");
-      
-      await addDoc(collection(db, "owner_activity"), {
-        ...visitData,
-        ip: geo.ip,
-        type: "owner_visit",
-        device: getDeviceType(),
-        note: isMobileIP ? "Mobile Phone" : (isLaptopIPv6 ? "Laptop (IPv6)" : "Desktop"),
-      });
-      console.log("Analytics: Owner activity logged to separate collection");
-      return;
-    }
-
-    // Regular visitor - log to visits collection
+    // Track all visits in the regular visits collection (including owner)
     await addDoc(collection(db, "visits"), {
       ...visitData,
       type: "visit",
     });
+    console.log("✅ Analytics: Visit logged successfully", {
+      ip: geo.ip,
+      city: geo.city,
+      os: os,
+      device: getDeviceType()
+    });
   } catch (error) {
-    // Silent fail
+    console.error("❌ Analytics: Failed to log visit", error);
+    console.error("Visit data:", visitData);
   }
 };
