@@ -26,7 +26,7 @@ export default function Visitors() {
     <div className="space-y-0">
       <div className="flex justify-between items-end pb-2">
         <div>
-          <h1 className="tactical-header text-xl">Recent Visitors</h1>
+          <h1 className="tactical-header text-lg md:text-xl tracking-normal md:tracking-widest whitespace-nowrap">Recent Visitors</h1>
           <p className="text-zinc-600 text-[10px] font-mono uppercase">
             Real-time List
           </p>

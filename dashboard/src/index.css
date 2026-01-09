@@ -29,65 +29,28 @@
 }
 
 @layer utilities {
-  .tactical-scroll::-webkit-scrollbar {
-    height: 8px;
-    width: 8px;
+  /* Global Dark Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
   }
-  .tactical-scroll::-webkit-scrollbar-track {
-    background-color: transparent;
-    /* Horizontal Rail: 4px thick, Emerald-900 color */
-    background-image: linear-gradient(
-      to bottom,
-      transparent calc(50% - 2px),
-      #064e3b calc(50% - 2px),
-      #064e3b calc(50% + 2px),
-      transparent calc(50% + 2px)
-    );
-    border-radius: 100vh; /* Round the rail ends */
+  
+  ::-webkit-scrollbar-track {
+    background: #09090b; /* zinc-950 */
   }
-
-  /* Vertical Rail */
-  .tactical-scroll::-webkit-scrollbar-track:vertical {
-    background-image: linear-gradient(
-      to right,
-      transparent calc(50% - 2px),
-      #064e3b calc(50% - 2px),
-      #064e3b calc(50% + 2px),
-      transparent calc(50% + 2px)
-    );
+  
+  ::-webkit-scrollbar-thumb {
+    background: #27272a; /* zinc-800 */
+    border-radius: 0px;
   }
-
-  .tactical-scroll::-webkit-scrollbar-thumb {
-    background-color: transparent;
-    border: none;
-    background-repeat: no-repeat;
-    background-position: center;
-    cursor: pointer;
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3f3f46; /* zinc-700 */
   }
-
-  .tactical-scroll::-webkit-scrollbar-thumb:horizontal {
-    background-image: radial-gradient(
-      circle,
-      rgba(5, 150, 105, 1) 9px,
-      transparent 9.5px
-    );
-    background-size: 100% 100%;
-  }
-
-  .tactical-scroll::-webkit-scrollbar-thumb:vertical {
-    background-image: radial-gradient(
-      circle,
-      rgba(5, 150, 105, 1) 9px,
-      transparent 9.5px
-    );
-    background-size: 100% 100%;
-  }
-
-  .tactical-scroll::-webkit-scrollbar-thumb:hover {
-    background-image: radial-gradient(
-      circle,
-      rgba(16, 185, 129, 1) 10px,
-      transparent 10.5px
-    );
+  
+  /* Keep tactical-scroll for specific use cases if needed, but simplified */
+  .tactical-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #27272a #09090b;
   }
 }

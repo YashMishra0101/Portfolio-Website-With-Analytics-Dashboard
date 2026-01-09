@@ -133,7 +133,7 @@ export default function Security() {
                 </p>
                 <div className="flex items-center gap-2">
                   <div className="flex flex-col">
-                    <span className={`font-bold italic ${getActionColor(log.action)}`}>
+                    <span className={`font-bold ${getActionColor(log.action)}`}>
                       {log.action.replace("_ATTEMPT", "")}
                     </span>
                     <span className={`text-[8px] font-mono tracking-tighter ${getRoleColor(getDisplayRole(log))}`}>

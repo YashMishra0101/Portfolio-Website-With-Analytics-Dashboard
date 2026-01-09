@@ -118,9 +118,9 @@ export default function Layout() {
   };
 
   return (
-    <div className="min-h-screen font-sans flex bg-zinc-950 flex-col md:flex-row">
+    <div className="h-screen w-full overflow-hidden font-sans flex flex-col md:block bg-zinc-950">
       {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-zinc-900 border-b border-zinc-800 sticky top-0 z-40">
+      <div className="md:hidden flex-none flex items-center justify-between p-4 bg-zinc-900 border-b border-zinc-800 z-40">
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 bg-emerald-600 flex items-center justify-center rounded-none">
             <div className="w-1.5 h-1.5 bg-black"></div>
@@ -159,8 +159,9 @@ export default function Layout() {
         </div>
       )}
 
-      <main className="flex-1 md:ml-64 p-4 md:p-8 overflow-y-auto h-[calc(100vh-60px)] md:h-screen">
-        <div className="max-w-6xl mx-auto space-y-4">
+      {/* Main Content Area */}
+      <main className="flex-1 md:h-screen md:ml-64 p-4 md:p-8 overflow-y-auto overflow-x-hidden h-full">
+        <div className="max-w-6xl mx-auto space-y-4 pb-20 md:pb-0">
           <Outlet />
         </div>
       </main>

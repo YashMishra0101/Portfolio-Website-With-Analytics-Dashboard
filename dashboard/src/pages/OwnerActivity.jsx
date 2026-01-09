@@ -121,11 +121,10 @@ export default function OwnerActivity() {
             <div className="flex items-end justify-between border-b border-zinc-800 pb-4">
                 <div>
                     <h1 className="text-2xl font-bold text-zinc-100 flex items-center gap-3">
-                        <Shield className="text-violet-500" size={28} />
                         Owner Activity Audit
                     </h1>
                     <p className="text-zinc-500 text-xs font-mono uppercase tracking-wider mt-1">
-                        Personal visit logs (Excluded from public analytics)
+                        Personal visit logs <span className="block md:inline text-[10px] md:text-xs opacity-70 md:opacity-100">(Excluded from public analytics)</span>
                     </p>
                 </div>
                 <div className="text-right hidden sm:block">
