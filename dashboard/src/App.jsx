@@ -13,6 +13,7 @@ import Visitors from "./pages/Visitors";
 import ContentManager from "./pages/ContentManager";
 import Security from "./pages/Security";
 import OwnerActivity from "./pages/OwnerActivity";
+import VisitorManagement from "./pages/VisitorManagement";
 import { AuthProvider, useAuth } from "./context/AuthProvider";
 
 // Auth Guard Wrapper
@@ -78,6 +79,11 @@ function App() {
             <Route path="owner-activity" element={
               <ProtectedRoute adminOnly={true}>
                 <OwnerActivity />
+              </ProtectedRoute>
+            } />
+            <Route path="visitor-management" element={
+              <ProtectedRoute adminOnly={true}>
+                <VisitorManagement />
               </ProtectedRoute>
             } />
           </Route>

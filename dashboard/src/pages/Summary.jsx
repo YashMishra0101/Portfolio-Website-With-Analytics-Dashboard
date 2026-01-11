@@ -446,6 +446,8 @@ export default function Summary() {
                   paddingAngle={5}
                   dataKey="value"
                   stroke="none"
+                  label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                  labelLine={false}
                 >
                   {stats.os.map((entry, index) => (
                     <Cell
@@ -459,17 +461,27 @@ export default function Summary() {
                     backgroundColor: "#18181b",
                     border: "1px solid #27272a",
                   }}
+                  formatter={(value, name) => {
+                    const total = stats.os.reduce((sum, item) => sum + item.value, 0);
+                    const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                    return [`${value} (${percent}%)`, name];
+                  }}
                 />
                 <Legend
                   verticalAlign="bottom"
                   height={36}
                   iconType="rect"
                   iconSize={8}
-                  formatter={(value) => (
-                    <span className="text-[10px] font-mono text-zinc-500 uppercase ml-1">
-                      {value}
-                    </span>
-                  )}
+                  formatter={(value, entry) => {
+                    const total = stats.os.reduce((sum, item) => sum + item.value, 0);
+                    const itemData = stats.os.find(item => item.name === value);
+                    const percent = total > 0 && itemData ? ((itemData.value / total) * 100).toFixed(0) : 0;
+                    return (
+                      <span className="text-[10px] font-mono text-zinc-500 uppercase ml-1">
+                        {value} ({percent}%)
+                      </span>
+                    );
+                  }}
                 />
               </PieChart>
             </ResponsiveContainer>

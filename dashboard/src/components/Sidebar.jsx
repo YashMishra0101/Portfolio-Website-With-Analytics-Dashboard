@@ -10,6 +10,7 @@ import {
   X,
   Shield,
   Lock,
+  UserX,
 } from "lucide-react";
 
 import { useAuth } from "../context/AuthProvider";
@@ -41,6 +42,12 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
       label: "Session History",
       path: "/dashboard/security",
     },
+    {
+      icon: <UserX size={20} />,
+      label: "Visitor Management",
+      path: "/dashboard/visitor-management",
+      adminOnly: true,
+    },
   ];
 
   const handleNavClick = (item, e) => {
@@ -60,11 +67,14 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
       {/* Restricted Access Notification */}
       {showRestricted && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[200] animate-in slide-in-from-top-4 fade-in duration-300">
-          <div className="bg-zinc-900 border border-amber-500/50 px-4 py-3 rounded-sm shadow-lg flex items-center gap-3">
-            <Lock size={16} className="text-amber-500" />
-            <span className="text-sm text-zinc-200 font-mono">
-              This section is accessible only to admins
-            </span>
+          <div className="bg-zinc-900 border border-red-500/50 px-5 py-4 shadow-lg flex items-center gap-3">
+            <div className="w-8 h-8 bg-red-500/20 flex items-center justify-center">
+              <Lock size={16} className="text-red-500" />
+            </div>
+            <div>
+              <p className="text-sm text-zinc-100 font-bold uppercase tracking-wider">Access Denied</p>
+              <p className="text-xs text-zinc-400 font-mono">Only Admin can access this section</p>
+            </div>
           </div>
         </div>
       )}
