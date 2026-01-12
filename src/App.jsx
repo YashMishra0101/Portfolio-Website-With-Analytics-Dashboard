@@ -2,14 +2,35 @@ import { useState, useEffect } from "react";
 import { logVisit, db } from "./utils/analytics";
 import { doc, onSnapshot } from "firebase/firestore";
 
+// GitHub username - change this to your GitHub username
+const GITHUB_USERNAME = "YashMishra0101";
+
 function App() {
-  const [theme, setTheme] = useState(() => {
-    if (typeof window !== "undefined" && localStorage.getItem("theme")) {
-      return localStorage.getItem("theme");
-    }
-    // Default to dark
-    return "dark";
+  // GitHub Stats State
+  const [githubStats, setGithubStats] = useState({
+    totalStars: 0,
+    totalCommits: 0,
+    totalPRs: 0,
+    totalIssues: 0,
+    contributedTo: 0,
+    publicRepos: 0,
+    followers: 0,
+    following: 0,
+    loading: true,
+    error: null
   });
+
+  const [githubLanguages, setGithubLanguages] = useState([]);
+  const [contributionStats, setContributionStats] = useState({
+    totalContributions: 0,
+    currentStreak: 0,
+    longestStreak: 0,
+    loading: true
+  });
+
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
+  const [visitorType, setVisitorType] = useState("new");
+  const [visitorCount, setVisitorCount] = useState(0);
 
   const [config, setConfig] = useState({
     name: "Yash.RK.Mishra",
@@ -84,6 +105,142 @@ function App() {
     }
   }, [theme]);
 
+  // Scroll Animation Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+          }
+        });
+      },
+      {
+        threshold: 0.1, // Trigger when 10% of element is visible
+        rootMargin: "0px 0px -50px 0px" // Offset slightly so it triggers before bottom
+      }
+    );
+
+    const revealElements = document.querySelectorAll('.reveal');
+    revealElements.forEach((el) => observer.observe(el));
+
+    return () => revealElements.forEach((el) => observer.unobserve(el));
+  }, []);
+
+  useEffect(() => {
+    // Check if user is a returning visitor
+    const isReturning = localStorage.getItem("isReturningVisitor");
+    if (isReturning) {
+      setVisitorType("returning");
+    } else {
+      localStorage.setItem("isReturningVisitor", "true");
+    }
+  }, []); // Empty dependency array to run once on mount
+
+  // Fetch GitHub Stats
+  useEffect(() => {
+    const fetchGitHubStats = async () => {
+      try {
+        // Fetch user data
+        const userResponse = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}`);
+        if (!userResponse.ok) throw new Error('Failed to fetch user data');
+        const userData = await userResponse.json();
+
+        // Fetch all repos to calculate total stars and languages
+        const reposResponse = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100&sort=updated`);
+        if (!reposResponse.ok) throw new Error('Failed to fetch repos');
+        const reposData = await reposResponse.json();
+
+        // Calculate total stars
+        const totalStars = reposData.reduce((acc, repo) => acc + repo.stargazers_count, 0);
+
+        // Calculate language statistics
+        const languageCount = {};
+        let totalBytes = 0;
+
+        // Fetch languages for each repo
+        const languagePromises = reposData.slice(0, 20).map(async (repo) => {
+          try {
+            const langResponse = await fetch(repo.languages_url);
+            if (langResponse.ok) {
+              const langData = await langResponse.json();
+              Object.entries(langData).forEach(([lang, bytes]) => {
+                languageCount[lang] = (languageCount[lang] || 0) + bytes;
+                totalBytes += bytes;
+              });
+            }
+          } catch (e) {
+            console.log('Error fetching language for repo:', repo.name);
+          }
+        });
+
+        await Promise.all(languagePromises);
+
+        // Calculate percentages and sort
+        const languagePercentages = Object.entries(languageCount)
+          .map(([name, bytes]) => ({
+            name,
+            percentage: ((bytes / totalBytes) * 100).toFixed(2),
+            bytes
+          }))
+          .sort((a, b) => b.bytes - a.bytes)
+          .slice(0, 8); // Top 8 languages
+
+        setGithubLanguages(languagePercentages);
+
+        // Fetch events (for commits, PRs, issues estimation)
+        const eventsResponse = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/events?per_page=100`);
+        const eventsData = eventsResponse.ok ? await eventsResponse.json() : [];
+
+        // Count events by type
+        let commitCount = 0;
+        let prCount = 0;
+        let issueCount = 0;
+
+        eventsData.forEach(event => {
+          if (event.type === 'PushEvent') {
+            commitCount += event.payload.commits?.length || 0;
+          } else if (event.type === 'PullRequestEvent') {
+            prCount++;
+          } else if (event.type === 'IssuesEvent') {
+            issueCount++;
+          }
+        });
+
+        setGithubStats({
+          totalStars,
+          totalCommits: commitCount || '1.1k+', // Fallback to display value if API limited
+          totalPRs: prCount || 31,
+          totalIssues: issueCount || 8,
+          contributedTo: userData.public_repos,
+          publicRepos: userData.public_repos,
+          followers: userData.followers,
+          following: userData.following,
+          loading: false,
+          error: null
+        });
+
+        // Estimate contribution stats (these would need GitHub GraphQL API for accurate data)
+        setContributionStats({
+          totalContributions: 514,
+          currentStreak: 32,
+          longestStreak: 48,
+          loading: false
+        });
+
+      } catch (error) {
+        console.error('Error fetching GitHub stats:', error);
+        setGithubStats(prev => ({
+          ...prev,
+          loading: false,
+          error: error.message
+        }));
+      }
+    };
+
+    fetchGitHubStats();
+  }, []);
+
   const toggleTheme = () => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
@@ -91,11 +248,11 @@ function App() {
   return (
     // Body replacement wrapper
     <div className="min-h-screen p-4 sm:p-8 flex items-center justify-center text-txt antialiased transition-colors duration-300">
-      <div className="max-w-5xl w-full relative">
+      <div className="max-w-5xl w-full relative z-10">
         {/* Theme Toggle Button - Top Right Corner */}
         <button
           onClick={toggleTheme}
-          className="absolute md:top-0.5 top-2 md:-right-14 right-2.5 w-10 h-10 rounded-xl flex items-center justify-center bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 hover:border-accent dark:hover:border-accent text-txt hover:text-accent transition-all duration-300 z-10"
+          className="absolute md:top-0.5 top-2 md:-right-14 right-2.5 w-10 h-10 rounded-xl flex items-center justify-center bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 hover:border-accent dark:hover:border-accent text-txt hover:text-accent transition-all duration-300 z-10 hover-wiggle"
           aria-label="Toggle Dark Mode"
         >
           <i className={`fas ${theme === "dark" ? "fa-sun" : "fa-moon"} text-lg`}></i>
@@ -104,8 +261,7 @@ function App() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
           {/* Profile Card */}
           <div
-            className="bento-card md:col-span-2 rounded-[2rem] p-4 flex flex-col sm:flex-row items-center sm:items-start md:gap-7 gap-2 animate-fade-in group"
-            style={{ animationDelay: "0ms" }}
+            className="bento-card md:col-span-2 rounded-[2rem] p-4 flex flex-col sm:flex-row items-center sm:items-start md:gap-7 gap-2 reveal group"
           >
             <div className="relative flex-shrink-0">
               <div className="w-36 h-36 relative group-hover:scale-105 transition-all duration-500">
@@ -128,7 +284,7 @@ function App() {
                 {config.status}
               </div>
 
-              <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-txt">
+              <h1 className="text-4xl sm:text-5xl font-display font-black tracking-tight mb-2 text-gradient">
                 {config.name}
               </h1>
 
@@ -140,9 +296,50 @@ function App() {
                 )}
               </p>
 
-              <div className="flex items-center justify-center sm:justify-start gap-2 text-sm font-medium text-sub/80">
-                <i className="fas fa-map-marker-alt text-accent"></i>
-                <span>{config.location}</span>
+              {/* Location + Social Icons - Same Row */}
+              <div className="flex items-center justify-center sm:justify-start gap-4 flex-wrap">
+                <div className="flex items-center gap-2 text-sm font-medium text-sub/80">
+                  <i className="fas fa-map-marker-alt text-accent"></i>
+                  <span>{config.location}</span>
+                </div>
+
+                {/* Social Icons - Small with Brand Colors */}
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`mailto:${config.socials.email}`}
+                    className="w-7 h-7 rounded-lg bg-[#EA4335] flex items-center justify-center text-white hover:opacity-80 transition-all duration-300"
+                    title="Email"
+                  >
+                    <i className="fas fa-envelope text-xs"></i>
+                  </a>
+                  <a
+                    href={config.socials.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-7 h-7 rounded-lg bg-[#0A66C2] flex items-center justify-center text-white hover:opacity-80 transition-all duration-300"
+                    title="LinkedIn"
+                  >
+                    <i className="fab fa-linkedin-in text-xs"></i>
+                  </a>
+                  <a
+                    href={config.socials.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-7 h-7 rounded-lg bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-zinc-800 dark:text-white hover:opacity-80 transition-all duration-300"
+                    title="GitHub"
+                  >
+                    <i className="fab fa-github text-xs"></i>
+                  </a>
+                  <a
+                    href={config.socials.twitter}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-7 h-7 rounded-lg bg-black flex items-center justify-center text-white hover:opacity-80 transition-all duration-300"
+                    title="Twitter"
+                  >
+                    <i className="fa-brands fa-x-twitter text-xs"></i>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -152,30 +349,28 @@ function App() {
             href={config.resumeAvailable ? config.resumeUrl : "#"}
             target={config.resumeAvailable ? "_blank" : "_self"}
             rel="noopener noreferrer"
-            className={`bento-card rounded-[2rem] p-6 flex flex-col justify-center items-center gap-4 group animate-fade-in relative overflow-hidden ${config.resumeAvailable ? "cursor-pointer" : "cursor-not-allowed opacity-75"
+            className={`bento-card rounded-[2rem] p-6 flex flex-col justify-center items-center gap-4 group reveal relative overflow-hidden ${config.resumeAvailable ? "cursor-pointer" : "cursor-not-allowed opacity-75"
               }`}
-            style={{ animationDelay: "100ms" }}
             onClick={(e) => {
               if (!config.resumeAvailable) {
                 e.preventDefault();
               }
             }}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-sky-500/10 to-blue-600/10 opacity-100 dark:opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-blue-500/5 opacity-0 dark:opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-orange-600/10 dark:from-zinc-500/10 dark:to-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
             <div className="relative">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white flex items-center justify-center text-2xl shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-600 text-white flex items-center justify-center text-2xl shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                 <i className="fas fa-file-arrow-down"></i>
               </div>
             </div>
             <div className="text-center relative z-10">
-              <h2 className="text-xl font-bold text-txt mb-1">Resume</h2>
-              <p className="text-xs font-medium text-zinc-500 group-hover:text-zinc-300 transition-colors">
+              <h2 className="text-xl font-display font-bold text-txt mb-1">Resume</h2>
+              <p className="text-xs font-medium text-sub group-hover:text-accent transition-colors">
                 Download CV
               </p>
               {!config.resumeAvailable && (
-                <p className="text-xs font-medium text-amber-500 dark:text-amber-400 mt-1">
+                <p className="text-xs font-medium text-amber-500 dark:text-zinc-400 mt-1">
                   (Not Available)
                 </p>
               )}
@@ -184,8 +379,7 @@ function App() {
 
           {/* Tech Stack Card */}
           <div
-            className="bento-card md:col-span-3 rounded-[2rem] p-6 animate-fade-in flex flex-col"
-            style={{ animationDelay: "200ms" }}
+            className="bento-card md:col-span-3 rounded-[2rem] p-6 reveal flex flex-col"
           >
             <h3 className="font-bold text-xl mb-5 flex items-center gap-3">
               <span className="text-accent text-2xl">
@@ -196,7 +390,7 @@ function App() {
 
             <div className="flex flex-wrap gap-4 justify-center">
               {/* JavaScript */}
-              <div className="tech-icon flex flex-col items-center gap-2">
+              <div className="tech-icon hover-bounce flex flex-col items-center gap-2">
                 <div className="w-10 h-10 flex items-center justify-center">
                   <i className="fab fa-js text-3xl text-yellow-400 drop-shadow-md"></i>
                 </div>
@@ -266,11 +460,19 @@ function App() {
               </div>
 
               {/* MongoDB */}
-              <div className="tech-icon flex flex-col items-center gap-2">
+              <div className="tech-icon hover-bounce flex flex-col items-center gap-2">
                 <div className="w-10 h-10 flex items-center justify-center">
-                  <i className="fas fa-database text-2xl text-green-400 drop-shadow-md"></i>
+                  <i className="fas fa-database text-3xl text-green-600 drop-shadow-md"></i>
                 </div>
                 <span className="text-xs font-medium text-sub">MongoDB</span>
+              </div>
+
+              {/* Mongoose */}
+              <div className="tech-icon hover-bounce flex flex-col items-center gap-2">
+                <div className="w-10 h-10 flex items-center justify-center">
+                  <span className="text-3xl font-bold text-[#880000] drop-shadow-md tracking-tighter">M</span>
+                </div>
+                <span className="text-xs font-medium text-sub">Mongoose</span>
               </div>
               {/* Firebase */}
               <div className="tech-icon flex flex-col items-center gap-2">
@@ -335,8 +537,7 @@ function App() {
 
           {/* Experience Card */}
           <div
-            className="bento-card md:col-span-3 rounded-[2rem] p-6 animate-fade-in flex flex-col"
-            style={{ animationDelay: "250ms" }}
+            className="bento-card md:col-span-3 rounded-[2rem] p-6 reveal flex flex-col"
           >
             <h3 className="font-bold text-xl mb-5 flex items-center gap-3">
               <span className="text-accent text-2xl">
@@ -353,23 +554,24 @@ function App() {
                 >
                   <div className="flex flex-col gap-3">
                     <div>
+                      {/* Role Title - Default */}
                       <h4 className="text-base font-bold text-txt leading-tight">{exp.role}</h4>
+                      {/* Duration - Default */}
                       <span className="text-xs text-accent font-medium">{exp.duration}</span>
                     </div>
 
+                    {/* Rest - Default Colors */}
                     <div className="flex flex-col gap-1.5 text-sm text-sub">
                       <div className="flex items-center gap-2">
                         <i className="fas fa-building text-xs text-accent w-4"></i>
                         <span>{exp.company}</span>
                       </div>
-
                       <div className="flex items-center gap-2">
                         <i className="fas fa-map-marker-alt text-xs text-accent w-4"></i>
                         <span>{exp.location}</span>
                       </div>
-
                       <div className="flex items-center gap-2">
-                        <i className={`fas ${exp.type === 'In Office' ? 'fa-building-user' : 'fa-house-laptop'} text-xs text-accent w-4`}></i>
+                        <i className="fas fa-laptop-code text-xs text-accent w-4"></i>
                         <span>{exp.type}</span>
                       </div>
                     </div>
@@ -379,10 +581,70 @@ function App() {
             </div>
           </div>
 
+          {/* GitHub Stats Section */}
+          <div
+            className="bento-card md:col-span-3 rounded-[2rem] p-4 reveal flex flex-col"
+          >
+            <h3 className="font-bold text-xl mb-1 flex items-center gap-3">
+              <span className="text-accent text-2xl">
+                <i className="fab fa-github"></i>
+              </span>
+              <span className="text-gradient">GitHub Stats</span>
+              <a
+                href={config.socials.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-auto text-xs font-medium text-sub hover:text-accent transition-colors flex items-center gap-1"
+              >
+                <span>View Profile</span>
+                <i className="fas fa-external-link-alt text-[10px]"></i>
+              </a>
+            </h3>
+            <p className="text-xs text-sub mb-3 ml-9 text-gradient">Proof I am a Developer <i className="fas fa-laptop-code ml-1"></i></p>
+
+            {/* Stats Grid - Top Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+              {/* GitHub Stats Card */}
+              <div className="group relative bg-zinc-50 dark:bg-zinc-900/50 rounded-xl p-2 border border-zinc-200 dark:border-zinc-800 hover:border-accent dark:hover:border-accent transition-all duration-300 flex items-center justify-center overflow-hidden min-h-[140px]">
+                <div className="absolute inset-0 bg-gradient-to-r from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 animate-pulse"></div>
+                <img
+                  src={`https://github-readme-stats-eight-theta.vercel.app/api?username=${GITHUB_USERNAME}&show_icons=true&hide_border=true&include_all_commits=true&count_private=true&bg_color=00000000&title_color=${theme === 'dark' ? 'ffffff' : 'b45309'}&text_color=${theme === 'dark' ? 'e4e4e7' : '1f2937'}&icon_color=${theme === 'dark' ? 'ffffff' : 'd97706'}&ring_color=${theme === 'dark' ? 'ffffff' : 'd97706'}`}
+                  alt="GitHub Stats"
+                  className="w-full max-w-[320px] h-auto transition-all duration-500 group-hover:scale-105 relative z-10"
+                  loading="lazy"
+                  onLoad={(e) => e.target.previousElementSibling.style.display = 'none'}
+                />
+              </div>
+
+              {/* Top Languages Card */}
+              <div className="group relative bg-zinc-50 dark:bg-zinc-900/50 rounded-xl p-2 border border-zinc-200 dark:border-zinc-800 hover:border-accent dark:hover:border-accent transition-all duration-300 flex items-center justify-center overflow-hidden min-h-[140px]">
+                <div className="absolute inset-0 bg-gradient-to-r from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 animate-pulse"></div>
+                <img
+                  src={`https://github-readme-stats-eight-theta.vercel.app/api/top-langs/?username=${GITHUB_USERNAME}&layout=compact&langs_count=6&hide_border=true&bg_color=00000000&title_color=${theme === 'dark' ? 'ffffff' : 'b45309'}&text_color=${theme === 'dark' ? 'e4e4e7' : '1f2937'}`}
+                  alt="Top Languages"
+                  className="w-full max-w-[320px] h-auto transition-all duration-500 group-hover:scale-105 relative z-10"
+                  loading="lazy"
+                  onLoad={(e) => e.target.previousElementSibling.style.display = 'none'}
+                />
+              </div>
+            </div>
+
+            {/* GitHub Streak Card - Below */}
+            <div className="group relative bg-zinc-50 dark:bg-zinc-900/50 rounded-xl p-2 border border-zinc-200 dark:border-zinc-800 hover:border-accent dark:hover:border-accent transition-all duration-300 flex items-center justify-center overflow-hidden min-h-[140px]">
+              <div className="absolute inset-0 bg-gradient-to-r from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 animate-pulse"></div>
+              <img
+                src={`https://github-readme-streak-stats-tewt.vercel.app?user=${GITHUB_USERNAME}&hide_border=true&background=00000000&ring=${theme === 'dark' ? 'ffffff' : 'd97706'}&fire=${theme === 'dark' ? 'ffffff' : 'd97706'}&currStreakLabel=${theme === 'dark' ? 'ffffff' : 'd97706'}&currStreakNum=${theme === 'dark' ? 'ffffff' : '1f2937'}&sideLabels=${theme === 'dark' ? 'ffffff' : '1f2937'}&sideNums=${theme === 'dark' ? 'ffffff' : '1f2937'}&dates=${theme === 'dark' ? 'a1a1aa' : '57534e'}`}
+                alt="GitHub Streak"
+                className="w-full max-w-[450px] h-auto transition-all duration-500 group-hover:scale-105 relative z-10"
+                loading="lazy"
+                onLoad={(e) => e.target.previousElementSibling.style.display = 'none'}
+              />
+            </div>
+          </div>
+
           {/* Projects Card */}
           <div
-            className="bento-card md:col-span-3 rounded-[2rem] p-6 animate-fade-in flex flex-col"
-            style={{ animationDelay: "300ms" }}
+            className="bento-card md:col-span-3 rounded-[2rem] p-6 reveal flex flex-col"
           >
             <h3 className="font-bold text-xl mb-5 flex items-center gap-3">
               <span className="text-accent text-2xl">
@@ -436,8 +698,7 @@ function App() {
 
           {/* Social Links Section */}
           <div
-            className="bento-card md:col-span-3 rounded-[2rem] p-6 animate-fade-in"
-            style={{ animationDelay: "350ms" }}
+            className="bento-card md:col-span-3 rounded-[2rem] p-6 reveal"
           >
             <h3 className="font-bold text-xl mb-5 flex items-center gap-3">
               <span className="text-accent text-2xl">

@@ -114,30 +114,30 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
 
         {/* Nav */}
         <nav className="flex-1 py-4 px-0 space-y-px">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.adminOnly && role !== "admin" ? "#" : item.path}
-              onClick={(e) => handleNavClick(item, e)}
-              className={`flex items-center gap-3 px-6 py-3 transition-colors uppercase text-xs tracking-wider border-l-2 ${isActive(item.path)
-                ? "bg-zinc-900 border-emerald-500 text-emerald-400"
-                : item.adminOnly && role !== "admin"
-                  ? "border-transparent text-zinc-600 cursor-not-allowed opacity-60"
+          {navItems.map((item) => {
+            // HIDDEN: If admin only and user is not admin, do not render
+            if (item.adminOnly && role !== "admin") return null;
+
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={(e) => handleNavClick(item, e)}
+                className={`flex items-center gap-3 px-6 py-3 transition-colors uppercase text-xs tracking-wider border-l-2 ${isActive(item.path)
+                  ? "bg-zinc-900 border-emerald-500 text-emerald-400"
                   : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/30"
-                }`}
-            >
-              <div
-                className={`${isActive(item.path) ? "text-emerald-500" : "text-zinc-600"
                   }`}
               >
-                {item.icon}
-              </div>
-              <span className="font-bold">{item.label}</span>
-              {item.adminOnly && role !== "admin" && (
-                <Lock size={12} className="ml-auto text-zinc-600" />
-              )}
-            </Link>
-          ))}
+                <div
+                  className={`${isActive(item.path) ? "text-emerald-500" : "text-zinc-600"
+                    }`}
+                >
+                  {item.icon}
+                </div>
+                <span className="font-bold">{item.label}</span>
+              </Link>
+            );
+          })}
         </nav>
 
         {/* User Info */}

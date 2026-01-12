@@ -6,6 +6,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', "sans-serif"],
+        display: ['"Outfit"', "sans-serif"],
       },
       colors: {
         canvas: "var(--bg-canvas)",
@@ -13,6 +14,7 @@ export default {
         txt: "var(--text-main)",
         sub: "var(--text-sub)",
         accent: "var(--color-accent)",
+        "accent-secondary": "var(--color-accent-secondary)",
         border: "var(--color-border)",
 
         // Icon backgrounds
