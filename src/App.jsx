@@ -284,7 +284,7 @@ function App() {
                 {config.status}
               </div>
 
-              <h1 className="text-4xl sm:text-5xl font-display font-black tracking-tight mb-2 text-gradient">
+              <h1 className="text-4xl sm:text-5xl font-poppins font-semibold tracking-tight mb-2 text-gradient">
                 {config.name}
               </h1>
 
@@ -296,8 +296,8 @@ function App() {
                 )}
               </p>
 
-              {/* Location + Social Icons - Same Row */}
-              <div className="flex items-center justify-center sm:justify-start gap-4 flex-wrap">
+              {/* Location + Social Icons - Stacked on Mobile, Row on Desktop */}
+              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 flex-wrap">
                 <div className="flex items-center gap-2 text-sm font-medium text-sub/80">
                   <i className="fas fa-map-marker-alt text-accent"></i>
                   <span>{config.location}</span>
@@ -600,7 +600,10 @@ function App() {
                 <i className="fas fa-external-link-alt text-[10px]"></i>
               </a>
             </h3>
-            <p className="text-xs text-sub mb-3 ml-9 text-gradient">Proof I am a Developer <i className="fas fa-laptop-code ml-1"></i></p>
+            <p className="text-xs text-sub mb-3 ml-8 text-gradient flex items-center gap-2">
+              Proof I am a Developer
+              <img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" alt="Coding" className="w-8 h-8 -ml-1 animate-bounce rounded-full" />
+            </p>
 
             {/* Stats Grid - Top Row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
@@ -608,7 +611,7 @@ function App() {
               <div className="group relative bg-zinc-50 dark:bg-zinc-900/50 rounded-xl p-2 border border-zinc-200 dark:border-zinc-800 hover:border-accent dark:hover:border-accent transition-all duration-300 flex items-center justify-center overflow-hidden min-h-[140px]">
                 <div className="absolute inset-0 bg-gradient-to-r from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 animate-pulse"></div>
                 <img
-                  src={`https://github-readme-stats-eight-theta.vercel.app/api?username=${GITHUB_USERNAME}&show_icons=true&hide_border=true&include_all_commits=true&count_private=true&bg_color=00000000&title_color=${theme === 'dark' ? 'ffffff' : 'b45309'}&text_color=${theme === 'dark' ? 'e4e4e7' : '1f2937'}&icon_color=${theme === 'dark' ? 'ffffff' : 'd97706'}&ring_color=${theme === 'dark' ? 'ffffff' : 'd97706'}`}
+                  src={`https://github-readme-stats-eight-theta.vercel.app/api?username=${GITHUB_USERNAME}&show_icons=true&hide_border=true&include_all_commits=true&count_private=true&bg_color=00000000&theme=${theme === 'dark' ? 'tokyonight' : 'default'}&title_color=${theme === 'dark' ? '' : 'b45309'}&text_color=${theme === 'dark' ? '' : '1f2937'}&icon_color=${theme === 'dark' ? '' : 'd97706'}&ring_color=${theme === 'dark' ? '' : 'd97706'}`}
                   alt="GitHub Stats"
                   className="w-full max-w-[320px] h-auto transition-all duration-500 group-hover:scale-105 relative z-10"
                   loading="lazy"
@@ -620,7 +623,7 @@ function App() {
               <div className="group relative bg-zinc-50 dark:bg-zinc-900/50 rounded-xl p-2 border border-zinc-200 dark:border-zinc-800 hover:border-accent dark:hover:border-accent transition-all duration-300 flex items-center justify-center overflow-hidden min-h-[140px]">
                 <div className="absolute inset-0 bg-gradient-to-r from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 animate-pulse"></div>
                 <img
-                  src={`https://github-readme-stats-eight-theta.vercel.app/api/top-langs/?username=${GITHUB_USERNAME}&layout=compact&langs_count=6&hide_border=true&bg_color=00000000&title_color=${theme === 'dark' ? 'ffffff' : 'b45309'}&text_color=${theme === 'dark' ? 'e4e4e7' : '1f2937'}`}
+                  src={`https://github-readme-stats-eight-theta.vercel.app/api/top-langs/?username=${GITHUB_USERNAME}&layout=compact&langs_count=6&hide_border=true&bg_color=00000000&theme=${theme === 'dark' ? 'tokyonight' : 'default'}&title_color=${theme === 'dark' ? '' : 'b45309'}&text_color=${theme === 'dark' ? '' : '1f2937'}`}
                   alt="Top Languages"
                   className="w-full max-w-[320px] h-auto transition-all duration-500 group-hover:scale-105 relative z-10"
                   loading="lazy"
@@ -633,7 +636,7 @@ function App() {
             <div className="group relative bg-zinc-50 dark:bg-zinc-900/50 rounded-xl p-2 border border-zinc-200 dark:border-zinc-800 hover:border-accent dark:hover:border-accent transition-all duration-300 flex items-center justify-center overflow-hidden min-h-[140px]">
               <div className="absolute inset-0 bg-gradient-to-r from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 animate-pulse"></div>
               <img
-                src={`https://github-readme-streak-stats-tewt.vercel.app?user=${GITHUB_USERNAME}&hide_border=true&background=00000000&ring=${theme === 'dark' ? 'ffffff' : 'd97706'}&fire=${theme === 'dark' ? 'ffffff' : 'd97706'}&currStreakLabel=${theme === 'dark' ? 'ffffff' : 'd97706'}&currStreakNum=${theme === 'dark' ? 'ffffff' : '1f2937'}&sideLabels=${theme === 'dark' ? 'ffffff' : '1f2937'}&sideNums=${theme === 'dark' ? 'ffffff' : '1f2937'}&dates=${theme === 'dark' ? 'a1a1aa' : '57534e'}`}
+                src={`https://github-readme-streak-stats-tewt.vercel.app?user=${GITHUB_USERNAME}&hide_border=true&background=00000000&theme=${theme === 'dark' ? 'tokyonight' : 'default'}&ring=${theme === 'dark' ? '' : 'd97706'}&fire=${theme === 'dark' ? '' : 'd97706'}&currStreakLabel=${theme === 'dark' ? '' : 'd97706'}&currStreakNum=${theme === 'dark' ? '' : '1f2937'}&sideLabels=${theme === 'dark' ? '' : '1f2937'}&sideNums=${theme === 'dark' ? '' : '1f2937'}&dates=${theme === 'dark' ? '' : '57534e'}`}
                 alt="GitHub Streak"
                 className="w-full max-w-[450px] h-auto transition-all duration-500 group-hover:scale-105 relative z-10"
                 loading="lazy"
@@ -774,7 +777,7 @@ function App() {
 
           {/* Bottom Tagline */}
           <div className="md:col-span-3 text-center py-6 -mb-2 animate-fade-in" style={{ animationDelay: "400ms" }}>
-            <p className="text-sub text-sm font-medium tracking-wide">
+            <p className="text-accent text-sm font-medium tracking-wide">
               Learning · Building · Improving
             </p>
             <p className="text-accent text-sm mt-1">

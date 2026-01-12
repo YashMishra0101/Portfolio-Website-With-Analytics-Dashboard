@@ -7,6 +7,7 @@ export default {
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', "sans-serif"],
         display: ['"Outfit"', "sans-serif"],
+        poppins: ['"Poppins"', "sans-serif"],
       },
       colors: {
         canvas: "var(--bg-canvas)",
