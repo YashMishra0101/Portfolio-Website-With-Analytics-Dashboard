@@ -636,7 +636,7 @@ function App() {
             <div className="group relative bg-zinc-50 dark:bg-zinc-900/50 rounded-xl p-2 border border-zinc-200 dark:border-zinc-800 hover:border-accent dark:hover:border-accent transition-all duration-300 flex items-center justify-center overflow-hidden min-h-[140px]">
               <div className="absolute inset-0 bg-gradient-to-r from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 animate-pulse"></div>
               <img
-                src={`https://github-readme-streak-stats-tewt.vercel.app?user=${GITHUB_USERNAME}&hide_border=true&background=00000000&theme=${theme === 'dark' ? 'tokyonight' : 'default'}&ring=${theme === 'dark' ? '' : 'd97706'}&fire=${theme === 'dark' ? '' : 'd97706'}&currStreakLabel=${theme === 'dark' ? '' : 'd97706'}&currStreakNum=${theme === 'dark' ? '' : '1f2937'}&sideLabels=${theme === 'dark' ? '' : '1f2937'}&sideNums=${theme === 'dark' ? '' : '1f2937'}&dates=${theme === 'dark' ? '' : '57534e'}`}
+                src={`https://github-readme-streak-stats-nnqf.vercel.app?user=${GITHUB_USERNAME}&hide_border=true&background=00000000&theme=${theme === 'dark' ? 'tokyonight' : 'default'}&ring=${theme === 'dark' ? '' : 'd97706'}&fire=${theme === 'dark' ? '' : 'd97706'}&currStreakLabel=${theme === 'dark' ? '' : 'd97706'}&currStreakNum=${theme === 'dark' ? '' : '1f2937'}&sideLabels=${theme === 'dark' ? '' : '1f2937'}&sideNums=${theme === 'dark' ? '' : '1f2937'}&dates=${theme === 'dark' ? '' : '57534e'}`}
                 alt="GitHub Streak"
                 className="w-full max-w-[450px] h-auto transition-all duration-500 group-hover:scale-105 relative z-10"
                 loading="lazy"
