@@ -28,7 +28,8 @@ function App() {
     loading: true
   });
 
-  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
+  // Theme is always dark
+  const theme = 'dark';
   const [visitorType, setVisitorType] = useState("new");
   const [visitorCount, setVisitorCount] = useState(0);
 
@@ -93,17 +94,10 @@ function App() {
     logVisit();
   }, []); // Empty dependency array = runs only once
 
-  // Handle theme changes separately
+  // Ensure dark mode is always active
   useEffect(() => {
-    const html = document.documentElement;
-    if (theme === "dark") {
-      html.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      html.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [theme]);
+    document.documentElement.classList.add("dark");
+  }, []);
 
   // Scroll Animation Observer
   useEffect(() => {
@@ -241,28 +235,27 @@ function App() {
     fetchGitHubStats();
   }, []);
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-  };
-
   return (
     // Body replacement wrapper
     <div className="min-h-screen p-4 sm:p-8 flex items-center justify-center text-txt antialiased transition-colors duration-300">
       <div className="max-w-5xl w-full relative z-10">
-        {/* Theme Toggle Button - Top Right Corner */}
-        <button
-          onClick={toggleTheme}
-          className="absolute md:top-0.5 top-2 md:-right-14 right-2.5 w-10 h-10 rounded-xl flex items-center justify-center bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 hover:border-accent dark:hover:border-accent text-txt hover:text-accent transition-all duration-300 z-10 hover-wiggle"
-          aria-label="Toggle Dark Mode"
-        >
-          <i className={`fas ${theme === "dark" ? "fa-sun" : "fa-moon"} text-lg`}></i>
-        </button>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
           {/* Profile Card */}
           <div
             className="bento-card md:col-span-2 rounded-[2rem] p-4 flex flex-col sm:flex-row items-center sm:items-start md:gap-7 gap-2 reveal group"
           >
+            {/* Mobile Only - Status Badge Centered */}
+            <div className="sm:hidden w-full flex justify-center mb-2">
+              <div className="inline-flex items-center px-3 py-1 rounded-full bg-[#007E33]/10 text-[#2ecc71] border border-[#007E33]/30 text-xs font-bold tracking-wide">
+                <span className="relative flex h-2 w-2 mr-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                {config.status}
+              </div>
+            </div>
+
             <div className="relative flex-shrink-0">
               <div className="w-36 h-36 relative group-hover:scale-105 transition-all duration-500">
                 <div className="absolute inset-[6px] rounded-full overflow-hidden shadow-lg z-0">
@@ -276,7 +269,8 @@ function App() {
             </div>
 
             <div className="flex-1 text-center sm:text-left">
-              <div className="inline-flex items-center px-3 py-1 rounded-full bg-[#007E33]/10 text-[#2ecc71] border border-[#007E33]/30 text-xs font-bold mb-4 tracking-wide">
+              {/* Desktop Only - Status Badge */}
+              <div className="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-[#007E33]/10 text-[#2ecc71] border border-[#007E33]/30 text-xs font-bold mb-4 tracking-wide">
                 <span className="relative flex h-2 w-2 mr-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -388,7 +382,8 @@ function App() {
               <span className="text-gradient">Tech Stack</span>
             </h3>
 
-            <div className="flex flex-wrap gap-4 justify-center">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+              {/* === FRONTEND === */}
               {/* JavaScript */}
               <div className="tech-icon hover-bounce flex flex-col items-center gap-2">
                 <div className="w-10 h-10 flex items-center justify-center">
@@ -425,6 +420,8 @@ function App() {
                 <span className="text-xs font-medium text-sub">React</span>
               </div>
 
+
+              {/* === BACKEND === */}
               {/* Node.js */}
               <div className="tech-icon flex flex-col items-center gap-2">
                 <div className="w-10 h-10 flex items-center justify-center">
@@ -474,6 +471,20 @@ function App() {
                 </div>
                 <span className="text-xs font-medium text-sub">Mongoose</span>
               </div>
+
+              {/* TanStack Query */}
+              <div className="tech-icon flex flex-col items-center gap-2">
+                <div className="w-10 h-10 flex items-center justify-center">
+                  <svg className="w-8 h-8 drop-shadow-md" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="16" cy="16" r="14" fill="#FF4154" />
+                    <path d="M10 16C10 12.7 12.7 10 16 10" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
+                    <path d="M16 22C19.3 22 22 19.3 22 16" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
+                    <circle cx="16" cy="16" r="3" fill="white" />
+                  </svg>
+                </div>
+                <span className="text-xs font-medium text-sub text-center">TanStack Query</span>
+              </div>
+
               {/* Firebase */}
               <div className="tech-icon flex flex-col items-center gap-2">
                 <div className="w-10 h-10 flex items-center justify-center">
@@ -497,6 +508,8 @@ function App() {
                 </div>
                 <span className="text-xs font-medium text-sub">Supabase</span>
               </div>
+
+              {/* === CSS/STYLING === */}
               {/* Tailwind CSS */}
               <div className="tech-icon flex flex-col items-center gap-2">
                 <div className="w-10 h-10 flex items-center justify-center">
@@ -506,31 +519,36 @@ function App() {
                 </div>
                 <span className="text-xs font-medium text-sub">Tailwind</span>
               </div>
-              {/* Git */}
+
+              {/* Bootstrap */}
               <div className="tech-icon flex flex-col items-center gap-2">
                 <div className="w-10 h-10 flex items-center justify-center">
-                  <i className="fab fa-git-alt text-3xl text-orange-600 drop-shadow-md"></i>
+                  <i className="fab fa-bootstrap text-3xl text-purple-500 drop-shadow-md"></i>
                 </div>
-                <span className="text-xs font-medium text-sub">Git</span>
+                <span className="text-xs font-medium text-sub">Bootstrap</span>
               </div>
 
-              {/* GitHub */}
-              <div className="tech-icon flex flex-col items-center gap-2">
-                <div className="w-10 h-10 flex items-center justify-center">
-                  <i className="fab fa-github text-3xl text-txt drop-shadow-md"></i>
-                </div>
-                <span className="text-xs font-medium text-sub">GitHub</span>
-              </div>
-
-              {/* Postman */}
+              {/* shadcn/ui */}
               <div className="tech-icon flex flex-col items-center gap-2">
                 <div className="w-10 h-10 flex items-center justify-center">
                   <svg className="w-8 h-8 drop-shadow-md" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="12" fill="#FF6C37" />
-                    <path d="M16.5 7.5L12 12L9.5 9.5L7 12L9.5 14.5L12 12L16.5 16.5L19 14L16.5 11.5L14 9L16.5 7.5Z" fill="white" />
+                    <rect width="24" height="24" rx="4" className="fill-zinc-900 dark:fill-white" />
+                    <path d="M16.5 3.5L7.5 20.5" stroke="white" strokeWidth="2" strokeLinecap="round" className="dark:stroke-zinc-900" />
                   </svg>
                 </div>
-                <span className="text-xs font-medium text-sub">Postman</span>
+                <span className="text-xs font-medium text-sub">shadcn/ui</span>
+              </div>
+
+              {/* Ant Design */}
+              <div className="tech-icon flex flex-col items-center gap-2">
+                <div className="w-10 h-10 flex items-center justify-center">
+                  <svg className="w-8 h-8 drop-shadow-md" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#1890FF" />
+                    <path d="M2 17L12 22L22 17" stroke="#1890FF" strokeWidth="2" />
+                    <path d="M2 12L12 17L22 12" stroke="#1890FF" strokeWidth="2" />
+                  </svg>
+                </div>
+                <span className="text-xs font-medium text-sub">Ant Design</span>
               </div>
             </div>
           </div>
@@ -789,8 +807,8 @@ function App() {
             <hr className="border-t border-zinc-200 dark:border-zinc-800" />
           </div>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
 
