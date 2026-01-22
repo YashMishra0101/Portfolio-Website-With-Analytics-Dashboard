@@ -30,13 +30,13 @@ export default function Visitors() {
             <h1 className="tactical-header text-sm md:text-base tracking-normal md:tracking-widest">
               Recent Visitors
             </h1>
-            <span className="px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 text-zinc-400 text-[9px] font-mono">
+            <span className="px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-mono">
               Total Visitors: <span className="text-zinc-200 font-bold">{visits.length}</span>
             </span>
           </div>
-          <p className="text-zinc-600 text-[8px] font-mono uppercase">Real-time List</p>
+          <p className="text-zinc-600 text-[9px] font-mono uppercase">Real-time List</p>
         </div>
-        <div className="flex gap-1.5 items-center px-1.5 py-0.5 bg-emerald-900/10 border border-emerald-900/30 text-emerald-500 text-[8px] font-bold uppercase tracking-widest w-fit">
+        <div className="flex gap-1.5 items-center px-1.5 py-0.5 bg-emerald-900/10 border border-emerald-900/30 text-emerald-500 text-[9px] font-bold uppercase tracking-widest w-fit">
           <div className="w-1 h-1 bg-emerald-500 animate-pulse"></div>
           Monitoring Active
         </div>
@@ -53,22 +53,22 @@ export default function Visitors() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
               {/* Date-Time */}
               <div>
-                <p className="text-zinc-600 text-[8px] uppercase tracking-widest mb-0.5">Date & Time</p>
-                <p className="text-zinc-400 text-[10px] font-mono">{formatTime(v.timestamp)}</p>
+                <p className="text-zinc-600 text-[9px] uppercase tracking-widest mb-0.5">Date & Time</p>
+                <p className="text-zinc-400 text-[11px] font-mono">{formatTime(v.timestamp)}</p>
               </div>
 
               {/* Location */}
               <div>
-                <p className="text-zinc-600 text-[8px] uppercase tracking-widest mb-0.5">Location</p>
-                <p className="text-zinc-300 text-[10px]">{v.city}, {v.country}</p>
+                <p className="text-zinc-600 text-[9px] uppercase tracking-widest mb-0.5">Location</p>
+                <p className="text-zinc-300 text-[11px]">{v.city}, {v.country}</p>
               </div>
 
               {/* IP Address */}
               <div>
-                <p className="text-zinc-600 text-[8px] uppercase tracking-widest mb-0.5">IP Address</p>
+                <p className="text-zinc-600 text-[9px] uppercase tracking-widest mb-0.5">IP Address</p>
                 <div className="flex items-center gap-1">
                   <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse shrink-0"></div>
-                  <span className="text-emerald-400 text-[10px] font-mono font-semibold">{v.ip}</span>
+                  <span className="text-emerald-400 text-[11px] font-mono font-semibold">{v.ip}</span>
                 </div>
               </div>
             </div>
@@ -77,20 +77,20 @@ export default function Visitors() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-zinc-800/40">
               {/* Platform */}
               <div>
-                <p className="text-zinc-600 text-[8px] uppercase tracking-widest mb-0.5">Platform</p>
-                <p className="text-zinc-300 text-[10px] font-mono">{v.os}</p>
+                <p className="text-zinc-600 text-[9px] uppercase tracking-widest mb-0.5">Platform</p>
+                <p className="text-zinc-300 text-[11px] font-mono">{v.os}</p>
               </div>
 
               {/* Source */}
               <div>
-                <p className="text-zinc-600 text-[8px] uppercase tracking-widest mb-0.5">Source</p>
-                <p className="text-zinc-400 text-[10px] break-all">{v.referrer || "Direct"}</p>
+                <p className="text-zinc-600 text-[9px] uppercase tracking-widest mb-0.5">Source</p>
+                <p className="text-zinc-400 text-[11px] break-all">{v.referrer || "Direct"}</p>
               </div>
 
               {/* Visitor ID */}
               <div>
-                <p className="text-zinc-600 text-[8px] uppercase tracking-widest mb-0.5">Visitor ID</p>
-                <p className="text-zinc-500 text-[9px] font-mono break-all">{v.visitorId}</p>
+                <p className="text-zinc-600 text-[9px] uppercase tracking-widest mb-0.5">Visitor ID</p>
+                <p className="text-zinc-500 text-[10px] font-mono break-all">{v.visitorId}</p>
               </div>
             </div>
           </div>
@@ -100,14 +100,14 @@ export default function Visitors() {
       {/* Empty State */}
       {visits.length === 0 && (
         <div className="tactical-card p-5 text-center">
-          <p className="text-zinc-500 text-[10px] font-mono">No visitor records found</p>
+          <p className="text-zinc-500 text-[11px] font-mono">No visitor records found</p>
         </div>
       )}
 
       {/* Summary */}
       {visits.length > 0 && (
         <div className="text-center pt-1">
-          <p className="text-zinc-600 text-[8px] font-mono uppercase">
+          <p className="text-zinc-600 text-[9px] font-mono uppercase">
             Showing {visits.length} visitor{visits.length !== 1 ? "s" : ""}
           </p>
         </div>

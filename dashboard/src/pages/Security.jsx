@@ -115,7 +115,7 @@ export default function Security() {
     <div className="space-y-6">
       <div className="border-b border-zinc-800 pb-4">
         <h1 className="tactical-header text-xl">Session History</h1>
-        <p className="text-zinc-600 text-[10px] font-mono uppercase">
+        <p className="text-zinc-600 text-[11px] font-mono uppercase">
           Activity History
         </p>
       </div>
@@ -128,7 +128,7 @@ export default function Security() {
           >
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-zinc-500 text-[10px] font-mono mb-1">
+                <p className="text-zinc-500 text-[11px] font-mono mb-1">
                   {formatTime(log.timestamp)}
                 </p>
                 <div className="flex items-center gap-2">
@@ -136,12 +136,12 @@ export default function Security() {
                     <span className={`font-bold ${getActionColor(log.action)}`}>
                       {log.action.replace("_ATTEMPT", "")}
                     </span>
-                    <span className={`text-[8px] font-mono tracking-tighter ${getRoleColor(getDisplayRole(log))}`}>
+                    <span className={`text-[9px] font-mono tracking-tighter ${getRoleColor(getDisplayRole(log))}`}>
                       ({getDisplayRole(log)})
                     </span>
                   </div>
                   <span
-                    className={`px-1.5 py-0.5 text-[9px] font-bold uppercase border ${getStatusClass(log.status)}`}
+                    className={`px-1.5 py-0.5 text-[10px] font-bold uppercase border ${getStatusClass(log.status)}`}
                   >
                     {getStatusDisplay(log.status)}
                   </span>
@@ -151,7 +151,7 @@ export default function Security() {
 
             <div className="grid grid-cols-2 gap-3 pt-3 border-t border-zinc-800/50">
               <div className="overflow-hidden">
-                <p className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">
+                <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">
                   User
                 </p>
                 <p
@@ -162,7 +162,7 @@ export default function Security() {
                 </p>
               </div>
               <div className="overflow-hidden">
-                <p className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">
+                <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">
                   IP Address
                 </p>
                 <p className="text-xs text-zinc-400 font-mono break-all">
@@ -170,7 +170,7 @@ export default function Security() {
                 </p>
               </div>
               <div className="col-span-2">
-                <p className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">
+                <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">
                   Device
                 </p>
                 <div className="flex items-center gap-2">
@@ -221,7 +221,7 @@ export default function Security() {
 
       <div className="hidden md:block tactical-card overflow-x-auto">
         <table className="w-full text-left font-mono min-w-[900px]">
-          <thead className="bg-zinc-950 border-b border-zinc-800 text-zinc-500 font-bold uppercase text-[9px] tracking-wider">
+          <thead className="bg-zinc-950 border-b border-zinc-800 text-zinc-500 font-bold uppercase text-[10px] tracking-wider">
             <tr>
               <th className="px-4 py-3">Timestamp</th>
               <th className="px-4 py-3">Action</th>
@@ -232,7 +232,7 @@ export default function Security() {
               <th className="px-4 py-3">
                 <div className="flex flex-col items-center">
                   <span>Location</span>
-                  <span className="text-[8px] font-normal opacity-70 whitespace-nowrap">
+                  <span className="text-[9px] font-normal opacity-70 whitespace-nowrap">
                     (ESTIMATED LOCATION)
                   </span>
                 </div>
@@ -245,28 +245,28 @@ export default function Security() {
                 key={log.id}
                 className="hover:bg-zinc-800/50 transition-colors"
               >
-                <td className="px-4 py-2 text-zinc-400 text-[10px]">
+                <td className="px-4 py-2 text-zinc-400 text-[11px]">
                   {formatTime(log.timestamp)}
                 </td>
-                <td className="px-4 py-2 font-bold text-[10px]">
+                <td className="px-4 py-2 font-bold text-[11px]">
                   <div className="flex flex-col">
-                    <span className={`text-[10px] ${getActionColor(log.action)}`}>
+                    <span className={`text-[11px] ${getActionColor(log.action)}`}>
                       {log.action.replace("_ATTEMPT", "")}
                     </span>
-                    <span className={`text-[8px] font-mono font-normal tracking-tighter ${getRoleColor(getDisplayRole(log))}`}>
+                    <span className={`text-[9px] font-mono font-normal tracking-tighter ${getRoleColor(getDisplayRole(log))}`}>
                       ({getDisplayRole(log)})
                     </span>
                   </div>
                 </td>
                 <td className="px-4 py-2">
                   <span
-                    className={`px-1.5 py-0.5 text-[9px] font-bold uppercase border ${getStatusClass(log.status)}`}
+                    className={`px-1.5 py-0.5 text-[10px] font-bold uppercase border ${getStatusClass(log.status)}`}
                   >
                     {getStatusDisplay(log.status)}
                   </span>
                 </td>
                 <td
-                  className="px-4 py-2 text-zinc-400 text-[10px] truncate max-w-[150px]"
+                  className="px-4 py-2 text-zinc-400 text-[11px] truncate max-w-[150px]"
                   title={role === "admin" ? log.userId : undefined}
                 >
                   {getDisplayEmail(log)}
@@ -278,25 +278,18 @@ export default function Security() {
                     ) : (
                       <Monitor size={12} className="text-zinc-500" />
                     )}
-                    <div className="flex flex-col">
-                      <span className="text-[10px] text-zinc-200 font-bold">
-                        {formatOS(log.device?.os)}
-                      </span>
-                      <span className="text-[9px] text-zinc-500 truncate max-w-[120px]">
-                        {log.device?.model !== "PC/Mac"
-                          ? log.device?.model
-                          : log.device?.browser || "Browser"}
-                      </span>
-                    </div>
+                    <span className="text-[11px] text-zinc-200">
+                      {formatOS(log.device?.os)} • {log.device?.model !== "PC/Mac" ? log.device?.model : log.device?.browser || "Browser"}
+                    </span>
                   </div>
                 </td>
                 <td
-                  className="px-4 py-2 text-zinc-500 text-[10px] font-mono whitespace-nowrap"
+                  className="px-4 py-2 text-zinc-500 text-[11px] font-mono whitespace-nowrap"
                   title={role === "admin" ? log.ip : undefined}
                 >
                   {getDisplayIP(log)}
                 </td>
-                <td className="px-4 py-2 text-[10px]">
+                <td className="px-4 py-2 text-[11px]">
                   {(() => {
                     const locData = getDisplayLocation(log);
                     if (locData.hidden) {

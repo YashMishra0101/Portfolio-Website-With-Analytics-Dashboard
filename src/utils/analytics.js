@@ -41,69 +41,115 @@ const getVisitorId = () => {
   return vid;
 };
 
-// Helper to get IP and Geo Info
+// Helper to get IP and Geo Info with multiple fallbacks
 const getGeoInfo = async () => {
-  // Try primary API
+  // Try primary API: ipapi.co
   try {
-    const response = await fetch("https://ipapi.co/json/");
+    const response = await fetch("https://ipapi.co/json/", {
+      headers: { 'Accept': 'application/json' }
+    });
     if (!response.ok) throw new Error("Primary API failed");
     const data = await response.json();
-    
-    // Check if we got rate limited
-    if (data.error) {
-      console.warn("ipapi.co rate limited, trying fallback...");
-      throw new Error("Rate limited");
+
+    // Check if we got rate limited or error
+    if (data.error || data.reason) {
+      console.warn("ipapi.co error:", data.reason || data.error);
+      throw new Error("Rate limited or error");
     }
-    
-    return {
-      ip: data.ip || "unknown",
-      city: data.city || "Unknown",
-      country: data.country_name || "Unknown",
-      countryCode: data.country_code || "UN",
-      isp: data.org || "Unknown",
-    };
-  } catch (e) {
-    console.warn("Primary IP API failed, trying fallback 1...", e.message);
-    
-    // Fallback 1: ipify + ip-api.com
-    try {
-      const ipRes = await fetch("https://api.ipify.org?format=json");
-      const ipData = await ipRes.json();
-      const ip = ipData.ip;
-      
-      const geoRes = await fetch(`http://ip-api.com/json/${ip}`);
-      const geoData = await geoRes.json();
-      
+
+    if (data.city && data.country_name) {
       return {
-        ip: ip || "unknown",
-        city: geoData.city || "Unknown",
-        country: geoData.country || "Unknown",
-        countryCode: geoData.countryCode || "UN",
-        isp: geoData.isp || "Unknown",
+        ip: data.ip || "unknown",
+        city: data.city,
+        country: data.country_name,
+        countryCode: data.country_code || "UN",
+        isp: data.org || "Unknown",
       };
+    }
+    throw new Error("Incomplete data from ipapi.co");
+  } catch (e) {
+    console.warn("Primary IP API failed:", e.message);
+
+    // Fallback 1: freeipapi.com (HTTPS, no key needed)
+    try {
+      const response = await fetch("https://freeipapi.com/api/json/");
+      if (!response.ok) throw new Error("freeipapi failed");
+      const data = await response.json();
+
+      if (data.cityName && data.countryName) {
+        return {
+          ip: data.ipAddress || "unknown",
+          city: data.cityName,
+          country: data.countryName,
+          countryCode: data.countryCode || "UN",
+          isp: data.isp || "Unknown",
+        };
+      }
+      throw new Error("Incomplete data from freeipapi");
     } catch (e2) {
-      console.warn("Fallback 1 failed, using minimal data...", e2.message);
-      
-      // Last resort: Just get IP
+      console.warn("Fallback 1 (freeipapi) failed:", e2.message);
+
+      // Fallback 2: ipwho.is (HTTPS, reliable)
       try {
-        const res = await fetch("https://api.ipify.org?format=json");
-        const data = await res.json();
-        return {
-          ip: data.ip || "unknown",
-          city: "Unknown",
-          country: "Unknown",
-          countryCode: "UN",
-          isp: "Unknown",
-        };
+        const response = await fetch("https://ipwho.is/");
+        if (!response.ok) throw new Error("ipwho.is failed");
+        const data = await response.json();
+
+        if (data.success !== false && data.city && data.country) {
+          return {
+            ip: data.ip || "unknown",
+            city: data.city,
+            country: data.country,
+            countryCode: data.country_code || "UN",
+            isp: data.connection?.isp || "Unknown",
+          };
+        }
+        throw new Error("Incomplete data from ipwho.is");
       } catch (e3) {
-        console.error("All IP APIs failed", e3);
-        return {
-          ip: "unknown",
-          city: "Unknown",
-          country: "Unknown",
-          countryCode: "UN",
-          isp: "Unknown",
-        };
+        console.warn("Fallback 2 (ipwho.is) failed:", e3.message);
+
+        // Fallback 3: ip-api.com via HTTPS with fields (limited but works)
+        try {
+          const ipRes = await fetch("https://api.ipify.org?format=json");
+          const ipData = await ipRes.json();
+          const ip = ipData.ip;
+
+          // Use ip-api.com with HTTPS via cors-anywhere or direct with fields
+          const geoRes = await fetch(`https://ipwho.is/${ip}`);
+          const geoData = await geoRes.json();
+
+          return {
+            ip: ip || "unknown",
+            city: geoData.city || "Unknown",
+            country: geoData.country || "Unknown",
+            countryCode: geoData.country_code || "UN",
+            isp: geoData.connection?.isp || "Unknown",
+          };
+        } catch (e4) {
+          console.warn("Fallback 3 failed:", e4.message);
+
+          // Last resort: Just get IP
+          try {
+            const res = await fetch("https://api.ipify.org?format=json");
+            const data = await res.json();
+            return {
+              ip: data.ip || "unknown",
+              city: "Unknown",
+              country: "Unknown",
+              countryCode: "UN",
+              isp: "Unknown",
+            };
+          } catch (e5) {
+            console.error("All IP APIs failed", e5);
+            return {
+              ip: "unknown",
+              city: "Unknown",
+              country: "Unknown",
+              countryCode: "UN",
+              isp: "Unknown",
+            };
+          }
+        }
       }
     }
   }
@@ -128,12 +174,12 @@ export const logVisit = async () => {
   const lastVisitKey = "last_visit_logged";
   const lastVisitTime = sessionStorage.getItem(lastVisitKey);
   const now = Date.now();
-  
+
   if (lastVisitTime && (now - parseInt(lastVisitTime)) < 5000) {
     console.log("Analytics: Visit already logged recently, skipping duplicate");
     return;
   }
-  
+
   // Mark this visit as logged
   sessionStorage.setItem(lastVisitKey, now.toString());
 

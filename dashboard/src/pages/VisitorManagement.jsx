@@ -187,16 +187,16 @@ export default function VisitorManagement() {
                 <div>
                     <div className="flex items-center gap-2">
                         <h1 className="tactical-header text-sm md:text-base tracking-normal md:tracking-widest">Visitor Management</h1>
-                        <span className="px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 text-zinc-400 text-[9px] font-mono">
+                        <span className="px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-mono">
                             Total Visitors: <span className="text-zinc-200 font-bold">{visits.length}</span>
                         </span>
                     </div>
-                    <p className="text-zinc-600 text-[8px] font-mono uppercase">Admin Only - Delete Visitors</p>
+                    <p className="text-zinc-600 text-[9px] font-mono uppercase">Admin Only - Delete Visitors</p>
                 </div>
                 <div className="flex gap-1.5 items-center flex-wrap">
                     <button
                         onClick={() => setShowFilters(!showFilters)}
-                        className={`flex gap-1 items-center px-2 py-1 border text-[8px] font-bold uppercase tracking-widest transition-all ${showFilters || activeFiltersCount > 0
+                        className={`flex gap-1 items-center px-2 py-1 border text-[9px] font-bold uppercase tracking-widest transition-all ${showFilters || activeFiltersCount > 0
                             ? "bg-amber-900/20 border-amber-500/50 text-amber-400"
                             : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200"
                             }`}
@@ -208,7 +208,7 @@ export default function VisitorManagement() {
                         )}
                         <ChevronDown size={10} className={`transition-transform ${showFilters ? "rotate-180" : ""}`} />
                     </button>
-                    <div className="flex gap-1 items-center px-1.5 py-0.5 bg-red-900/10 border border-red-900/30 text-red-500 text-[8px] font-bold uppercase tracking-widest">
+                    <div className="flex gap-1 items-center px-1.5 py-0.5 bg-red-900/10 border border-red-900/30 text-red-500 text-[9px] font-bold uppercase tracking-widest">
                         <Shield size={10} />
                         Admin
                     </div>
@@ -217,7 +217,7 @@ export default function VisitorManagement() {
 
             {/* Filters */}
             {showFilters && (
-                <div className="p-3 bg-zinc-900/50 border border-zinc-800 text-[9px]">
+                <div className="p-3 bg-zinc-900/50 border border-zinc-800 text-[10px]">
                     <div className="flex items-center justify-between mb-2">
                         <h3 className="font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-1">
                             <Filter size={10} /> Filter Visitors
@@ -234,7 +234,7 @@ export default function VisitorManagement() {
                             <select
                                 value={filters.dateRange}
                                 onChange={(e) => setFilters((prev) => ({ ...prev, dateRange: e.target.value }))}
-                                className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 text-zinc-300 text-[9px] font-mono focus:border-amber-500/50 focus:outline-none"
+                                className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 text-zinc-300 text-[10px] font-mono focus:border-amber-500/50 focus:outline-none"
                             >
                                 <option value="all">All Time</option>
                                 <option value="today">Today</option>
@@ -248,12 +248,12 @@ export default function VisitorManagement() {
                                 <div>
                                     <label className="text-zinc-500 uppercase tracking-widest mb-1 block">Start</label>
                                     <input type="date" value={filters.startDate} onChange={(e) => setFilters((prev) => ({ ...prev, startDate: e.target.value }))}
-                                        className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 text-zinc-300 text-[9px] font-mono focus:border-amber-500/50 focus:outline-none" />
+                                        className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 text-zinc-300 text-[10px] font-mono focus:border-amber-500/50 focus:outline-none" />
                                 </div>
                                 <div>
                                     <label className="text-zinc-500 uppercase tracking-widest mb-1 block">End</label>
                                     <input type="date" value={filters.endDate} onChange={(e) => setFilters((prev) => ({ ...prev, endDate: e.target.value }))}
-                                        className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 text-zinc-300 text-[9px] font-mono focus:border-amber-500/50 focus:outline-none" />
+                                        className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 text-zinc-300 text-[10px] font-mono focus:border-amber-500/50 focus:outline-none" />
                                 </div>
                             </>
                         )}
@@ -262,7 +262,7 @@ export default function VisitorManagement() {
                                 <Globe size={8} /> Country
                             </label>
                             <select value={filters.country} onChange={(e) => setFilters((prev) => ({ ...prev, country: e.target.value }))}
-                                className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 text-zinc-300 text-[9px] font-mono focus:border-amber-500/50 focus:outline-none">
+                                className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 text-zinc-300 text-[10px] font-mono focus:border-amber-500/50 focus:outline-none">
                                 <option value="all">All</option>
                                 {filterOptions.countries.map((c) => <option key={c} value={c}>{c}</option>)}
                             </select>
@@ -272,7 +272,7 @@ export default function VisitorManagement() {
                                 <Monitor size={8} /> OS
                             </label>
                             <select value={filters.os} onChange={(e) => setFilters((prev) => ({ ...prev, os: e.target.value }))}
-                                className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 text-zinc-300 text-[9px] font-mono focus:border-amber-500/50 focus:outline-none">
+                                className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 text-zinc-300 text-[10px] font-mono focus:border-amber-500/50 focus:outline-none">
                                 <option value="all">All</option>
                                 {filterOptions.osList.map((o) => <option key={o} value={o}>{o}</option>)}
                             </select>
@@ -282,7 +282,7 @@ export default function VisitorManagement() {
                                 <Link2 size={8} /> Source
                             </label>
                             <select value={filters.source} onChange={(e) => setFilters((prev) => ({ ...prev, source: e.target.value }))}
-                                className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 text-zinc-300 text-[9px] font-mono focus:border-amber-500/50 focus:outline-none">
+                                className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 text-zinc-300 text-[10px] font-mono focus:border-amber-500/50 focus:outline-none">
                                 <option value="all">All</option>
                                 {filterOptions.sources.map((s) => <option key={s} value={s}>{s}</option>)}
                             </select>
@@ -290,7 +290,7 @@ export default function VisitorManagement() {
                         <div>
                             <label className="text-zinc-500 uppercase tracking-widest mb-1 block">IP Search</label>
                             <input type="text" value={filters.ip} onChange={(e) => setFilters((prev) => ({ ...prev, ip: e.target.value }))}
-                                placeholder="192.168..." className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 text-zinc-300 text-[9px] font-mono focus:border-amber-500/50 focus:outline-none placeholder:text-zinc-700" />
+                                placeholder="192.168..." className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 text-zinc-300 text-[10px] font-mono focus:border-amber-500/50 focus:outline-none placeholder:text-zinc-700" />
                         </div>
                     </div>
                     <div className="mt-2 pt-2 border-t border-zinc-800 flex items-center justify-between">
@@ -303,7 +303,7 @@ export default function VisitorManagement() {
 
             {/* Result Notification */}
             {deleteResult && (
-                <div className={`p-2 border flex items-center gap-2 text-[10px] ${deleteResult.success ? "bg-emerald-900/20 border-emerald-500/30 text-emerald-400" : "bg-red-900/20 border-red-500/30 text-red-400"}`}>
+                <div className={`p-2 border flex items-center gap-2 text-[11px] ${deleteResult.success ? "bg-emerald-900/20 border-emerald-500/30 text-emerald-400" : "bg-red-900/20 border-red-500/30 text-red-400"}`}>
                     {deleteResult.success ? <CheckCircle size={12} /> : <AlertTriangle size={12} />}
                     <span className="font-mono">{deleteResult.message}</span>
                 </div>
@@ -313,12 +313,12 @@ export default function VisitorManagement() {
             {selectedVisitors.length > 0 && (
                 <div className="p-2 bg-zinc-900 border border-zinc-800 flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                        <span className="px-1.5 py-0.5 bg-amber-500/20 border border-amber-500/50 text-amber-400 text-[10px] font-bold">{selectedVisitors.length}</span>
-                        <span className="text-zinc-300 text-[10px] font-mono">selected</span>
+                        <span className="px-1.5 py-0.5 bg-amber-500/20 border border-amber-500/50 text-amber-400 text-[11px] font-bold">{selectedVisitors.length}</span>
+                        <span className="text-zinc-300 text-[11px] font-mono">selected</span>
                     </div>
                     <div className="flex gap-1.5">
-                        <button onClick={() => setSelectedVisitors([])} className="px-2 py-1 bg-zinc-800 border border-zinc-700 text-zinc-400 text-[8px] font-bold uppercase">Clear</button>
-                        <button onClick={() => setBulkConfirm(true)} disabled={isDeleting} className="px-2 py-1 bg-red-900/30 border border-red-500/50 text-red-400 text-[8px] font-bold uppercase flex items-center gap-1">
+                        <button onClick={() => setSelectedVisitors([])} className="px-2 py-1 bg-zinc-800 border border-zinc-700 text-zinc-400 text-[9px] font-bold uppercase">Clear</button>
+                        <button onClick={() => setBulkConfirm(true)} disabled={isDeleting} className="px-2 py-1 bg-red-900/30 border border-red-500/50 text-red-400 text-[9px] font-bold uppercase flex items-center gap-1">
                             <Trash2 size={10} /> Delete
                         </button>
                     </div>
@@ -333,13 +333,13 @@ export default function VisitorManagement() {
                             <AlertTriangle className="text-red-500" size={20} />
                             <div>
                                 <h3 className="text-sm font-bold text-zinc-100 uppercase">Confirm Delete</h3>
-                                <p className="text-zinc-500 text-[9px] font-mono">Cannot be undone</p>
+                                <p className="text-zinc-500 text-[10px] font-mono">Cannot be undone</p>
                             </div>
                         </div>
-                        <p className="text-zinc-300 text-[10px] mb-4">Delete <span className="text-red-400 font-bold">{selectedVisitors.length}</span> visitor(s)?</p>
+                        <p className="text-zinc-300 text-[11px] mb-4">Delete <span className="text-red-400 font-bold">{selectedVisitors.length}</span> visitor(s)?</p>
                         <div className="flex gap-2">
-                            <button onClick={() => setBulkConfirm(false)} className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-300 text-[9px] font-bold uppercase">Cancel</button>
-                            <button onClick={handleBulkDelete} disabled={isDeleting} className="flex-1 px-3 py-2 bg-red-600 border border-red-500 text-white text-[9px] font-bold uppercase flex items-center justify-center gap-1">
+                            <button onClick={() => setBulkConfirm(false)} className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-300 text-[10px] font-bold uppercase">Cancel</button>
+                            <button onClick={handleBulkDelete} disabled={isDeleting} className="flex-1 px-3 py-2 bg-red-600 border border-red-500 text-white text-[10px] font-bold uppercase flex items-center justify-center gap-1">
                                 {isDeleting ? <RefreshCw size={12} className="animate-spin" /> : <Trash2 size={12} />}
                                 {isDeleting ? "..." : "Delete"}
                             </button>
@@ -356,16 +356,16 @@ export default function VisitorManagement() {
                             <AlertTriangle className="text-red-500" size={20} />
                             <div>
                                 <h3 className="text-sm font-bold text-zinc-100 uppercase">Confirm Delete</h3>
-                                <p className="text-zinc-500 text-[9px] font-mono">Cannot be undone</p>
+                                <p className="text-zinc-500 text-[10px] font-mono">Cannot be undone</p>
                             </div>
                         </div>
-                        <div className="bg-zinc-950 border border-zinc-800 p-2 mb-3 text-[10px]">
+                        <div className="bg-zinc-950 border border-zinc-800 p-2 mb-3 text-[11px]">
                             <p className="text-zinc-300 font-mono">IP: {confirmDelete.ip}</p>
                             <p className="text-zinc-400">{confirmDelete.city}, {confirmDelete.country}</p>
                         </div>
                         <div className="flex gap-2">
-                            <button onClick={() => setConfirmDelete(null)} className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-300 text-[9px] font-bold uppercase">Cancel</button>
-                            <button onClick={() => handleDeleteSingle(confirmDelete.id)} disabled={isDeleting} className="flex-1 px-3 py-2 bg-red-600 border border-red-500 text-white text-[9px] font-bold uppercase flex items-center justify-center gap-1">
+                            <button onClick={() => setConfirmDelete(null)} className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 text-zinc-300 text-[10px] font-bold uppercase">Cancel</button>
+                            <button onClick={() => handleDeleteSingle(confirmDelete.id)} disabled={isDeleting} className="flex-1 px-3 py-2 bg-red-600 border border-red-500 text-white text-[10px] font-bold uppercase flex items-center justify-center gap-1">
                                 {isDeleting ? <RefreshCw size={12} className="animate-spin" /> : <Trash2 size={12} />}
                                 {isDeleting ? "..." : "Delete"}
                             </button>
@@ -376,10 +376,10 @@ export default function VisitorManagement() {
 
             {/* Select All + Count */}
             <div className="flex items-center justify-between">
-                <button onClick={toggleSelectAll} className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-200 text-[8px] font-bold uppercase">
+                <button onClick={toggleSelectAll} className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-200 text-[9px] font-bold uppercase">
                     {selectedVisitors.length === filteredVisits.length && filteredVisits.length > 0 ? "Deselect All" : "Select All"}
                 </button>
-                <span className="text-zinc-500 text-[8px] font-mono">{filteredVisits.length} visitors</span>
+                <span className="text-zinc-500 text-[9px] font-mono">{filteredVisits.length} visitors</span>
             </div>
 
             {/* Visitor Cards */}
@@ -408,23 +408,23 @@ export default function VisitorManagement() {
                                     <Trash2 size={10} />
                                 </button>
                                 <div>
-                                    <p className="text-zinc-600 text-[8px] uppercase tracking-widest mb-0.5">Date & Time</p>
-                                    <p className="text-zinc-400 text-[10px] font-mono">{formatTime(v.timestamp)}</p>
+                                    <p className="text-zinc-600 text-[9px] uppercase tracking-widest mb-0.5">Date & Time</p>
+                                    <p className="text-zinc-400 text-[11px] font-mono">{formatTime(v.timestamp)}</p>
                                 </div>
                             </div>
 
                             {/* Location */}
                             <div>
-                                <p className="text-zinc-600 text-[8px] uppercase tracking-widest mb-0.5">Location</p>
-                                <p className="text-zinc-300 text-[10px]">{v.city}, {v.country}</p>
+                                <p className="text-zinc-600 text-[9px] uppercase tracking-widest mb-0.5">Location</p>
+                                <p className="text-zinc-300 text-[11px]">{v.city}, {v.country}</p>
                             </div>
 
                             {/* IP Address */}
                             <div>
-                                <p className="text-zinc-600 text-[8px] uppercase tracking-widest mb-0.5">IP Address</p>
+                                <p className="text-zinc-600 text-[9px] uppercase tracking-widest mb-0.5">IP Address</p>
                                 <div className="flex items-center gap-1">
                                     <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse shrink-0"></div>
-                                    <span className="text-emerald-400 text-[10px] font-mono font-semibold">{v.ip}</span>
+                                    <span className="text-emerald-400 text-[11px] font-mono font-semibold">{v.ip}</span>
                                 </div>
                             </div>
                         </div>
@@ -432,16 +432,16 @@ export default function VisitorManagement() {
                         {/* Row 2: Platform | Source | Visitor ID */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-zinc-800/40">
                             <div>
-                                <p className="text-zinc-600 text-[8px] uppercase tracking-widest mb-0.5">Platform</p>
-                                <p className="text-zinc-300 text-[10px] font-mono">{v.os}</p>
+                                <p className="text-zinc-600 text-[9px] uppercase tracking-widest mb-0.5">Platform</p>
+                                <p className="text-zinc-300 text-[11px] font-mono">{v.os}</p>
                             </div>
                             <div>
-                                <p className="text-zinc-600 text-[8px] uppercase tracking-widest mb-0.5">Source</p>
-                                <p className="text-zinc-400 text-[10px] break-all">{v.referrer || "Direct"}</p>
+                                <p className="text-zinc-600 text-[9px] uppercase tracking-widest mb-0.5">Source</p>
+                                <p className="text-zinc-400 text-[11px] break-all">{v.referrer || "Direct"}</p>
                             </div>
                             <div>
-                                <p className="text-zinc-600 text-[8px] uppercase tracking-widest mb-0.5">Visitor ID</p>
-                                <p className="text-zinc-500 text-[9px] font-mono break-all">{v.visitorId}</p>
+                                <p className="text-zinc-600 text-[9px] uppercase tracking-widest mb-0.5">Visitor ID</p>
+                                <p className="text-zinc-500 text-[10px] font-mono break-all">{v.visitorId}</p>
                             </div>
                         </div>
                     </div>
@@ -451,11 +451,11 @@ export default function VisitorManagement() {
             {/* Empty State */}
             {filteredVisits.length === 0 && (
                 <div className="tactical-card p-5 text-center">
-                    <p className="text-zinc-500 text-[10px] font-mono">
+                    <p className="text-zinc-500 text-[11px] font-mono">
                         {visits.length === 0 ? "No visitor records found" : "No visitors match filters"}
                     </p>
                     {activeFiltersCount > 0 && (
-                        <button onClick={resetFilters} className="mt-2 px-3 py-1 bg-zinc-800 border border-zinc-700 text-zinc-400 text-[8px] font-bold uppercase">
+                        <button onClick={resetFilters} className="mt-2 px-3 py-1 bg-zinc-800 border border-zinc-700 text-zinc-400 text-[9px] font-bold uppercase">
                             Clear Filters
                         </button>
                     )}
