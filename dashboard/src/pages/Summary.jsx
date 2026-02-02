@@ -76,6 +76,19 @@ export default function Summary() {
     ios: 0,
   });
 
+  // Independent graph filter - default to 30 days
+  const [graphFilter, setGraphFilter] = useState("30d");
+  const graphFilterOptions = [
+    { value: "Total", label: "All Time" },
+    { value: "24h", label: "24 Hours" },
+    { value: "7d", label: "7 Days" },
+    { value: "15d", label: "15 Days" },
+    { value: "30d", label: "30 Days" },
+    { value: "3m", label: "3 Months" },
+    { value: "6m", label: "6 Months" },
+    { value: "1y", label: "1 Year" },
+  ];
+
   useEffect(() => {
     // UNLIMITED QUERY - Fetching ALL History
     const q = query(collection(db, "visits"), orderBy("timestamp", "desc"));
@@ -93,13 +106,13 @@ export default function Summary() {
         // 1. Set All-Time Total
         setAllTimeTotal(allData.length);
 
-        // 2. Filter by Time Range
+        // 2. Filter by Time Range (for stats cards)
         const now = new Date();
         let startTime = new Date();
 
         switch (timeRange) {
           case "24h":
-            startTime.setHours(now.getHours() - 24);
+            startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
             break;
           case "7d":
             startTime.setDate(now.getDate() - 7);
@@ -195,15 +208,47 @@ export default function Summary() {
           .sort((a, b) => b[1] - a[1])
           .map(([name, value]) => ({ name, value }));
 
-        // Chart Data Generation
+        // === INDEPENDENT GRAPH FILTER - Chart Data Generation ===
+        let graphStartTime = new Date();
+        switch (graphFilter) {
+          case "24h":
+            graphStartTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            break;
+          case "7d":
+            graphStartTime.setDate(now.getDate() - 7);
+            break;
+          case "15d":
+            graphStartTime.setDate(now.getDate() - 15);
+            break;
+          case "30d":
+            graphStartTime.setDate(now.getDate() - 30);
+            break;
+          case "3m":
+            graphStartTime.setMonth(now.getMonth() - 3);
+            break;
+          case "6m":
+            graphStartTime.setMonth(now.getMonth() - 6);
+            break;
+          case "1y":
+            graphStartTime.setFullYear(now.getFullYear() - 1);
+            break;
+          case "Total":
+            graphStartTime = new Date(0); // Epoch start
+            break;
+          default:
+            graphStartTime.setDate(now.getDate() - 30); // Default 30 days
+        }
+
+        const graphFilteredData = allData.filter((d) => d.createdAt >= graphStartTime);
+
         const chartPoints = 20;
         const chartData = [];
-        const step = (now - startTime) / chartPoints;
+        const step = (now - graphStartTime) / chartPoints;
 
         for (let i = 0; i < chartPoints; i++) {
-          const pointStart = new Date(startTime.getTime() + i * step);
+          const pointStart = new Date(graphStartTime.getTime() + i * step);
           const pointEnd = new Date(pointStart.getTime() + step);
-          const count = filteredData.filter(
+          const count = graphFilteredData.filter(
             (d) => d.createdAt >= pointStart && d.createdAt < pointEnd
           ).length;
           chartData.push({
@@ -235,7 +280,7 @@ export default function Summary() {
       }
     );
     return () => unsub();
-  }, [timeRange]);
+  }, [timeRange, graphFilter]);
 
   const FilterButton = ({ range }) => (
     <button
@@ -372,9 +417,28 @@ export default function Summary() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-          <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2 font-mono">
-            <Radar size={14} className="text-emerald-500" /> Visitor Trend
-          </h3>
+          <div>
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2 font-mono">
+              <Radar size={14} className="text-emerald-500" /> Visitor Trend
+            </h3>
+            <p className="text-[10px] text-zinc-600 font-mono mt-1">
+              Traffic pattern over time
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-mono text-zinc-500 uppercase">Time Range:</span>
+            <select
+              value={graphFilter}
+              onChange={(e) => setGraphFilter(e.target.value)}
+              className="bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs font-mono rounded px-3 py-1.5 focus:outline-none focus:border-emerald-500 hover:border-zinc-600 transition-colors cursor-pointer"
+            >
+              {graphFilterOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="h-[350px] w-full">
@@ -435,61 +499,74 @@ export default function Summary() {
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-2">
               <Monitor size={14} className="text-blue-500" /> Operating Systems
             </h3>
+            <span className="text-[9px] font-mono text-zinc-600 bg-zinc-800/50 px-2 py-0.5 rounded border border-zinc-700/50">
+              {timeRange === "Total" ? "All Time" : timeRange}
+            </span>
           </div>
-          <div className="flex-1 min-h-[250px] relative">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={stats.os}
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                  stroke="none"
-                  label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
-                  labelLine={false}
-                >
-                  {stats.os.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={PIE_COLORS[index % PIE_COLORS.length]}
+          <div className="flex-1 min-h-[320px] relative">
+            {stats.os.length > 0 ? (
+              <>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={stats.os}
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                      stroke="none"
+                      label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                      labelLine={false}
+                    >
+                      {stats.os.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={PIE_COLORS[index % PIE_COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#18181b",
+                        border: "1px solid #27272a",
+                      }}
+                      formatter={(value, name) => {
+                        const total = stats.os.reduce((sum, item) => sum + item.value, 0);
+                        const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                        return [`${value} (${percent}%)`, name];
+                      }}
                     />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#18181b",
-                    border: "1px solid #27272a",
-                  }}
-                  formatter={(value, name) => {
-                    const total = stats.os.reduce((sum, item) => sum + item.value, 0);
-                    const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                    return [`${value} (${percent}%)`, name];
-                  }}
-                />
-                <Legend
-                  verticalAlign="bottom"
-                  height={36}
-                  iconType="rect"
-                  iconSize={8}
-                  formatter={(value, entry) => {
-                    const total = stats.os.reduce((sum, item) => sum + item.value, 0);
-                    const itemData = stats.os.find(item => item.name === value);
-                    const percent = total > 0 && itemData ? ((itemData.value / total) * 100).toFixed(0) : 0;
-                    return (
-                      <span className="text-[10px] font-mono text-zinc-500 uppercase ml-1">
-                        {value} ({percent}%)
-                      </span>
-                    );
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none pb-8">
-              <span className="text-xs font-mono text-zinc-600 uppercase">
-                Systems
-              </span>
-            </div>
+                    <Legend
+                      verticalAlign="bottom"
+                      height={70}
+                      iconType="rect"
+                      iconSize={8}
+                      wrapperStyle={{ paddingTop: '10px' }}
+                      formatter={(value, entry) => {
+                        const total = stats.os.reduce((sum, item) => sum + item.value, 0);
+                        const itemData = stats.os.find(item => item.name === value);
+                        const percent = total > 0 && itemData ? ((itemData.value / total) * 100).toFixed(0) : 0;
+                        return (
+                          <span className="text-[10px] font-mono text-zinc-500 uppercase ml-1">
+                            {value} ({percent}%)
+                          </span>
+                        );
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none pb-16">
+                  <span className="text-xs font-mono text-zinc-600 uppercase">
+                    Systems
+                  </span>
+                </div>
+              </>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-zinc-600">
+                <Monitor size={32} className="mb-2 opacity-30" />
+                <p className="text-xs font-mono">No data for this time range</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -499,50 +576,60 @@ export default function Summary() {
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-2">
               <Globe size={14} className="text-emerald-500" /> Top Locations
             </h3>
+            <span className="text-[9px] font-mono text-zinc-600 bg-zinc-800/50 px-2 py-0.5 rounded border border-zinc-700/50">
+              {timeRange === "Total" ? "All Time" : timeRange}
+            </span>
           </div>
           <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.geo} margin={{ left: 0, right: 0 }}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="#27272a"
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="name"
-                  tick={{
-                    fill: "#71717a",
-                    fontSize: 10,
-                    fontFamily: "monospace",
-                  }}
-                  axisLine={false}
-                  tickLine={false}
-                  dy={10}
-                />
-                <YAxis
-                  tick={{
-                    fill: "#71717a",
-                    fontSize: 10,
-                    fontFamily: "monospace",
-                  }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  cursor={{ fill: "#27272a", opacity: 0.4 }}
-                  contentStyle={{
-                    backgroundColor: "#18181b",
-                    border: "1px solid #27272a",
-                  }}
-                />
-                <Bar
-                  dataKey="value"
-                  fill={COLORS.emerald}
-                  barSize={40}
-                  radius={[2, 2, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {stats.geo.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.geo} margin={{ left: 0, right: 0 }}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#27272a"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="name"
+                    tick={{
+                      fill: "#71717a",
+                      fontSize: 10,
+                      fontFamily: "monospace",
+                    }}
+                    axisLine={false}
+                    tickLine={false}
+                    dy={10}
+                  />
+                  <YAxis
+                    tick={{
+                      fill: "#71717a",
+                      fontSize: 10,
+                      fontFamily: "monospace",
+                    }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "#27272a", opacity: 0.4 }}
+                    contentStyle={{
+                      backgroundColor: "#18181b",
+                      border: "1px solid #27272a",
+                    }}
+                  />
+                  <Bar
+                    dataKey="value"
+                    fill={COLORS.emerald}
+                    barSize={40}
+                    radius={[2, 2, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-zinc-600">
+                <Globe size={32} className="mb-2 opacity-30" />
+                <p className="text-xs font-mono">No data for this time range</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -552,48 +639,58 @@ export default function Summary() {
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-2">
               <Activity size={14} className="text-amber-500" /> Traffic Sources
             </h3>
+            <span className="text-[9px] font-mono text-zinc-600 bg-zinc-800/50 px-2 py-0.5 rounded border border-zinc-700/50">
+              {timeRange === "Total" ? "All Time" : timeRange}
+            </span>
           </div>
           <div className="h-[250px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={stats.source}
-                layout="vertical"
-                margin={{ left: 20 }}
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="#27272a"
-                  horizontal={false}
-                />
-                <XAxis type="number" hide />
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  tick={{
-                    fill: "#a1a1aa",
-                    fontSize: 12, // Increased Font Size
-                    fontFamily: "monospace",
-                    width: 150,
-                  }}
-                  width={150}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  cursor={{ fill: "#27272a", opacity: 0.4 }}
-                  contentStyle={{
-                    backgroundColor: "#18181b",
-                    border: "1px solid #27272a",
-                  }}
-                />
-                <Bar
-                  dataKey="value"
-                  fill={COLORS.amber}
-                  barSize={20}
-                  radius={[0, 4, 4, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {stats.source.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={stats.source}
+                  layout="vertical"
+                  margin={{ left: 20 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#27272a"
+                    horizontal={false}
+                  />
+                  <XAxis type="number" hide />
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    tick={{
+                      fill: "#a1a1aa",
+                      fontSize: 12,
+                      fontFamily: "monospace",
+                      width: 150,
+                    }}
+                    width={150}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "#27272a", opacity: 0.4 }}
+                    contentStyle={{
+                      backgroundColor: "#18181b",
+                      border: "1px solid #27272a",
+                    }}
+                  />
+                  <Bar
+                    dataKey="value"
+                    fill={COLORS.amber}
+                    barSize={20}
+                    radius={[0, 4, 4, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-zinc-600">
+                <Activity size={32} className="mb-2 opacity-30" />
+                <p className="text-xs font-mono">No data for this time range</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
