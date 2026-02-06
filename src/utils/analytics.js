@@ -166,6 +166,188 @@ const getOS = () => {
   return platform;
 };
 
+// Comprehensive Traffic Source Detection
+// Priority: UTM params > Known platforms > Parsed referrer > Direct
+const getTrafficSource = () => {
+  const url = new URL(window.location.href);
+  const rawReferrer = document.referrer;
+
+  // 1. Check UTM parameters first (most reliable - you control these in your shared links)
+  const utmSource = url.searchParams.get("utm_source");
+  const utmMedium = url.searchParams.get("utm_medium");
+  const utmCampaign = url.searchParams.get("utm_campaign");
+
+  if (utmSource) {
+    // UTM source found - this is the most accurate
+    return {
+      source: utmSource.toLowerCase(),
+      medium: utmMedium || "referral",
+      campaign: utmCampaign || "none",
+      raw: rawReferrer || "Direct",
+      method: "utm"
+    };
+  }
+
+  // 2. Check referrer against known platforms
+  if (rawReferrer) {
+    try {
+      const referrerUrl = new URL(rawReferrer);
+      const referrerHost = referrerUrl.hostname.toLowerCase();
+
+      // Known social platforms and their variations
+      const knownSources = {
+        // LinkedIn
+        "linkedin.com": { source: "LinkedIn", medium: "social" },
+        "www.linkedin.com": { source: "LinkedIn", medium: "social" },
+        "lnkd.in": { source: "LinkedIn", medium: "social" },
+
+        // Twitter/X
+        "twitter.com": { source: "Twitter", medium: "social" },
+        "www.twitter.com": { source: "Twitter", medium: "social" },
+        "x.com": { source: "Twitter", medium: "social" },
+        "www.x.com": { source: "Twitter", medium: "social" },
+        "t.co": { source: "Twitter", medium: "social" },
+
+        // GitHub
+        "github.com": { source: "GitHub", medium: "social" },
+        "www.github.com": { source: "GitHub", medium: "social" },
+        "gist.github.com": { source: "GitHub Gist", medium: "social" },
+
+        // Facebook
+        "facebook.com": { source: "Facebook", medium: "social" },
+        "www.facebook.com": { source: "Facebook", medium: "social" },
+        "m.facebook.com": { source: "Facebook", medium: "social" },
+        "l.facebook.com": { source: "Facebook", medium: "social" },
+        "fb.me": { source: "Facebook", medium: "social" },
+
+        // Instagram
+        "instagram.com": { source: "Instagram", medium: "social" },
+        "www.instagram.com": { source: "Instagram", medium: "social" },
+        "l.instagram.com": { source: "Instagram", medium: "social" },
+
+        // Reddit
+        "reddit.com": { source: "Reddit", medium: "social" },
+        "www.reddit.com": { source: "Reddit", medium: "social" },
+        "old.reddit.com": { source: "Reddit", medium: "social" },
+
+        // WhatsApp
+        "web.whatsapp.com": { source: "WhatsApp", medium: "social" },
+        "whatsapp.com": { source: "WhatsApp", medium: "social" },
+
+        // Telegram
+        "t.me": { source: "Telegram", medium: "social" },
+        "telegram.org": { source: "Telegram", medium: "social" },
+
+        // Discord
+        "discord.com": { source: "Discord", medium: "social" },
+        "discordapp.com": { source: "Discord", medium: "social" },
+
+        // YouTube
+        "youtube.com": { source: "YouTube", medium: "social" },
+        "www.youtube.com": { source: "YouTube", medium: "social" },
+        "youtu.be": { source: "YouTube", medium: "social" },
+
+        // Search Engines
+        "google.com": { source: "Google", medium: "organic" },
+        "www.google.com": { source: "Google", medium: "organic" },
+        "google.co.in": { source: "Google", medium: "organic" },
+        "www.google.co.in": { source: "Google", medium: "organic" },
+        "bing.com": { source: "Bing", medium: "organic" },
+        "www.bing.com": { source: "Bing", medium: "organic" },
+        "duckduckgo.com": { source: "DuckDuckGo", medium: "organic" },
+        "yahoo.com": { source: "Yahoo", medium: "organic" },
+        "search.yahoo.com": { source: "Yahoo", medium: "organic" },
+        "baidu.com": { source: "Baidu", medium: "organic" },
+
+        // Dev platforms
+        "stackoverflow.com": { source: "StackOverflow", medium: "referral" },
+        "dev.to": { source: "Dev.to", medium: "referral" },
+        "medium.com": { source: "Medium", medium: "referral" },
+        "hashnode.com": { source: "Hashnode", medium: "referral" },
+        "producthunt.com": { source: "ProductHunt", medium: "referral" },
+
+        // Job platforms
+        "indeed.com": { source: "Indeed", medium: "referral" },
+        "glassdoor.com": { source: "Glassdoor", medium: "referral" },
+        "naukri.com": { source: "Naukri", medium: "referral" },
+        "wellfound.com": { source: "Wellfound", medium: "referral" },
+        "angel.co": { source: "AngelList", medium: "referral" },
+      };
+
+      // Check for exact match first
+      if (knownSources[referrerHost]) {
+        return {
+          source: knownSources[referrerHost].source,
+          medium: knownSources[referrerHost].medium,
+          campaign: "none",
+          raw: rawReferrer,
+          method: "known_platform"
+        };
+      }
+
+      // Check for partial matches (handles subdomains)
+      for (const [domain, info] of Object.entries(knownSources)) {
+        if (referrerHost.includes(domain) || referrerHost.endsWith("." + domain)) {
+          return {
+            source: info.source,
+            medium: info.medium,
+            campaign: "none",
+            raw: rawReferrer,
+            method: "known_platform"
+          };
+        }
+      }
+
+      // Unknown referrer - extract domain name
+      const domainParts = referrerHost.replace("www.", "").split(".");
+      const sourceName = domainParts[0].charAt(0).toUpperCase() + domainParts[0].slice(1);
+
+      return {
+        source: sourceName,
+        medium: "referral",
+        campaign: "none",
+        raw: rawReferrer,
+        method: "parsed_referrer"
+      };
+
+    } catch (e) {
+      // Invalid referrer URL - treat as the raw string
+      return {
+        source: rawReferrer.substring(0, 50),
+        medium: "referral",
+        campaign: "none",
+        raw: rawReferrer,
+        method: "raw_referrer"
+      };
+    }
+  }
+
+  // 3. Check for in-app browsers (these often don't send referrer)
+  const ua = navigator.userAgent.toLowerCase();
+
+  if (ua.includes("linkedin")) {
+    return { source: "LinkedIn", medium: "social", campaign: "none", raw: "Direct", method: "user_agent" };
+  }
+  if (ua.includes("twitter") || ua.includes(" x/")) {
+    return { source: "Twitter", medium: "social", campaign: "none", raw: "Direct", method: "user_agent" };
+  }
+  if (ua.includes("instagram")) {
+    return { source: "Instagram", medium: "social", campaign: "none", raw: "Direct", method: "user_agent" };
+  }
+  if (ua.includes("fban") || ua.includes("fbav")) {
+    return { source: "Facebook", medium: "social", campaign: "none", raw: "Direct", method: "user_agent" };
+  }
+
+  // 4. No source detected - truly Direct traffic
+  return {
+    source: "Direct",
+    medium: "none",
+    campaign: "none",
+    raw: "Direct",
+    method: "direct"
+  };
+};
+
 export const logVisit = async () => {
   if (!db) return;
 
@@ -188,7 +370,9 @@ export const logVisit = async () => {
   const os = getOS();
   const userAgent = navigator.userAgent;
   const screenRes = `${window.screen.width}x${window.screen.height}`;
-  const referrer = document.referrer || "Direct";
+
+  // Get traffic source with comprehensive detection
+  const trafficSource = getTrafficSource();
 
   // Determine device type for owner visits
   const getDeviceType = () => {
@@ -209,7 +393,12 @@ export const logVisit = async () => {
     os,
     userAgent,
     screenRes,
-    referrer,
+    // Enhanced traffic source tracking
+    referrer: trafficSource.source, // Clean source name for display
+    referrerRaw: trafficSource.raw, // Original referrer for debugging
+    trafficMedium: trafficSource.medium, // social, organic, referral, none
+    trafficCampaign: trafficSource.campaign, // UTM campaign if present
+    trafficMethod: trafficSource.method, // How source was detected
     page: window.location.pathname,
     sessionStart: Date.now(),
   };
@@ -224,6 +413,9 @@ export const logVisit = async () => {
       ip: geo.ip,
       city: geo.city,
       os: os,
+      source: trafficSource.source,
+      medium: trafficSource.medium,
+      method: trafficSource.method,
       device: getDeviceType()
     });
   } catch (error) {
