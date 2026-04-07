@@ -167,10 +167,22 @@ const getOS = () => {
 };
 
 // Comprehensive Traffic Source Detection
-// Priority: UTM params > Known platforms > Parsed referrer > Direct
+// Priority: Localhost > UTM params > Known platforms > Parsed referrer > Direct
 const getTrafficSource = () => {
   const url = new URL(window.location.href);
   const rawReferrer = document.referrer;
+
+  // 0. Explicit Localhost Check
+  const hostname = url.hostname;
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return {
+      source: "Localhost",
+      medium: "development",
+      campaign: "none",
+      raw: rawReferrer || "Direct",
+      method: "localhost"
+    };
+  }
 
   // 1. Check UTM parameters first (most reliable - you control these in your shared links)
   const utmSource = url.searchParams.get("utm_source");

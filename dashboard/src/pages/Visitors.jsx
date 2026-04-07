@@ -19,7 +19,15 @@ export default function Visitors() {
     return () => unsub();
   }, []);
 
-  const formatTime = (ts) => (ts?.toDate ? ts.toDate().toLocaleString() : "");
+  const formatTime = (ts) => {
+    if (!ts?.toDate) return "";
+    const date = ts.toDate();
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = date.toLocaleString('default', { month: 'short' });
+    const year = date.getFullYear();
+    const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    return `${day} ${month} ${year}, ${time}`;
+  };
 
   return (
     <div className="space-y-2.5">
@@ -84,7 +92,14 @@ export default function Visitors() {
               {/* Source */}
               <div>
                 <p className="text-zinc-600 text-[9px] uppercase tracking-widest mb-0.5">Source</p>
-                <p className="text-zinc-400 text-[11px] break-all">{v.referrer || "Direct"}</p>
+                <p className="text-zinc-400 text-[11px] break-all">
+                  {(v.referrer && v.referrer.toLowerCase().includes("localhost")) || 
+                   v.referrer === "Localhost" || 
+                   v.ip === "127.0.0.1" || 
+                   v.ip === "::1" 
+                    ? "Localhost" 
+                    : (v.referrer || "Direct")}
+                </p>
               </div>
 
               {/* Visitor ID */}

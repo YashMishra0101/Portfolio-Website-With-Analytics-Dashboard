@@ -1,163 +1,178 @@
-#  Portfolio Website with Analytics Dashboard
+# Portfolio + Analytics Dashboard
 
-A modern, responsive portfolio website built with React and Vite, featuring a comprehensive admin dashboard for real-time visitor analytics and content management.
+<p align="left">
+  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" alt="React 19" />
+  <img src="https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white" alt="Vite 7" />
+  <img src="https://img.shields.io/badge/Firebase-12-FFCA28?logo=firebase&logoColor=black" alt="Firebase 12" />
+  <img src="https://img.shields.io/badge/TailwindCSS-3.4-06B6D4?logo=tailwindcss&logoColor=white" alt="TailwindCSS 3.4" />
+</p>
 
-## ✨ Features
+A modern dual-app portfolio management system with:
 
-### Portfolio Website
-- **Dark-themed modern design** with smooth animations and glassmorphism effects
-- **Responsive layout** optimized for all devices (mobile, tablet, desktop)
-- **GitHub Integration** - Live stats including total commits, stars, PRs, and contribution streak
-- **Tech Stack showcase** with animated icons
-- **Experience & Projects section** with interactive cards
-- **Real-time visitor tracking** with geolocation
+- **Public Portfolio** (frontend)
+- **Private Admin Dashboard** (analytics + content control)
 
-### Admin Dashboard
-- **Real-time Analytics** - Live visitor tracking with charts and graphs
-- **Visitor Trend Analysis** - Independent time-range filters (24h, 7d, 15d, 30d, 3m, 6m, 1y)
-- **Geographic Distribution** - Interactive world map showing visitor locations
-- **Operating System & Device Breakdown** - Pie charts with detailed statistics
-- **Traffic Sources** - Track where visitors come from
-- **Session History** - Detailed logs of all visitor sessions
-- **Visitor Management** - Admin controls for visitor data
-- **Content Manager** - Update portfolio content dynamically
-- **Role-based Access** - Admin vs Viewer permissions
+Originally built for personal use, now open-sourced for learning, customization, and contribution.
 
-## 🛠️ Tech Stack
+## Purpose
 
-### Frontend
-- **React 19** - UI framework
-- **Vite 7** - Build tool & dev server
-- **TailwindCSS 3.4** - Utility-first CSS framework
-- **Recharts** - Data visualization library
-- **Lucide React** - Icon library
-- **React Router** - Client-side routing
+- Showcase a personal portfolio on a public frontend.
+- Manage portfolio content and monitor visitor activity through a private dashboard.
+- Demonstrate a practical full-stack setup using Firebase (Firestore + Auth) with real-time updates.
 
-### Backend & Database
-- **Firebase Firestore** - Real-time NoSQL database
-- **Firebase Authentication** - User authentication
+## How The Website Works
 
-### Other Libraries
-- **React Simple Maps** - Geographic visualizations
-- **UA Parser JS** - User agent parsing for device detection
-- **clsx & tailwind-merge** - Conditional className utilities
+### 1) Frontend (Public Portfolio)
 
-## 📁 Project Structure
+- The public site lives in `src/`.
+- It renders portfolio sections (profile, experience, projects, open source contributions, social links, etc.) from Firestore document `portfolio/config`.
+- Visitor sessions are logged through `src/utils/analytics.js` into the `visits` collection.
 
-```
-My-Portfolio/
-├── src/                    # Portfolio website source
-│   ├── App.jsx            # Main portfolio component
-│   ├── index.css          # Global styles
-│   └── utils/
-│       └── analytics.js   # Visitor tracking logic
-├── dashboard/             # Admin dashboard (separate app)
-│   └── src/
-│       ├── pages/
-│       │   ├── Summary.jsx         # Main analytics dashboard
-│       │   ├── Analytics.jsx       # Detailed statistics
-│       │   ├── Visitors.jsx        # Recent visitors list
-│       │   ├── Security.jsx        # Session history
-│       │   ├── VisitorManagement.jsx
-│       │   ├── ContentManager.jsx  # CMS for portfolio
-│       │   └── Login.jsx           # Authentication
-│       └── components/
-├── public/                # Static assets
-└── package.json
-```
+### 2) Dashboard (Admin Panel)
 
-## 🚀 Getting Started
+- The dashboard lives in `dashboard/` as a separate Vite app.
+- It contains analytics views (`Summary`, `Visitors`, `VisitorManagement`, `OwnerActivity`, `Security`) and a content control UI (`ContentManager`).
+- The `ContentManager` edits the same `portfolio/config` document used by the frontend.
+- After save, frontend updates through Firestore real-time listeners (`onSnapshot`).
+
+### 3) Content Management Flow
+
+1. Admin updates values in `ContentManager`.
+2. Dashboard writes to Firestore using `setDoc` on `portfolio/config`.
+3. Frontend receives real-time snapshot updates and re-renders with new values.
+
+### 4) Analytics / Visitor Tracking Flow
+
+1. Frontend captures visitor metadata (device, OS, geo/referrer context).
+2. Data is written to Firestore collection `visits`.
+3. Dashboard reads and visualizes aggregated and detailed analytics.
+
+## Features
+
+- Live portfolio content management from dashboard.
+- Real-time synchronization between dashboard and frontend.
+- Visitor analytics dashboard with charts, filters, and session history.
+- Visitor and activity operational controls.
+- Content Manager for profile text, links, sections, projects, and open-source contributions.
+- Role-based behavior (`admin` / `viewer`) in dashboard logic.
+
+## Tech Stack (From Current Codebase)
+
+### Frontend App (`/`)
+
+- React 19
+- Vite 7
+- Firebase JS SDK 12 (Firestore)
+- Tailwind CSS 3.4
+
+### Dashboard App (`/dashboard`)
+
+- React 19
+- Vite 7
+- Firebase JS SDK 12 (Firestore + Auth)
+- React Router DOM 7
+- Recharts, React Simple Maps, D3 Geo
+- UA Parser JS
+- Tailwind CSS 3.4
+- Lucide React
+
+## Setup Instructions
 
 ### Prerequisites
-- Node.js 18+ 
-- pnpm (recommended) or npm
 
-### Installation
+- Node.js 18+
+- pnpm
+- Firebase project (Firestore + Auth)
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/YashMishra0101/My-Portfolio.git
-   cd My-Portfolio
-   ```
+### 1) Clone Repository
 
-2. **Install dependencies for portfolio**
-   ```bash
-   pnpm install
-   ```
+```bash
+git clone <your-fork-url>
+cd My-Portfolio
+```
 
-3. **Install dependencies for dashboard**
-   ```bash
-   cd dashboard
-   pnpm install
-   ```
+### 2) Install Dependencies
 
-4. **Set up environment variables**
-   
-   Create a `.env` file in the root directory:
-   ```env
-   VITE_FIREBASE_API_KEY=your_api_key
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-   VITE_FIREBASE_APP_ID=your_app_id
-   ```
+```bash
+pnpm install
+cd dashboard && pnpm install
+cd ..
+```
 
-5. **Run the portfolio**
-   ```bash
-   pnpm dev
-   ```
+### 3) Configure Environment Variables
 
-6. **Run the dashboard** (in a separate terminal)
-   ```bash
-   cd dashboard
-   pnpm dev
-   ```
+This repo reads Firebase values from Vite env vars:
 
-## 🌐 Deployment
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
 
-Both the portfolio and dashboard are configured for Vercel deployment:
+Create `.env` files with these variables:
 
-- **Portfolio**: Deployed at your main domain
-- **Dashboard**: Deployed at a subdomain (e.g., `admin.yourdomain.com`)
+- Root app: `.env`
+- Dashboard app: `dashboard/.env`
 
-## 📊 Dashboard Features
+Example (`.env`):
 
-### Analytics Dashboard
-- Real-time visitor count with live updates
-- Time-range filters: Total, 24h, 7d, 15d, 30d, 3m, 6m, 1y
-- KPIs: Views, Desktop %, Mobile %, Top Country
+```env
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+```
 
-### Visitor Trend Graph
-- Independent time-range filter (default: 30 days)
-- Interactive area chart with gradient fill
-- Responsive design
+### 4) Run Locally
 
-### Data Sections
-- **Operating Systems** - Donut chart with legend
-- **Top Locations** - Bar chart of countries
-- **Traffic Sources** - Horizontal bar chart
+Run frontend:
 
-### Security & Logs
-- Session history with timestamps
-- Device info, browser, OS detection
-- IP-based geolocation (privacy-focused)
+```bash
+pnpm dev
+```
 
-## 🔒 Security
+Run dashboard (separate terminal):
 
-- Firebase Authentication for admin access
-- Role-based permissions (Admin/Viewer)
-- Sensitive data masking for non-admin users
-- HTTPS-only geolocation APIs
+```bash
+cd dashboard
+pnpm dev
+```
 
-## 📝 License
+## Usage Guide
 
-This project is open source and available under the [MIT License](LICENSE).
+1. Open frontend app to view the public portfolio.
+2. Open dashboard app and sign in with authorized credentials.
+3. Use `ContentManager` to update portfolio content.
+4. Use analytics pages to inspect visitor trends, sources, and devices.
 
-## 👤 Author
+## Security Notes
 
-**Yash Mishra**
-- GitHub: [@YashMishra0101](https://github.com/YashMishra0101)
-- LinkedIn: [Yash Mishra](https://www.linkedin.com/in/yash-mishra-356280223/)
-- Twitter: [@YashRKMishra1](https://x.com/YashRKMishra1)
+- Keep all Firebase credentials in `.env` files; never commit real secrets.
+- API keys in client apps are not private by design; security must be enforced by Firebase Auth + Firestore rules.
+- Do not rely only on frontend role checks; enforce authorization in backend rules.
+- Review and minimize visitor data collection based on legal/privacy requirements in your region.
+- Replace all personal defaults (name, email, social URLs, location, portfolio content) before deployment.
 
----
+## Contribution Guidelines
 
-⭐ Star this repo if you find it helpful!
+1. Fork the repository.
+2. Create a branch: `feat/your-feature-name`.
+3. Keep PRs focused and well described.
+4. Run lint and build for both apps before opening PR:
+   - root: `pnpm lint && pnpm build`
+   - dashboard: `cd dashboard && pnpm lint && pnpm build`
+5. Open a PR with:
+   - concise summary
+   - screenshots (if UI changes)
+   - test notes
+
+## Disclaimer
+
+This repository contains personal placeholder/default content from the original authoring context.
+
+Before using in production, you must replace:
+
+- Personal identity details (name, email, location, social links)
+- Portfolio data (experience, projects, contributions)
+- Firebase project configuration and security setup
+
+## License
+
+Released under the custom license available in [`LICENSE`](LICENSE).

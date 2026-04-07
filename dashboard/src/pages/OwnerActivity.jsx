@@ -82,17 +82,14 @@ export default function OwnerActivity() {
         }
     };
 
-    const formatTime = (timestamp) => {
-        if (!timestamp?.toDate) return "Unknown";
-        const date = timestamp.toDate();
-        return date.toLocaleString("en-IN", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-        });
+    const formatTime = (ts) => {
+        if (!ts?.toDate) return "Unknown";
+        const date = ts.toDate();
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = date.toLocaleString('default', { month: 'short' });
+        const year = date.getFullYear();
+        const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        return `${day} ${month} ${year}, ${time}`;
     };
 
     const getTimeAgo = (timestamp) => {

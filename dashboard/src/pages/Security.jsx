@@ -32,7 +32,15 @@ export default function Security() {
     return () => unsub();
   }, []);
 
-  const formatTime = (ts) => (ts?.toDate ? ts.toDate().toLocaleString() : "");
+  const formatTime = (ts) => {
+    if (!ts?.toDate) return "";
+    const date = ts.toDate();
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = date.toLocaleString('default', { month: 'short' });
+    const year = date.getFullYear();
+    const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    return `${day} ${month} ${year}, ${time}`;
+  };
 
   const formatOS = (osName) => {
     if (!osName) return "Unknown OS";
@@ -74,7 +82,7 @@ export default function Security() {
   // Mask email for viewers (hide admin email)
   const getDisplayEmail = (log) => {
     if (role !== "admin" && isAdminLog(log)) {
-      return "Admin Email (Hidden)";
+      return "Admin Email Hidden";
     }
     return log.userId;
   };
@@ -82,7 +90,7 @@ export default function Security() {
   // Mask IP for viewers (hide admin IP)
   const getDisplayIP = (log) => {
     if (role !== "admin" && isAdminLog(log)) {
-      return "Admin IP (Hidden)";
+      return "Admin IP Hidden";
     }
     return log.ip;
   };
@@ -93,6 +101,22 @@ export default function Security() {
       return { hidden: true };
     }
     return { hidden: false, city: log.city, country: log.country, location: log.location };
+  };
+
+  // Mask Timestamp for viewers (hide admin timestamp)
+  const getDisplayTime = (log) => {
+    if (role !== "admin" && isAdminLog(log)) {
+      return "Admin Timestamp Hidden";
+    }
+    return formatTime(log.timestamp);
+  };
+
+  // Mask Device for viewers (hide admin device)
+  const getDisplayDevice = (log) => {
+    if (role !== "admin" && isAdminLog(log)) {
+      return { hidden: true };
+    }
+    return { hidden: false, device: log.device };
   };
 
   // Format status display for better UX
@@ -129,7 +153,7 @@ export default function Security() {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-zinc-500 text-[11px] font-mono mb-1">
-                  {formatTime(log.timestamp)}
+                  {getDisplayTime(log)}
                 </p>
                 <div className="flex items-center gap-2">
                   <div className="flex flex-col">
@@ -173,19 +197,27 @@ export default function Security() {
                 <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">
                   Device
                 </p>
-                <div className="flex items-center gap-2">
-                  {log.device?.type === "mobile" ? (
-                    <Smartphone size={14} className="text-zinc-500" />
-                  ) : (
-                    <Monitor size={14} className="text-zinc-500" />
-                  )}
-                  <span className="text-xs text-zinc-300">
-                    {formatOS(log.device?.os)} •{" "}
-                    {log.device?.model !== "PC/Mac"
-                      ? log.device?.model
-                      : log.device?.browser}
-                  </span>
-                </div>
+                {(() => {
+                  const devData = getDisplayDevice(log);
+                  if (devData.hidden) {
+                    return <span className="text-xs text-zinc-600">Admin Device Hidden</span>;
+                  }
+                  return (
+                    <div className="flex items-center gap-2">
+                      {devData.device?.type === "mobile" ? (
+                        <Smartphone size={14} className="text-zinc-500" />
+                      ) : (
+                        <Monitor size={14} className="text-zinc-500" />
+                      )}
+                      <span className="text-xs text-zinc-300">
+                        {formatOS(devData.device?.os)} •{" "}
+                        {devData.device?.model !== "PC/Mac"
+                          ? devData.device?.model
+                          : devData.device?.browser}
+                      </span>
+                    </div>
+                  );
+                })()}
               </div>
               <div className="col-span-2">
                 <p className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1 flex flex-col items-center">
@@ -197,7 +229,7 @@ export default function Security() {
                 {(() => {
                   const locData = getDisplayLocation(log);
                   if (locData.hidden) {
-                    return <span className="text-zinc-600 text-xs">Admin Location (Hidden)</span>;
+                    return <span className="text-zinc-600 text-xs">Admin Location Hidden</span>;
                   }
                   return locData.location ? (
                     <a
@@ -246,7 +278,7 @@ export default function Security() {
                 className="hover:bg-zinc-800/50 transition-colors"
               >
                 <td className="px-4 py-2 text-zinc-400 text-[11px]">
-                  {formatTime(log.timestamp)}
+                  {getDisplayTime(log)}
                 </td>
                 <td className="px-4 py-2 font-bold text-[11px]">
                   <div className="flex flex-col">
@@ -272,16 +304,24 @@ export default function Security() {
                   {getDisplayEmail(log)}
                 </td>
                 <td className="px-4 py-2">
-                  <div className="flex items-center gap-2">
-                    {log.device?.type === "mobile" ? (
-                      <Smartphone size={12} className="text-zinc-500" />
-                    ) : (
-                      <Monitor size={12} className="text-zinc-500" />
-                    )}
-                    <span className="text-[11px] text-zinc-200">
-                      {formatOS(log.device?.os)} • {log.device?.model !== "PC/Mac" ? log.device?.model : log.device?.browser || "Browser"}
-                    </span>
-                  </div>
+                  {(() => {
+                    const devData = getDisplayDevice(log);
+                    if (devData.hidden) {
+                      return <span className="text-zinc-600 text-[11px]">Admin Device Hidden</span>;
+                    }
+                    return (
+                      <div className="flex items-center gap-2">
+                        {devData.device?.type === "mobile" ? (
+                          <Smartphone size={12} className="text-zinc-500" />
+                        ) : (
+                          <Monitor size={12} className="text-zinc-500" />
+                        )}
+                        <span className="text-[11px] text-zinc-200">
+                          {formatOS(devData.device?.os)} • {devData.device?.model !== "PC/Mac" ? devData.device?.model : devData.device?.browser || "Browser"}
+                        </span>
+                      </div>
+                    );
+                  })()}
                 </td>
                 <td
                   className="px-4 py-2 text-zinc-500 text-[11px] font-mono whitespace-nowrap"
@@ -293,7 +333,7 @@ export default function Security() {
                   {(() => {
                     const locData = getDisplayLocation(log);
                     if (locData.hidden) {
-                      return <span className="text-zinc-600">Admin Location (Hidden)</span>;
+                      return <span className="text-zinc-600">Admin Location Hidden</span>;
                     }
                     return locData.location ? (
                       <a

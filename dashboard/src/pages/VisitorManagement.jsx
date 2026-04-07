@@ -129,7 +129,15 @@ export default function VisitorManagement() {
         );
     }
 
-    const formatTime = (ts) => (ts?.toDate ? ts.toDate().toLocaleString() : "");
+    const formatTime = (ts) => {
+        if (!ts?.toDate) return "";
+        const date = ts.toDate();
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = date.toLocaleString('default', { month: 'short' });
+        const year = date.getFullYear();
+        const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        return `${day} ${month} ${year}, ${time}`;
+    };
 
     const handleDeleteSingle = async (visitorId) => {
         setIsDeleting(true);
@@ -374,13 +382,7 @@ export default function VisitorManagement() {
                 </div>
             )}
 
-            {/* Select All + Count */}
-            <div className="flex items-center justify-between">
-                <button onClick={toggleSelectAll} className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-200 text-[9px] font-bold uppercase">
-                    {selectedVisitors.length === filteredVisits.length && filteredVisits.length > 0 ? "Deselect All" : "Select All"}
-                </button>
-                <span className="text-zinc-500 text-[9px] font-mono">{filteredVisits.length} visitors</span>
-            </div>
+
 
             {/* Visitor Cards */}
             <div className="space-y-2">

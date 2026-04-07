@@ -76,18 +76,7 @@ export default function Summary() {
     ios: 0,
   });
 
-  // Independent graph filter - default to 30 days
-  const [graphFilter, setGraphFilter] = useState("30d");
-  const graphFilterOptions = [
-    { value: "Total", label: "All Time" },
-    { value: "24h", label: "24 Hours" },
-    { value: "7d", label: "7 Days" },
-    { value: "15d", label: "15 Days" },
-    { value: "30d", label: "30 Days" },
-    { value: "3m", label: "3 Months" },
-    { value: "6m", label: "6 Months" },
-    { value: "1y", label: "1 Year" },
-  ];
+
 
   useEffect(() => {
     // UNLIMITED QUERY - Fetching ALL History
@@ -182,6 +171,18 @@ export default function Summary() {
         const sources = {};
         filteredData.forEach((d) => {
           let r = d.referrer || "Direct";
+          
+          // Skip localhost entries from appearing in the chart
+          if (
+            r === "Localhost" || 
+            r.toLowerCase().includes("localhost") || 
+            r.includes("127.0.0.1") ||
+            d.ip === "127.0.0.1" ||
+            d.ip === "::1"
+          ) {
+            return;
+          }
+
           try {
             if (r.startsWith("http")) {
               r = new URL(r).hostname.replace("www.", "");
@@ -208,47 +209,14 @@ export default function Summary() {
           .sort((a, b) => b[1] - a[1])
           .map(([name, value]) => ({ name, value }));
 
-        // === INDEPENDENT GRAPH FILTER - Chart Data Generation ===
-        let graphStartTime = new Date();
-        switch (graphFilter) {
-          case "24h":
-            graphStartTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-            break;
-          case "7d":
-            graphStartTime.setDate(now.getDate() - 7);
-            break;
-          case "15d":
-            graphStartTime.setDate(now.getDate() - 15);
-            break;
-          case "30d":
-            graphStartTime.setDate(now.getDate() - 30);
-            break;
-          case "3m":
-            graphStartTime.setMonth(now.getMonth() - 3);
-            break;
-          case "6m":
-            graphStartTime.setMonth(now.getMonth() - 6);
-            break;
-          case "1y":
-            graphStartTime.setFullYear(now.getFullYear() - 1);
-            break;
-          case "Total":
-            graphStartTime = new Date(0); // Epoch start
-            break;
-          default:
-            graphStartTime.setDate(now.getDate() - 30); // Default 30 days
-        }
-
-        const graphFilteredData = allData.filter((d) => d.createdAt >= graphStartTime);
-
         const chartPoints = 20;
         const chartData = [];
-        const step = (now - graphStartTime) / chartPoints;
+        const step = (now - startTime) / chartPoints;
 
         for (let i = 0; i < chartPoints; i++) {
-          const pointStart = new Date(graphStartTime.getTime() + i * step);
+          const pointStart = new Date(startTime.getTime() + i * step);
           const pointEnd = new Date(pointStart.getTime() + step);
-          const count = graphFilteredData.filter(
+          const count = filteredData.filter(
             (d) => d.createdAt >= pointStart && d.createdAt < pointEnd
           ).length;
           chartData.push({
@@ -280,7 +248,7 @@ export default function Summary() {
       }
     );
     return () => unsub();
-  }, [timeRange, graphFilter]);
+  }, [timeRange]);
 
   const FilterButton = ({ range }) => (
     <button
@@ -296,6 +264,19 @@ export default function Summary() {
       {range === "Total" ? "Total Interaction" : range}
     </button>
   );
+
+  const graphFilterOptions = [
+    { value: "Total", label: "All Time" },
+    { value: "24h", label: "24 Hours" },
+    { value: "7d", label: "7 Days" },
+    { value: "15d", label: "15 Days" },
+    { value: "30d", label: "30 Days" },
+    { value: "3m", label: "3 Months" },
+    { value: "6m", label: "6 Months" },
+    { value: "1y", label: "1 Year" },
+  ];
+
+  const timeRangeLabel = graphFilterOptions.find((opt) => opt.value === timeRange)?.label || timeRange;
 
   return (
     <div className="space-y-6">
@@ -350,6 +331,7 @@ export default function Summary() {
           icon={<Eye size={20} className="text-blue-500" />}
           sub={`Last ${timeRange === "Total" ? "History" : timeRange}`}
           delay={0}
+          filterLabel={timeRangeLabel}
         />
         <TacticalCard
           title="Desktop & Laptop Users"
@@ -357,6 +339,7 @@ export default function Summary() {
           icon={<Monitor size={20} className="text-emerald-500" />}
           sub="Workstations"
           delay={100}
+          filterLabel={timeRangeLabel}
         />
         <TacticalCard
           title="Mobile Users"
@@ -364,6 +347,7 @@ export default function Summary() {
           icon={<Smartphone size={20} className="text-amber-500" />}
           sub="Handhelds"
           delay={200}
+          filterLabel={timeRangeLabel}
         />
         <TacticalCard
           title="Top Country"
@@ -371,6 +355,7 @@ export default function Summary() {
           icon={<Globe size={20} className="text-rose-500" />}
           sub="Most Visits"
           delay={300}
+          filterLabel={timeRangeLabel}
         />
       </div>
 
@@ -382,6 +367,7 @@ export default function Summary() {
           icon={<Monitor size={20} className="text-blue-400" />}
           sub="PC Systems"
           delay={400}
+          filterLabel={timeRangeLabel}
         />
         <TacticalCard
           title="MacOS"
@@ -389,6 +375,7 @@ export default function Summary() {
           icon={<Monitor size={20} className="text-zinc-400" />}
           sub="Apple Computers"
           delay={500}
+          filterLabel={timeRangeLabel}
         />
       </div>
 
@@ -400,6 +387,7 @@ export default function Summary() {
           icon={<Smartphone size={20} className="text-emerald-400" />}
           sub="Google OS"
           delay={600}
+          filterLabel={timeRangeLabel}
         />
         <TacticalCard
           title="iOS"
@@ -407,6 +395,7 @@ export default function Summary() {
           icon={<Smartphone size={20} className="text-zinc-100" />}
           sub="Apple Mobile"
           delay={700}
+          filterLabel={timeRangeLabel}
         />
       </div>
 
@@ -425,19 +414,9 @@ export default function Summary() {
               Traffic pattern over time
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase">Time Range:</span>
-            <select
-              value={graphFilter}
-              onChange={(e) => setGraphFilter(e.target.value)}
-              className="bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs font-mono rounded px-3 py-1.5 focus:outline-none focus:border-emerald-500 hover:border-zinc-600 transition-colors cursor-pointer"
-            >
-              {graphFilterOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Active Range:</span>
+            <span className="text-xs font-mono font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5">{timeRangeLabel}</span>
           </div>
         </div>
 
@@ -500,7 +479,7 @@ export default function Summary() {
               <Monitor size={14} className="text-blue-500" /> Operating Systems
             </h3>
             <span className="text-[9px] font-mono text-zinc-600 bg-zinc-800/50 px-2 py-0.5 rounded border border-zinc-700/50">
-              {timeRange === "Total" ? "All Time" : timeRange}
+              {timeRangeLabel}
             </span>
           </div>
           <div className="flex-1 min-h-[320px] relative">
@@ -513,6 +492,8 @@ export default function Summary() {
                       innerRadius={60}
                       outerRadius={80}
                       paddingAngle={5}
+                      startAngle={90}
+                      endAngle={-270}
                       dataKey="value"
                       stroke="none"
                       label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
@@ -529,7 +510,10 @@ export default function Summary() {
                       contentStyle={{
                         backgroundColor: "#18181b",
                         border: "1px solid #27272a",
+                        borderRadius: "0px",
+                        fontFamily: "monospace",
                       }}
+                      itemStyle={{ color: "#d4d4d8", fontSize: "12px" }}
                       formatter={(value, name) => {
                         const total = stats.os.reduce((sum, item) => sum + item.value, 0);
                         const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
@@ -577,7 +561,7 @@ export default function Summary() {
               <Globe size={14} className="text-emerald-500" /> Top Locations
             </h3>
             <span className="text-[9px] font-mono text-zinc-600 bg-zinc-800/50 px-2 py-0.5 rounded border border-zinc-700/50">
-              {timeRange === "Total" ? "All Time" : timeRange}
+              {timeRangeLabel}
             </span>
           </div>
           <div className="h-[300px]">
@@ -614,7 +598,11 @@ export default function Summary() {
                     contentStyle={{
                       backgroundColor: "#18181b",
                       border: "1px solid #27272a",
+                      borderRadius: "0px",
+                      fontFamily: "monospace",
                     }}
+                    itemStyle={{ color: "#10b981", fontSize: "12px" }}
+                    labelStyle={{ color: "#71717a", fontSize: "12px", marginBottom: "4px" }}
                   />
                   <Bar
                     dataKey="value"
@@ -640,7 +628,7 @@ export default function Summary() {
               <Activity size={14} className="text-amber-500" /> Traffic Sources
             </h3>
             <span className="text-[9px] font-mono text-zinc-600 bg-zinc-800/50 px-2 py-0.5 rounded border border-zinc-700/50">
-              {timeRange === "Total" ? "All Time" : timeRange}
+              {timeRangeLabel}
             </span>
           </div>
           <div className="h-[250px]">
@@ -675,7 +663,11 @@ export default function Summary() {
                     contentStyle={{
                       backgroundColor: "#18181b",
                       border: "1px solid #27272a",
+                      borderRadius: "0px",
+                      fontFamily: "monospace",
                     }}
+                    itemStyle={{ color: "#d97706", fontSize: "12px" }}
+                    labelStyle={{ color: "#71717a", fontSize: "12px", marginBottom: "4px" }}
                   />
                   <Bar
                     dataKey="value"
@@ -699,7 +691,7 @@ export default function Summary() {
 }
 
 // Enhanced Card Component
-function TacticalCard({ title, value, icon, sub, delay = 0 }) {
+function TacticalCard({ title, value, icon, sub, delay = 0, filterLabel }) {
   return (
     <div
       className="tactical-card p-5 group hover:bg-zinc-900/80 transition-all duration-300 relative overflow-hidden border border-zinc-800 hover:border-zinc-600 hover:shadow-[0_0_20px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom-4 fill-mode-backwards"
@@ -713,7 +705,13 @@ function TacticalCard({ title, value, icon, sub, delay = 0 }) {
           {icon}
         </div>
         {/* Dynamic Corner */}
-        <div className="w-1.5 h-1.5 bg-zinc-800 group-hover:bg-emerald-500 transition-colors"></div>
+        {filterLabel ? (
+          <span className="text-[9px] font-mono text-zinc-600 bg-zinc-800/50 px-2 py-0.5 rounded border border-zinc-700/50">
+            {filterLabel}
+          </span>
+        ) : (
+          <div className="w-1.5 h-1.5 bg-zinc-800 group-hover:bg-emerald-500 transition-colors"></div>
+        )}
       </div>
 
       <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-1 font-mono group-hover:text-zinc-400 transition-colors">
