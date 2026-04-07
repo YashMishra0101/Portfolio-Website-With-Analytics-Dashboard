@@ -170,7 +170,29 @@ const getOS = () => {
 // Priority: Localhost > UTM params > Known platforms > Parsed referrer > Direct
 const getTrafficSource = () => {
   const url = new URL(window.location.href);
-  const rawReferrer = document.referrer;
+  const rawReferrer = (document.referrer || "").trim();
+  const currentHost = url.hostname.toLowerCase();
+  const sourceCacheKey = "last_attributed_source";
+
+  const cacheSource = (payload) => {
+    try {
+      if (payload?.source && payload.source !== "Direct") {
+        sessionStorage.setItem(sourceCacheKey, JSON.stringify(payload));
+      }
+    } catch {
+      // Ignore sessionStorage errors (private mode, disabled storage)
+    }
+  };
+
+  const getCachedSource = () => {
+    try {
+      const cached = sessionStorage.getItem(sourceCacheKey);
+      if (!cached) return null;
+      return JSON.parse(cached);
+    } catch {
+      return null;
+    }
+  };
 
   // 0. Explicit Localhost Check
   const hostname = url.hostname;
@@ -184,27 +206,53 @@ const getTrafficSource = () => {
     };
   }
 
-  // 1. Check UTM parameters first (most reliable - you control these in your shared links)
+  // 1. Check UTM or source aliases first (most reliable - link controlled attribution)
   const utmSource = url.searchParams.get("utm_source");
   const utmMedium = url.searchParams.get("utm_medium");
   const utmCampaign = url.searchParams.get("utm_campaign");
+  const sourceAlias =
+    url.searchParams.get("source") ||
+    url.searchParams.get("src") ||
+    url.searchParams.get("ref") ||
+    url.searchParams.get("from");
+
+  if (sourceAlias) {
+    const aliasPayload = {
+      source: sourceAlias.toLowerCase(),
+      medium: utmMedium || "referral",
+      campaign: utmCampaign || "none",
+      raw: rawReferrer || "Direct",
+      method: "source_param"
+    };
+    cacheSource(aliasPayload);
+    return aliasPayload;
+  }
 
   if (utmSource) {
-    // UTM source found - this is the most accurate
-    return {
+    const utmPayload = {
       source: utmSource.toLowerCase(),
       medium: utmMedium || "referral",
       campaign: utmCampaign || "none",
       raw: rawReferrer || "Direct",
       method: "utm"
     };
+    cacheSource(utmPayload);
+    return utmPayload;
   }
 
-  // 2. Check referrer against known platforms
+  // 2. Referrer-based platform detection
   if (rawReferrer) {
     try {
       const referrerUrl = new URL(rawReferrer);
       const referrerHost = referrerUrl.hostname.toLowerCase();
+
+      // Internal/self navigations should not override external attribution.
+      if (referrerHost === currentHost || referrerHost.endsWith("." + currentHost)) {
+        const cached = getCachedSource();
+        if (cached) {
+          return { ...cached, method: "session_attribution" };
+        }
+      }
 
       // Known social platforms and their variations
       const knownSources = {
@@ -288,25 +336,29 @@ const getTrafficSource = () => {
 
       // Check for exact match first
       if (knownSources[referrerHost]) {
-        return {
+        const knownPayload = {
           source: knownSources[referrerHost].source,
           medium: knownSources[referrerHost].medium,
           campaign: "none",
           raw: rawReferrer,
           method: "known_platform"
         };
+        cacheSource(knownPayload);
+        return knownPayload;
       }
 
       // Check for partial matches (handles subdomains)
       for (const [domain, info] of Object.entries(knownSources)) {
         if (referrerHost.includes(domain) || referrerHost.endsWith("." + domain)) {
-          return {
+          const matchedPayload = {
             source: info.source,
             medium: info.medium,
             campaign: "none",
             raw: rawReferrer,
             method: "known_platform"
           };
+          cacheSource(matchedPayload);
+          return matchedPayload;
         }
       }
 
@@ -314,43 +366,78 @@ const getTrafficSource = () => {
       const domainParts = referrerHost.replace("www.", "").split(".");
       const sourceName = domainParts[0].charAt(0).toUpperCase() + domainParts[0].slice(1);
 
-      return {
+      const parsedPayload = {
         source: sourceName,
         medium: "referral",
         campaign: "none",
         raw: rawReferrer,
         method: "parsed_referrer"
       };
+      cacheSource(parsedPayload);
+      return parsedPayload;
 
     } catch (e) {
       // Invalid referrer URL - treat as the raw string
-      return {
+      const rawPayload = {
         source: rawReferrer.substring(0, 50),
         medium: "referral",
         campaign: "none",
         raw: rawReferrer,
         method: "raw_referrer"
       };
+      cacheSource(rawPayload);
+      return rawPayload;
     }
   }
 
-  // 3. Check for in-app browsers (these often don't send referrer)
+  // 3. Infer from known click identifiers when referrer is missing.
+  if (url.searchParams.has("twclid")) {
+    const twclidPayload = { source: "Twitter", medium: "social", campaign: "none", raw: "Direct", method: "click_id" };
+    cacheSource(twclidPayload);
+    return twclidPayload;
+  }
+  if (url.searchParams.has("li_fat_id") || url.searchParams.has("li_click_id")) {
+    const linkedinPayload = { source: "LinkedIn", medium: "social", campaign: "none", raw: "Direct", method: "click_id" };
+    cacheSource(linkedinPayload);
+    return linkedinPayload;
+  }
+  if (url.searchParams.has("fbclid")) {
+    const facebookPayload = { source: "Facebook", medium: "social", campaign: "none", raw: "Direct", method: "click_id" };
+    cacheSource(facebookPayload);
+    return facebookPayload;
+  }
+
+  // 4. Check for in-app browsers (these often don't send referrer)
   const ua = navigator.userAgent.toLowerCase();
 
   if (ua.includes("linkedin")) {
-    return { source: "LinkedIn", medium: "social", campaign: "none", raw: "Direct", method: "user_agent" };
+    const linkedinPayload = { source: "LinkedIn", medium: "social", campaign: "none", raw: "Direct", method: "user_agent" };
+    cacheSource(linkedinPayload);
+    return linkedinPayload;
   }
   if (ua.includes("twitter") || ua.includes(" x/")) {
-    return { source: "Twitter", medium: "social", campaign: "none", raw: "Direct", method: "user_agent" };
+    const twitterPayload = { source: "Twitter", medium: "social", campaign: "none", raw: "Direct", method: "user_agent" };
+    cacheSource(twitterPayload);
+    return twitterPayload;
   }
   if (ua.includes("instagram")) {
-    return { source: "Instagram", medium: "social", campaign: "none", raw: "Direct", method: "user_agent" };
+    const instagramPayload = { source: "Instagram", medium: "social", campaign: "none", raw: "Direct", method: "user_agent" };
+    cacheSource(instagramPayload);
+    return instagramPayload;
   }
   if (ua.includes("fban") || ua.includes("fbav")) {
-    return { source: "Facebook", medium: "social", campaign: "none", raw: "Direct", method: "user_agent" };
+    const facebookPayload = { source: "Facebook", medium: "social", campaign: "none", raw: "Direct", method: "user_agent" };
+    cacheSource(facebookPayload);
+    return facebookPayload;
   }
 
-  // 4. No source detected - truly Direct traffic
+  // 5. Use session attribution to prevent false "Direct" on subsequent same-session pages/reloads.
+  const cached = getCachedSource();
+  if (cached) {
+    return { ...cached, method: "session_attribution" };
+  }
+
+  // 6. No source detected - truly Direct traffic
   return {
     source: "Direct",
     medium: "none",
