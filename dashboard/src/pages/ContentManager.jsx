@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { doc, setDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import {
@@ -54,9 +54,9 @@ const DEFAULT_CONTENT = {
   },
   // Experience
   experience: [
-    { role: "Full Stack Intern", company: "Sky Mentor Technology", location: "Nagpur, India", duration: "3 months", type: "In Office" },
-    { role: "Full Stack Intern", company: "Coladco", location: "Delhi, Faridabad, India", duration: "3 months", type: "Remote" },
-    { role: "Freelancer", company: "Self-Employed", location: "Work From Home", duration: "3 months", type: "Remote" },
+    { role: "Full Stack Intern", company: "Sky Mentor Technology", location: "Nagpur, India", duration: "3 months", type: "In Office", experienceType: "Internship" },
+    { role: "Full Stack Intern", company: "Coladco", location: "Delhi, Faridabad, India", duration: "3 months", type: "Remote", experienceType: "Internship" },
+    { role: "Freelancer", company: "Self-Employed", location: "Work From Home", duration: "3 months", type: "Remote", experienceType: "Freelancing" },
   ],
   // Projects
   projects: [
@@ -74,7 +74,16 @@ function normalizeContent(data) {
     labels: { ...DEFAULT_CONTENT.labels, ...(data.labels || {}) },
     socials: { ...DEFAULT_CONTENT.socials, ...(data.socials || {}) },
     sections: { ...DEFAULT_CONTENT.sections, ...(data.sections || {}) },
-    experience: Array.isArray(data.experience) ? data.experience : DEFAULT_CONTENT.experience,
+    experience: Array.isArray(data.experience)
+      ? data.experience.map((item) => ({
+          role: item?.role || "",
+          company: item?.company || "",
+          location: item?.location || "",
+          duration: item?.duration || "",
+          type: item?.type || "Remote",
+          experienceType: item?.experienceType || "Job",
+        }))
+      : DEFAULT_CONTENT.experience,
     projects: Array.isArray(data.projects)
       ? data.projects.map((p) => ({ description: "", ...p, tech: Array.isArray(p.tech) ? p.tech : [], link: p.link || "" }))
       : DEFAULT_CONTENT.projects,
@@ -193,16 +202,31 @@ export default function ContentManager() {
   const [saving, setSaving] = useState(false);
   const [notification, setNotification] = useState({ type: "", text: "", durationMs: 0 });
   const [content, setContent] = useState(DEFAULT_CONTENT);
+  const [savedContent, setSavedContent] = useState(DEFAULT_CONTENT);
 
   // Real-time sync
   useEffect(() => {
     const unsub = onSnapshot(
       doc(db, "portfolio", "config"),
-      (snap) => { if (snap.exists()) setContent(normalizeContent(snap.data())); setLoading(false); },
+      (snap) => {
+        if (snap.exists()) {
+          const normalized = normalizeContent(snap.data());
+          setContent(normalized);
+          setSavedContent(normalized);
+        } else {
+          setSavedContent(DEFAULT_CONTENT);
+        }
+        setLoading(false);
+      },
       (err) => { console.error("Firestore error:", err); setLoading(false); }
     );
     return () => unsub();
   }, []);
+
+  const isDirty = useMemo(
+    () => JSON.stringify(content) !== JSON.stringify(savedContent),
+    [content, savedContent]
+  );
 
   // ── Persist ──────────────────────────────────────────────────────────────────
   const handleSave = async (e) => {
@@ -211,6 +235,7 @@ export default function ContentManager() {
     setNotification({ type: "", text: "", durationMs: 0 });
     try {
       await setDoc(doc(db, "portfolio", "config"), content);
+      setSavedContent(content);
       setNotification({
         type: "success",
         text: "Changes saved successfully",
@@ -236,7 +261,10 @@ export default function ContentManager() {
 
   // ── Experience CRUD ───────────────────────────────────────────────────────────
   const addExperience = () =>
-    setContent((p) => ({ ...p, experience: [...p.experience, { role: "", company: "", location: "", duration: "", type: "Remote" }] }));
+    setContent((p) => ({
+      ...p,
+      experience: [...p.experience, { role: "", company: "", location: "", duration: "", type: "Remote", experienceType: "Job" }],
+    }));
   const updateExperience = (i, field, val) =>
     setContent((p) => ({ ...p, experience: p.experience.map((e, idx) => idx === i ? { ...e, [field]: val } : e) }));
   const removeExperience = (i) =>
@@ -550,6 +578,19 @@ export default function ContentManager() {
                     <Field label="Company"><input type="text" readOnly={isReadOnly} className="tactical-input" value={exp.company} onChange={(e) => updateExperience(i, "company", e.target.value)} /></Field>
                     <Field label="Location"><input type="text" readOnly={isReadOnly} className="tactical-input" value={exp.location} onChange={(e) => updateExperience(i, "location", e.target.value)} /></Field>
                     <Field label="Duration"><input type="text" readOnly={isReadOnly} className="tactical-input" value={exp.duration} onChange={(e) => updateExperience(i, "duration", e.target.value)} /></Field>
+                    <Field label="Experience Type">
+                      <select
+                        disabled={isReadOnly}
+                        className="tactical-input"
+                        value={exp.experienceType || "Job"}
+                        onChange={(e) => updateExperience(i, "experienceType", e.target.value)}
+                      >
+                        <option value="Job">Job</option>
+                        <option value="Internship">Internship</option>
+                        <option value="Freelancing">Freelancing</option>
+                        <option value="Contract-Based">Contract-Based</option>
+                      </select>
+                    </Field>
                     <Field label="Work Type">
                       <select disabled={isReadOnly} className="tactical-input" value={exp.type} onChange={(e) => updateExperience(i, "type", e.target.value)}>
                         <option value="Remote">Remote</option>
@@ -856,11 +897,13 @@ export default function ContentManager() {
             )}
             <button
               type="submit"
-              disabled={saving || isReadOnly}
-              className={`ml-auto btn-tactical flex items-center gap-2 px-10 group ${isReadOnly ? "opacity-40 cursor-not-allowed" : ""}`}
+              disabled={saving || isReadOnly || !isDirty}
+              className={`ml-auto btn-tactical flex items-center gap-2 px-10 group ${
+                isReadOnly || !isDirty ? "opacity-40 cursor-not-allowed" : ""
+              }`}
             >
               <Save size={15} className={saving ? "animate-spin" : "group-hover:scale-110 transition-transform"} />
-              {saving ? "Saving..." : isReadOnly ? "Read Only" : "Save Configuration"}
+              {saving ? "Saving..." : isReadOnly ? "Read Only" : !isDirty ? "No Changes" : "Save Configuration"}
             </button>
           </div>
       </form>

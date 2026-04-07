@@ -42,9 +42,9 @@ const DEFAULT_CONFIG = {
     email: "yashrkm0011@gmail.com",
   },
   experience: [
-    { role: "Full Stack Intern", company: "Sky Mentor Technology", location: "Nagpur, India", duration: "3 months", type: "In Office" },
-    { role: "Full Stack Intern", company: "Coladco", location: "Delhi, Faridabad, India", duration: "3 months", type: "Remote" },
-    { role: "Freelancer", company: "Self-Employed", location: "Work From Home, India", duration: "3 months", type: "Remote" },
+    { role: "Full Stack Intern", company: "Sky Mentor Technology", location: "Nagpur, India", duration: "3 months", type: "In Office", experienceType: "Internship" },
+    { role: "Full Stack Intern", company: "Coladco", location: "Delhi, Faridabad, India", duration: "3 months", type: "Remote", experienceType: "Internship" },
+    { role: "Freelancer", company: "Self-Employed", location: "Work From Home, India", duration: "3 months", type: "Remote", experienceType: "Freelancing" },
   ],
   projects: [
     { title: "Major Project in Progress", status: "In Development", description: "", tech: [], link: null },
@@ -71,7 +71,14 @@ function mergeConfig(firebaseData) {
     socials: { ...DEFAULT_CONFIG.socials, ...(firebaseData.socials || {}) },
     sections: { ...DEFAULT_CONFIG.sections, ...(firebaseData.sections || {}) },
     experience: Array.isArray(firebaseData.experience)
-      ? firebaseData.experience
+      ? firebaseData.experience.map((item) => ({
+          role: item?.role || "",
+          company: item?.company || "",
+          location: item?.location || "",
+          duration: item?.duration || "",
+          type: item?.type || "Remote",
+          experienceType: item?.experienceType || "Job",
+        }))
       : DEFAULT_CONFIG.experience,
     projects: Array.isArray(firebaseData.projects)
       ? firebaseData.projects.map((p) => ({
@@ -519,6 +526,10 @@ function App() {
                           <span>{exp.location}</span>
                         </div>
                         <div className="flex items-center gap-2">
+                          <i className="fas fa-id-badge text-xs text-accent w-4"></i>
+                          <span>{exp.experienceType || "Job"}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
                           <i className="fas fa-laptop-code text-xs text-accent w-4"></i>
                           <span>{exp.type}</span>
                         </div>
@@ -613,13 +624,13 @@ function App() {
                     className="group relative bg-zinc-50 dark:bg-zinc-900/50 rounded-xl p-4 border border-zinc-200 dark:border-zinc-800 hover:border-accent dark:hover:border-accent transition-all duration-300"
                   >
                     <div className="flex flex-col gap-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-3">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
                           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center">
                             <i className="fas fa-rocket text-accent text-lg"></i>
                           </div>
-                          <div>
-                            <h4 className="text-base font-bold text-txt">{project.title}</h4>
+                          <div className="min-w-0">
+                            <h4 className="text-base font-bold text-txt break-words">{project.title}</h4>
                             <span className="inline-block px-2 py-0.5 mt-1 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/30">
                               {project.status}
                             </span>
@@ -630,7 +641,7 @@ function App() {
                             href={project.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-accent/10 text-accent border border-accent/30 hover:bg-accent hover:text-zinc-900 hover:border-zinc-300 transition-all duration-200 shrink-0"
+                            className="self-start sm:self-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-accent/10 text-accent border border-accent/30 hover:bg-accent hover:text-zinc-900 hover:border-zinc-300 transition-all duration-200 shrink-0"
                           >
                             <i className="fas fa-external-link-alt text-[10px]"></i>
                             {L.viewProjectBtn}
@@ -677,7 +688,7 @@ function App() {
                     key={`${item.companyName}-${index}`}
                     className="group relative bg-zinc-50 dark:bg-zinc-900/50 rounded-xl p-4 border border-zinc-200 dark:border-zinc-800 hover:border-accent dark:hover:border-accent transition-all duration-300"
                   >
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center shrink-0">
                           <i className="fas fa-building text-accent text-lg"></i>
@@ -689,7 +700,7 @@ function App() {
                           href={item.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-accent/10 text-accent border border-accent/30 hover:bg-accent hover:text-zinc-900 hover:border-zinc-300 transition-all duration-200 shrink-0"
+                          className="self-start sm:self-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-accent/10 text-accent border border-accent/30 hover:bg-accent hover:text-zinc-900 hover:border-zinc-300 transition-all duration-200 shrink-0"
                         >
                           <i className="fas fa-external-link-alt text-[10px]"></i>
                           View Contribution
