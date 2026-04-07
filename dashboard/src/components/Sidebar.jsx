@@ -29,24 +29,24 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
     },
     {
       icon: <Users size={20} />,
-      label: "Recent Visitors",
+      label: "Recent Visitor",
       path: "/dashboard/visitors",
     },
     {
       icon: <PieChart size={20} />,
-      label: "Content Manager",
+      label: "Content Management",
       path: "/dashboard/content",
-    },
-    {
-      icon: <ShieldAlert size={20} />,
-      label: "Session History",
-      path: "/dashboard/security",
     },
     {
       icon: <UserX size={20} />,
       label: "Visitor Management",
       path: "/dashboard/visitor-management",
       adminOnly: true,
+    },
+    {
+      icon: <ShieldAlert size={20} />,
+      label: "Session History",
+      path: "/dashboard/security",
     },
   ];
 

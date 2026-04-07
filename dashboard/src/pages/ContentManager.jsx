@@ -338,7 +338,7 @@ export default function ContentManager() {
 
       {/* ── Page Header ── */}
       <div className="border-b border-zinc-800 pb-5">
-        <h1 className="tactical-header text-xl">Content Manager</h1>
+        <h1 className="tactical-header text-xl">Content Management</h1>
         <p className="text-zinc-500 text-[10px] font-mono uppercase mt-1 tracking-wider">
           Manage live portfolio — all changes reflect on frontend instantly after saving
         </p>
