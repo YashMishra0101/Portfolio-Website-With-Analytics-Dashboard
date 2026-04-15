@@ -9,7 +9,7 @@ import {
     writeBatch,
 } from "firebase/firestore";
 import { db } from "../firebase";
-import { useAuth } from "../context/AuthProvider";
+import { tsToDate, formatTimestamp } from "../utils/timestamp";
 import {
     Trash2,
     AlertTriangle,
@@ -26,7 +26,6 @@ import {
 } from "lucide-react";
 
 export default function VisitorManagement() {
-    const { role } = useAuth();
     const [visits, setVisits] = useState([]);
     const [selectedVisitors, setSelectedVisitors] = useState([]);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -68,8 +67,9 @@ export default function VisitorManagement() {
 
     const filteredVisits = useMemo(() => {
         return visits.filter((v) => {
-            if (filters.dateRange !== "all" && v.timestamp?.toDate) {
-                const visitDate = v.timestamp.toDate();
+            if (filters.dateRange !== "all") {
+                const visitDate = tsToDate(v.timestamp, null);
+                if (!visitDate) return true; // can't filter, include
                 const now = new Date();
                 if (filters.dateRange === "today") {
                     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -117,27 +117,8 @@ export default function VisitorManagement() {
         return count;
     }, [filters]);
 
-    if (role !== "admin") {
-        return (
-            <div className="min-h-[60vh] flex items-center justify-center">
-                <div className="tactical-card p-6 text-center max-w-sm">
-                    <Shield className="w-12 h-12 text-red-500 mx-auto mb-3" />
-                    <h2 className="text-base font-bold text-zinc-100 uppercase tracking-widest mb-1">Access Denied</h2>
-                    <p className="text-zinc-500 text-[10px]">This section is restricted to administrators only.</p>
-                </div>
-            </div>
-        );
-    }
 
-    const formatTime = (ts) => {
-        if (!ts?.toDate) return "";
-        const date = ts.toDate();
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = date.toLocaleString('default', { month: 'short' });
-        const year = date.getFullYear();
-        const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        return `${day} ${month} ${year}, ${time}`;
-    };
+
 
     const handleDeleteSingle = async (visitorId) => {
         setIsDeleting(true);
@@ -411,7 +392,7 @@ export default function VisitorManagement() {
                                 </button>
                                 <div>
                                     <p className="text-zinc-600 text-[9px] uppercase tracking-widest mb-0.5">Date & Time</p>
-                                    <p className="text-zinc-400 text-[11px] font-mono">{formatTime(v.timestamp)}</p>
+                                    <p className="text-zinc-400 text-[11px] font-mono">{formatTimestamp(v.timestamp)}</p>
                                 </div>
                             </div>
 

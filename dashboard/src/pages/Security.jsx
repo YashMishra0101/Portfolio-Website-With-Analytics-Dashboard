@@ -8,10 +8,9 @@ import {
   limit,
 } from "firebase/firestore";
 import { db } from "../firebase";
-import { useAuth } from "../context/AuthProvider";
+import { tsToDate, formatTimestamp } from "../utils/timestamp";
 
 export default function Security() {
-  const { role } = useAuth();
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
@@ -32,15 +31,41 @@ export default function Security() {
     return () => unsub();
   }, []);
 
-  const formatTime = (ts) => {
-    if (!ts?.toDate) return "";
-    const date = ts.toDate();
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = date.toLocaleString('default', { month: 'short' });
-    const year = date.getFullYear();
-    const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    return `${day} ${month} ${year}, ${time}`;
-  };
+  /**
+   * Compute the number of currently ACTIVE sessions.
+   *
+   * Logic:
+   * 1. Group all SUCCESS-login logs by userId.
+   * 2. For each userId, take only the MOST RECENT success login.
+   * 3. Check whether the 30-day admin session has expired.
+   * 4. Count only the non-expired ones.
+   */
+  const ADMIN_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days in ms
+
+  const activeSessionCount = (() => {
+    const now = Date.now();
+    const successLogins = logs.filter(
+      (log) => log.action === "LOGIN" && log.status === "SUCCESS" && log.timestamp
+    );
+    const latestByUser = new Map();
+    for (const log of successLogins) {
+      const userId = log.userId;
+      const logTime = tsToDate(log.timestamp).getTime();
+      if (!latestByUser.has(userId) || logTime > tsToDate(latestByUser.get(userId).timestamp).getTime()) {
+        latestByUser.set(userId, log);
+      }
+    }
+    let count = 0;
+    for (const log of latestByUser.values()) {
+      const loginTime = tsToDate(log.timestamp).getTime();
+      if (now - loginTime < ADMIN_TTL) {
+        count++;
+      }
+    }
+    return count;
+  })();
+
+
 
   const formatOS = (osName) => {
     if (!osName) return "Unknown OS";
@@ -53,7 +78,6 @@ export default function Security() {
     return osName.replace(" (Detected)", "");
   };
 
-  // Get action color based on action type
   const getActionColor = (action) => {
     const actionLower = action.toLowerCase();
     if (actionLower.includes("login")) return "text-emerald-500";
@@ -61,73 +85,15 @@ export default function Security() {
     return "text-zinc-200";
   };
 
-  // Get role color
-  const getRoleColor = (logRole) => {
-    const roleLower = logRole?.toLowerCase() || "";
-    if (roleLower === "admin") return "text-sky-400";
-    if (roleLower === "viewer") return "text-yellow-400";
-    return "text-zinc-500";
-  };
-
-  // Get display role
   const getDisplayRole = (log) => {
-    return (log.role || (log.userId === "yashrkm0101@gmail.com" ? "ADMIN" : "VIEWER")).toUpperCase();
+    return (log.role || "ADMIN").toUpperCase();
   };
 
-  // Check if log entry is for admin
-  const isAdminLog = (log) => {
-    return log.userId === "yashrkm0101@gmail.com";
-  };
-
-  // Mask email for viewers (hide admin email)
-  const getDisplayEmail = (log) => {
-    if (role !== "admin" && isAdminLog(log)) {
-      return "Admin Email Hidden";
-    }
-    return log.userId;
-  };
-
-  // Mask IP for viewers (hide admin IP)
-  const getDisplayIP = (log) => {
-    if (role !== "admin" && isAdminLog(log)) {
-      return "Admin IP Hidden";
-    }
-    return log.ip;
-  };
-
-  // Mask Location for viewers (hide admin location)
-  const getDisplayLocation = (log) => {
-    if (role !== "admin" && isAdminLog(log)) {
-      return { hidden: true };
-    }
-    return { hidden: false, city: log.city, country: log.country, location: log.location };
-  };
-
-  // Mask Timestamp for viewers (hide admin timestamp)
-  const getDisplayTime = (log) => {
-    if (role !== "admin" && isAdminLog(log)) {
-      return "Admin Timestamp Hidden";
-    }
-    return formatTime(log.timestamp);
-  };
-
-  // Mask Device for viewers (hide admin device)
-  const getDisplayDevice = (log) => {
-    if (role !== "admin" && isAdminLog(log)) {
-      return { hidden: true };
-    }
-    return { hidden: false, device: log.device };
-  };
-
-  // Format status display for better UX
   const getStatusDisplay = (status) => {
-    if (status === "FAILED - SECURITY KEY") {
-      return "KEY FAILED";
-    }
+    if (status === "FAILED - SECURITY KEY") return "KEY FAILED";
     return status;
   };
 
-  // Get status color class
   const getStatusClass = (status) => {
     if (status === "SUCCESS") {
       return "bg-emerald-900/10 text-emerald-500 border-emerald-900/30";
@@ -137,13 +103,29 @@ export default function Security() {
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-zinc-800 pb-4">
-        <h1 className="tactical-header text-xl">Session History</h1>
-        <p className="text-zinc-600 text-[11px] font-mono uppercase">
-          Activity History
-        </p>
+      <div className="border-b border-zinc-800 pb-4 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="tactical-header text-xl">Session History</h1>
+          <p className="text-zinc-600 text-[11px] font-mono uppercase">
+            Activity History
+          </p>
+        </div>
+        {/* Active Sessions Indicator */}
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-900/15 border border-emerald-900/30 rounded-sm shrink-0">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500">
+            Active Sessions:
+          </span>
+          <span className="text-[11px] font-bold font-mono text-emerald-400">
+            {activeSessionCount}
+          </span>
+        </div>
       </div>
 
+      {/* Mobile Cards */}
       <div className="md:hidden space-y-4">
         {logs.map((log) => (
           <div
@@ -153,14 +135,14 @@ export default function Security() {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-zinc-500 text-[11px] font-mono mb-1">
-                  {getDisplayTime(log)}
+                  {formatTimestamp(log.timestamp)}
                 </p>
                 <div className="flex items-center gap-2">
                   <div className="flex flex-col">
                     <span className={`font-bold ${getActionColor(log.action)}`}>
                       {log.action.replace("_ATTEMPT", "")}
                     </span>
-                    <span className={`text-[9px] font-mono tracking-tighter ${getRoleColor(getDisplayRole(log))}`}>
+                    <span className="text-[9px] font-mono tracking-tighter text-sky-400">
                       ({getDisplayRole(log)})
                     </span>
                   </div>
@@ -178,11 +160,8 @@ export default function Security() {
                 <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">
                   User
                 </p>
-                <p
-                  className="text-xs text-zinc-300 truncate"
-                  title={role === "admin" ? log.userId : undefined}
-                >
-                  {getDisplayEmail(log)}
+                <p className="text-xs text-zinc-300 truncate" title={log.userId}>
+                  {log.userId}
                 </p>
               </div>
               <div className="overflow-hidden">
@@ -190,34 +169,26 @@ export default function Security() {
                   IP Address
                 </p>
                 <p className="text-xs text-zinc-400 font-mono break-all">
-                  {getDisplayIP(log)}
+                  {log.ip}
                 </p>
               </div>
               <div className="col-span-2">
                 <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">
                   Device
                 </p>
-                {(() => {
-                  const devData = getDisplayDevice(log);
-                  if (devData.hidden) {
-                    return <span className="text-xs text-zinc-600">Admin Device Hidden</span>;
-                  }
-                  return (
-                    <div className="flex items-center gap-2">
-                      {devData.device?.type === "mobile" ? (
-                        <Smartphone size={14} className="text-zinc-500" />
-                      ) : (
-                        <Monitor size={14} className="text-zinc-500" />
-                      )}
-                      <span className="text-xs text-zinc-300">
-                        {formatOS(devData.device?.os)} •{" "}
-                        {devData.device?.model !== "PC/Mac"
-                          ? devData.device?.model
-                          : devData.device?.browser}
-                      </span>
-                    </div>
-                  );
-                })()}
+                <div className="flex items-center gap-2">
+                  {log.device?.type === "mobile" ? (
+                    <Smartphone size={14} className="text-zinc-500" />
+                  ) : (
+                    <Monitor size={14} className="text-zinc-500" />
+                  )}
+                  <span className="text-xs text-zinc-300">
+                    {formatOS(log.device?.os)} •{" "}
+                    {log.device?.model !== "PC/Mac"
+                      ? log.device?.model
+                      : log.device?.browser}
+                  </span>
+                </div>
               </div>
               <div className="col-span-2">
                 <p className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1 flex flex-col items-center">
@@ -226,31 +197,26 @@ export default function Security() {
                     (ESTIMATED LOCATION)
                   </span>
                 </p>
-                {(() => {
-                  const locData = getDisplayLocation(log);
-                  if (locData.hidden) {
-                    return <span className="text-zinc-600 text-xs">Admin Location Hidden</span>;
-                  }
-                  return locData.location ? (
-                    <a
-                      href={`https://www.google.com/maps?q=${locData.location.lat},${locData.location.lng}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-emerald-500 hover:text-emerald-400 text-xs flex items-center gap-1"
-                    >
-                      <MapPin size={12} />
-                      {locData.city ? `${locData.city}, ${locData.country}` : "View Map"}
-                    </a>
-                  ) : (
-                    <span className="text-zinc-600 text-xs">-</span>
-                  );
-                })()}
+                {log.location ? (
+                  <a
+                    href={`https://www.google.com/maps?q=${log.location.lat},${log.location.lng}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-emerald-500 hover:text-emerald-400 text-xs flex items-center gap-1"
+                  >
+                    <MapPin size={12} />
+                    {log.city ? `${log.city}, ${log.country}` : "View Map"}
+                  </a>
+                ) : (
+                  <span className="text-zinc-600 text-xs">-</span>
+                )}
               </div>
             </div>
           </div>
         ))}
       </div>
 
+      {/* Desktop Table */}
       <div className="hidden md:block tactical-card overflow-x-auto">
         <table className="w-full text-left font-mono min-w-[900px]">
           <thead className="bg-zinc-950 border-b border-zinc-800 text-zinc-500 font-bold uppercase text-[10px] tracking-wider">
@@ -278,14 +244,14 @@ export default function Security() {
                 className="hover:bg-zinc-800/50 transition-colors"
               >
                 <td className="px-4 py-2 text-zinc-400 text-[11px]">
-                  {getDisplayTime(log)}
+                  {formatTimestamp(log.timestamp)}
                 </td>
                 <td className="px-4 py-2 font-bold text-[11px]">
                   <div className="flex flex-col">
                     <span className={`text-[11px] ${getActionColor(log.action)}`}>
                       {log.action.replace("_ATTEMPT", "")}
                     </span>
-                    <span className={`text-[9px] font-mono font-normal tracking-tighter ${getRoleColor(getDisplayRole(log))}`}>
+                    <span className="text-[9px] font-mono font-normal tracking-tighter text-sky-400">
                       ({getDisplayRole(log)})
                     </span>
                   </div>
@@ -299,58 +265,47 @@ export default function Security() {
                 </td>
                 <td
                   className="px-4 py-2 text-zinc-400 text-[11px] truncate max-w-[150px]"
-                  title={role === "admin" ? log.userId : undefined}
+                  title={log.userId}
                 >
-                  {getDisplayEmail(log)}
+                  {log.userId}
                 </td>
                 <td className="px-4 py-2">
-                  {(() => {
-                    const devData = getDisplayDevice(log);
-                    if (devData.hidden) {
-                      return <span className="text-zinc-600 text-[11px]">Admin Device Hidden</span>;
-                    }
-                    return (
-                      <div className="flex items-center gap-2">
-                        {devData.device?.type === "mobile" ? (
-                          <Smartphone size={12} className="text-zinc-500" />
-                        ) : (
-                          <Monitor size={12} className="text-zinc-500" />
-                        )}
-                        <span className="text-[11px] text-zinc-200">
-                          {formatOS(devData.device?.os)} • {devData.device?.model !== "PC/Mac" ? devData.device?.model : devData.device?.browser || "Browser"}
-                        </span>
-                      </div>
-                    );
-                  })()}
+                  <div className="flex items-center gap-2">
+                    {log.device?.type === "mobile" ? (
+                      <Smartphone size={12} className="text-zinc-500" />
+                    ) : (
+                      <Monitor size={12} className="text-zinc-500" />
+                    )}
+                    <span className="text-[11px] text-zinc-200">
+                      {formatOS(log.device?.os)} •{" "}
+                      {log.device?.model !== "PC/Mac"
+                        ? log.device?.model
+                        : log.device?.browser || "Browser"}
+                    </span>
+                  </div>
                 </td>
                 <td
                   className="px-4 py-2 text-zinc-500 text-[11px] font-mono whitespace-nowrap"
-                  title={role === "admin" ? log.ip : undefined}
+                  title={log.ip}
                 >
-                  {getDisplayIP(log)}
+                  {log.ip}
                 </td>
                 <td className="px-4 py-2 text-[11px]">
-                  {(() => {
-                    const locData = getDisplayLocation(log);
-                    if (locData.hidden) {
-                      return <span className="text-zinc-600">Admin Location Hidden</span>;
-                    }
-                    return locData.location ? (
-                      <a
-                        href={`https://www.google.com/maps?q=${locData.location.lat},${locData.location.lng}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-emerald-600 hover:text-emerald-500 hover:underline flex items-center gap-1"
-                      >
-                        <MapPin size={12} />
-                        {locData.city
-                          ? `${locData.city}, ${locData.country}`
-                          : "View Map (GPS)"}
-                      </a>
-                    ) : (
-                      <span className="text-zinc-700">-</span>
-                    );
-                  })()}
+                  {log.location ? (
+                    <a
+                      href={`https://www.google.com/maps?q=${log.location.lat},${log.location.lng}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-emerald-600 hover:text-emerald-500 hover:underline flex items-center gap-1"
+                    >
+                      <MapPin size={12} />
+                      {log.city
+                        ? `${log.city}, ${log.country}`
+                        : "View Map (GPS)"}
+                    </a>
+                  ) : (
+                    <span className="text-zinc-700">-</span>
+                  )}
                 </td>
               </tr>
             ))}

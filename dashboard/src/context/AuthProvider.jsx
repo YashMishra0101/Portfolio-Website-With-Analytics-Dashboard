@@ -1,11 +1,9 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../firebase";
+import { auth } from "../firebase";
 
 const AuthContext = createContext({
   user: null,
-  role: null,
   loading: true,
 });
 
@@ -13,40 +11,12 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setLoading(true);
-
-
-
-      if (currentUser) {
-        setUser(currentUser);
-        // Hardcoded Admin Fallback for safety
-        const ADMIN_EMAIL = "yashrkm0101@gmail.com";
-
-        if (currentUser.email === ADMIN_EMAIL) {
-          setRole("admin");
-        } else {
-          // Fetch role from Firestore for other users
-          try {
-            const userDoc = await getDoc(doc(db, "users", currentUser.email));
-            if (userDoc.exists()) {
-              setRole(userDoc.data().role || "viewer");
-            } else {
-              setRole("viewer");
-            }
-          } catch (error) {
-            console.error("Error fetching user role:", error);
-            setRole("viewer");
-          }
-        }
-      } else {
-        setUser(null);
-        setRole(null);
-      }
+      setUser(currentUser ?? null);
       setLoading(false);
     });
 
@@ -54,7 +24,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, role, loading }}>
+    <AuthContext.Provider value={{ user, loading }}>
       {children}
     </AuthContext.Provider>
   );

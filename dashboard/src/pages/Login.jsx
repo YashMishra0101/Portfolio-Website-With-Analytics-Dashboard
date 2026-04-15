@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { db, auth } from "../firebase";
 import { UAParser } from "ua-parser-js";
-import { ShieldCheck, Lock, AlertTriangle, Key } from "lucide-react";
+import { ShieldCheck, AlertTriangle, Key } from "lucide-react";
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", pass: "" });
@@ -12,10 +12,13 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("idle"); // 'idle', 'verifying', 'success', 'security-key'
   const [securityKey, setSecurityKey] = useState("");
-  const [userRole, setUserRole] = useState(null);
   const [securityKeyError, setSecurityKeyError] = useState("");
   const [keyAttempts, setKeyAttempts] = useState(0);
   const [loginData, setLoginData] = useState(null); // Store login data for logging after security key
+  // Synchronous guard: prevents duplicate addDoc calls from rapid double-clicks.
+  // useRef is intentionally used here instead of state because we need the lock
+  // to be checked and set in the same synchronous tick, before any re-render.
+  const isSubmittingRef = useRef(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -118,11 +121,9 @@ export default function Login() {
       deviceModel = "PC";
     }
 
-    const role = formData.email === "yashrkm0101@gmail.com" ? "admin" : "viewer";
-
     // Store login data for logging after security key verification
     setLoginData({
-      role,
+      role: "admin",
       userId: formData.email,
       ip,
       city,
@@ -138,22 +139,21 @@ export default function Login() {
     });
 
     // Proceed to security key verification
-    setUserRole(role);
     setStatus("security-key");
     setLoading(false);
   };
 
   const handleSecurityKeySubmit = async (e) => {
+    // Synchronous double-submit guard — must be checked before any await
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     e.preventDefault();
     setSecurityKeyError("");
     setLoading(true);
 
     try {
-      // Fetch the correct security key from Firebase based on role
-      const collectionName = userRole === "admin" ? "adminSecurityKey" : "viewerSecurityKey";
-      const docName = userRole === "admin" ? "adminKey" : "viewerKey";
-
-      const keyDoc = await getDoc(doc(db, collectionName, docName));
+      // Fetch admin security key from Firebase
+      const keyDoc = await getDoc(doc(db, "adminSecurityKey", "adminKey"));
 
       if (!keyDoc.exists()) {
         setSecurityKeyError("Security configuration error. Contact administrator.");
@@ -178,18 +178,14 @@ export default function Login() {
           }
         }
 
-        // Set Session Expiry based on Role
+        // Set Session Expiry — 30 days for admin
         const now = Date.now();
-        const expiryDuration =
-          userRole === "admin"
-            ? 30 * 24 * 60 * 60 * 1000 // 30 Days for Admin
-            : 24 * 60 * 60 * 1000; // 24 Hours for Viewer
-
-        const expiryTime = now + expiryDuration;
+        const expiryTime = now + 30 * 24 * 60 * 60 * 1000;
 
         localStorage.setItem("sessionExpiry", expiryTime.toString());
         localStorage.setItem("securityKeyVerified", "true"); // Persist across tabs
 
+        isSubmittingRef.current = false;
         setStatus("success");
         setLoading(false);
         setTimeout(() => navigate("/dashboard"), 1000);
@@ -213,6 +209,7 @@ export default function Login() {
             }
           }
 
+          isSubmittingRef.current = false;
           setSecurityKeyError("Too many failed attempts. Session terminated.");
           setLoading(false);
           await signOut(auth);
@@ -222,13 +219,13 @@ export default function Login() {
           setTimeout(() => {
             setStatus("idle");
             setSecurityKey("");
-            setUserRole(null);
             setSecurityKeyError("");
             setKeyAttempts(0);
             setFormData({ email: "", pass: "" });
             setLoginData(null);
           }, 2000);
         } else {
+          isSubmittingRef.current = false;
           setSecurityKeyError(`Invalid Security Key. ${3 - newAttempts} attempts remaining.`);
           setLoading(false);
           setSecurityKey("");
@@ -236,6 +233,7 @@ export default function Login() {
       }
     } catch (err) {
       console.error("Security key verification error:", err);
+      isSubmittingRef.current = false;
       setSecurityKeyError("Verification failed. Please try again.");
       setLoading(false);
     }
@@ -247,7 +245,6 @@ export default function Login() {
     localStorage.removeItem("sessionExpiry");
     setStatus("idle");
     setSecurityKey("");
-    setUserRole(null);
     setSecurityKeyError("");
     setKeyAttempts(0);
     // formData is NOT cleared here, allowing persistence

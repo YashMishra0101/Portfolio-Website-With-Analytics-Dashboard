@@ -86,11 +86,21 @@ export default function Summary() {
       q,
       (snapshot) => {
         setError(null);
-        const allData = snapshot.docs.map((doc) => ({
-          ...doc.data(),
-          createdAt: doc.data().timestamp?.toDate() || new Date(),
-          id: doc.id,
-        }));
+        const allData = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          // Handle both Firestore Timestamp (.toDate()) and
+          // plain objects {seconds, nanoseconds} written by Admin SDK during migration
+          let createdAt = new Date();
+          const ts = data.timestamp;
+          if (ts) {
+            if (typeof ts.toDate === "function") {
+              createdAt = ts.toDate();
+            } else if (ts.seconds !== undefined) {
+              createdAt = new Date(ts.seconds * 1000);
+            }
+          }
+          return { ...data, createdAt, id: doc.id };
+        });
 
         // 1. Set All-Time Total
         setAllTimeTotal(allData.length);
@@ -209,21 +219,20 @@ export default function Summary() {
           .sort((a, b) => b[1] - a[1])
           .map(([name, value]) => ({ name, value }));
 
-        const chartPoints = 20;
-        const chartData = [];
-        const step = (now - startTime) / chartPoints;
-
-        for (let i = 0; i < chartPoints; i++) {
-          const pointStart = new Date(startTime.getTime() + i * step);
-          const pointEnd = new Date(pointStart.getTime() + step);
-          const count = filteredData.filter(
-            (d) => d.createdAt >= pointStart && d.createdAt < pointEnd
-          ).length;
-          chartData.push({
-            name: i,
-            value: count,
-          });
-        }
+        // Group by calendar day (ISO key for reliable sorting, display label for chart)
+        const dailyMap = {};
+        filteredData.forEach((d) => {
+          if (!(d.createdAt instanceof Date) || isNaN(d.createdAt)) return;
+          const isoKey = d.createdAt.toISOString().split("T")[0];
+          const label = d.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+          if (!dailyMap[isoKey]) dailyMap[isoKey] = { label, count: 0 };
+          dailyMap[isoKey].count++;
+        });
+        // Sort chronologically, take most recent 30 days that had visits
+        const chartData = Object.entries(dailyMap)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .slice(-30)
+          .map(([, { label, count }]) => ({ name: label, value: count }));
 
         setStats({
           total, // This is FILTERED total
@@ -421,10 +430,10 @@ export default function Summary() {
         </div>
 
         <div className="h-[350px] w-full">
-          <ResponsiveContainer>
+          <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={stats.chartData}
-              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+              margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
             >
               <defs>
                 <linearGradient id="colorTraffic" x1="0" y1="0" x2="0" y2="1">
@@ -437,7 +446,15 @@ export default function Summary() {
                 stroke="#27272a"
                 vertical={false}
               />
-              <XAxis dataKey="name" hide />
+              <XAxis
+                dataKey="name"
+                tick={{ fill: "#52525b", fontSize: 9, fontFamily: "monospace" }}
+                tickLine={false}
+                axisLine={false}
+                interval="preserveStartEnd"
+                angle={-35}
+                textAnchor="end"
+              />
               <YAxis
                 stroke="#52525b"
                 fontSize={10}

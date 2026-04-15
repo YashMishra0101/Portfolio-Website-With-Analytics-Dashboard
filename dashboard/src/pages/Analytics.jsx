@@ -39,6 +39,8 @@ import {
   Graticule,
 } from "react-simple-maps";
 
+import { tsToDate } from "../utils/timestamp";
+
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 // Tactical Palette
@@ -118,8 +120,8 @@ export default function Analytics() {
     }
 
     return visits.filter(v => {
-      if (!v.timestamp?.toDate) return false;
-      return v.timestamp.toDate() >= cutoffDate;
+      const d = tsToDate(v.timestamp, null);
+      return d ? d >= cutoffDate : false;
     });
   };
 
@@ -129,22 +131,25 @@ export default function Analytics() {
 
     if (filteredVisits.length === 0) return [];
 
-    // Group visits by date
-    const dateGroups = {};
+    // Key by ISO date (YYYY-MM-DD) so we can sort strings correctly.
+    // Store the human-readable label separately for the X-axis.
+    const dateGroups = {}; // { "2026-04-01": { label: "Apr 1", count: 3 }, ... }
     filteredVisits.forEach(v => {
-      if (!v.timestamp?.toDate) return;
-      const date = v.timestamp.toDate();
-      const dateKey = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      dateGroups[dateKey] = (dateGroups[dateKey] || 0) + 1;
+      const date = tsToDate(v.timestamp, null);
+      if (!date) return;
+      const isoKey = date.toISOString().split("T")[0]; // YYYY-MM-DD — sorts lexicographically
+      const label = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      if (!dateGroups[isoKey]) dateGroups[isoKey] = { label, count: 0 };
+      dateGroups[isoKey].count++;
     });
 
-    // Convert to array and sort by date
-    const trendData = Object.entries(dateGroups)
-      .map(([name, value]) => ({ name, value }))
-      .slice(-20); // Show last 20 data points
-
-    return trendData;
+    // Sort oldest→newest, then take the most recent 20 days
+    return Object.entries(dateGroups)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-20)
+      .map(([, { label, count }]) => ({ name: label, value: count }));
   };
+
 
   // Store raw visits for graph filtering
   const [rawVisits, setRawVisits] = useState([]);

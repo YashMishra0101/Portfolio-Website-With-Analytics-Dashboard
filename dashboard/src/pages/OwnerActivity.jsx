@@ -9,6 +9,7 @@ import {
     doc,
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { tsToDate, formatTimestamp } from "../utils/timestamp";
 import {
     User,
     Smartphone,
@@ -49,10 +50,8 @@ export default function OwnerActivity() {
             today.setHours(0, 0, 0, 0);
 
             const todayCount = data.filter((d) => {
-                if (d.timestamp?.toDate) {
-                    return d.timestamp.toDate() >= today;
-                }
-                return false;
+                const t = tsToDate(d.timestamp, null);
+                return t ? t >= today : false;
             }).length;
 
             const mobileCount = data.filter((d) => d.device === "Mobile").length;
@@ -82,22 +81,11 @@ export default function OwnerActivity() {
         }
     };
 
-    const formatTime = (ts) => {
-        if (!ts?.toDate) return "Unknown";
-        const date = ts.toDate();
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = date.toLocaleString('default', { month: 'short' });
-        const year = date.getFullYear();
-        const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        return `${day} ${month} ${year}, ${time}`;
-    };
-
     const getTimeAgo = (timestamp) => {
-        if (!timestamp?.toDate) return "";
+        const date = tsToDate(timestamp, null);
+        if (!date) return "";
         const now = new Date();
-        const date = timestamp.toDate();
         const diff = Math.floor((now - date) / 1000);
-
         if (diff < 60) return `${diff}s ago`;
         if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
         if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
@@ -209,7 +197,7 @@ export default function OwnerActivity() {
                                         {/* Date & Time */}
                                         <div className="flex items-center gap-1 text-sm text-zinc-300 mb-2">
                                             <Clock size={12} className="text-violet-500" />
-                                            {formatTime(activity.timestamp)}
+                                            {formatTimestamp(activity.timestamp)}
                                         </div>
 
                                         {/* Location & OS */}

@@ -8,18 +8,12 @@ import {
   PieChart,
   Edit3,
   X,
-  Shield,
-  Lock,
   UserX,
 } from "lucide-react";
 
-import { useAuth } from "../context/AuthProvider";
-
 export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
-  const { role } = useAuth();
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
-  const [showRestricted, setShowRestricted] = useState(false);
 
   const navItems = [
     {
@@ -29,7 +23,7 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
     },
     {
       icon: <Users size={20} />,
-      label: "Recent Visitor",
+      label: "Recent Visitors",
       path: "/dashboard/visitors",
     },
     {
@@ -41,7 +35,6 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
       icon: <UserX size={20} />,
       label: "Visitor Management",
       path: "/dashboard/visitor-management",
-      adminOnly: true,
     },
     {
       icon: <ShieldAlert size={20} />,
@@ -50,35 +43,8 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
     },
   ];
 
-  const handleNavClick = (item, e) => {
-    // Check if item is admin-only and user is not admin
-    if (item.adminOnly && role !== "admin") {
-      e.preventDefault();
-      setShowRestricted(true);
-      setTimeout(() => setShowRestricted(false), 3000);
-      return;
-    }
-    // Close sidebar on mobile
-    onClose && onClose();
-  };
-
   return (
     <>
-      {/* Restricted Access Notification */}
-      {showRestricted && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[200] animate-in slide-in-from-top-4 fade-in duration-300">
-          <div className="bg-zinc-900 border border-red-500/50 px-5 py-4 shadow-lg flex items-center gap-3">
-            <div className="w-8 h-8 bg-red-500/20 flex items-center justify-center">
-              <Lock size={16} className="text-red-500" />
-            </div>
-            <div>
-              <p className="text-sm text-zinc-100 font-bold uppercase tracking-wider">Access Denied</p>
-              <p className="text-xs text-zinc-400 font-mono">Only Admin can access this section</p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Mobile Overlay */}
       {isOpen && (
         <div
@@ -114,49 +80,41 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
 
         {/* Nav */}
         <nav className="flex-1 py-4 px-0 space-y-px">
-          {navItems.map((item) => {
-            // HIDDEN: If admin only and user is not admin, do not render
-            if (item.adminOnly && role !== "admin") return null;
-
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={(e) => handleNavClick(item, e)}
-                className={`flex items-center gap-3 px-6 py-3 transition-colors uppercase text-xs tracking-wider border-l-2 ${isActive(item.path)
+          {navItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={() => onClose && onClose()}
+              className={`flex items-center gap-3 px-6 py-3 transition-colors uppercase text-xs tracking-wider border-l-2 ${
+                isActive(item.path)
                   ? "bg-zinc-900 border-emerald-500 text-emerald-400"
                   : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/30"
-                  }`}
+              }`}
+            >
+              <div
+                className={`${
+                  isActive(item.path) ? "text-emerald-500" : "text-zinc-600"
+                }`}
               >
-                <div
-                  className={`${isActive(item.path) ? "text-emerald-500" : "text-zinc-600"
-                    }`}
-                >
-                  {item.icon}
-                </div>
-                <span className="font-bold">{item.label}</span>
-              </Link>
-            );
-          })}
+                {item.icon}
+              </div>
+              <span className="font-bold">{item.label}</span>
+            </Link>
+          ))}
         </nav>
 
         {/* User Info */}
         <div className="p-4 border-t border-zinc-800">
           <div className="flex items-center gap-3 px-3 py-2 border border-zinc-800 bg-zinc-900 mb-3">
             <div className="w-6 h-6 bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-400 rounded-none">
-              {role === "admin" ? "AD" : "VW"}
+              AD
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-zinc-100 uppercase truncate tracking-wide">
-                {role === "admin" ? "Administrator" : "Viewer (Read Only)"}
+                Administrator
               </p>
-              <div
-                className={`mt-1.5 px-2 py-0.5 border font-mono text-[9px] font-bold uppercase tracking-widest w-fit ${role === "admin"
-                  ? "bg-emerald-950/40 border-emerald-500/30 text-emerald-500"
-                  : "bg-blue-950/40 border-blue-500/30 text-blue-400"
-                  }`}
-              >
-                {role === "admin" ? "FULL ACCESS" : "READ ONLY"}
+              <div className="mt-1.5 px-2 py-0.5 border font-mono text-[9px] font-bold uppercase tracking-widest w-fit bg-emerald-950/40 border-emerald-500/30 text-emerald-500">
+                FULL ACCESS
               </div>
             </div>
           </div>

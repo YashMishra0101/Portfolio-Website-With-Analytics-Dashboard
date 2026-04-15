@@ -6,10 +6,8 @@ import { db, auth } from "../firebase";
 import { signOut } from "firebase/auth";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { UAParser } from "ua-parser-js";
-import { useAuth } from "../context/AuthProvider";
 
 export default function Layout() {
-  const { role } = useAuth();
   const navigate = useNavigate();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -87,7 +85,7 @@ export default function Layout() {
       await addDoc(collection(db, "admin_logs"), {
         action: "LOGOUT",
         status: "SUCCESS",
-        role: role,
+        role: "admin",
         userId: auth.currentUser?.email || "admin",
         ip: ip,
         city: city,

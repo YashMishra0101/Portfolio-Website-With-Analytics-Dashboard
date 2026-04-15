@@ -4,9 +4,8 @@ import { db } from "../firebase";
 import {
   Save, User, Link as LinkIcon, AlertCircle, CheckCircle,
   Briefcase, Code, Plus, Trash2, ImageOff, ArrowUp, ArrowDown,
-  Eye, EyeOff, Settings, Github, Lock, Tag, Type, GitBranch,
+  Eye, EyeOff, Settings, GitFork, Lock, Tag, Type, GitBranch,
 } from "lucide-react";
-import { useAuth } from "../context/AuthProvider";
 
 // ─── Canonical default shape (must mirror App.jsx DEFAULT_CONFIG) ─────────────
 const DEFAULT_CONTENT = {
@@ -195,8 +194,8 @@ function SaveSnackbar({ notification, onClose }) {
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 export default function ContentManager() {
-  const { role } = useAuth();
-  const isReadOnly = role === "viewer";
+  // Viewer role removed — all authenticated users are admins, always editable
+  const isReadOnly = false;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -698,7 +697,7 @@ export default function ContentManager() {
             §3  GITHUB SETTINGS
         ══════════════════════════════════════════════════════════════ */}
           <SectionCard>
-            <SectionHeader icon={<Github size={13} />} label="GitHub Settings" color="zinc" badge="text" />
+            <SectionHeader icon={<GitFork size={13} />} label="GitHub Settings" color="zinc" badge="text" />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field label="GitHub Username" hint="Drives all three stats widget images">

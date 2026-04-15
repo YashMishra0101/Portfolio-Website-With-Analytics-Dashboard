@@ -16,9 +16,9 @@ import OwnerActivity from "./pages/OwnerActivity";
 import VisitorManagement from "./pages/VisitorManagement";
 import { AuthProvider, useAuth } from "./context/AuthProvider";
 
-// Auth Guard Wrapper
-const ProtectedRoute = ({ children, adminOnly = false }) => {
-  const { user, role, loading } = useAuth();
+// Admin-only Auth Guard
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -32,7 +32,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
     return <Navigate to="/" />;
   }
 
-  // Check Security Key & Session Expiry
+  // Validate security key + session expiry
   const securityVerified = localStorage.getItem("securityKeyVerified");
   const sessionExpiry = localStorage.getItem("sessionExpiry");
   const now = Date.now();
@@ -40,17 +40,12 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
   const isSessionExpired = !sessionExpiry || now > parseInt(sessionExpiry);
 
   if (securityVerified !== "true" || isSessionExpired) {
-    // Session invalid or expired - cleanup and redirect
     signOut(auth).then(() => {
       localStorage.removeItem("securityKeyVerified");
       localStorage.removeItem("sessionExpiry");
     }).catch(console.error);
 
     return <Navigate to="/" />;
-  }
-
-  if (adminOnly && role !== "admin") {
-    return <Navigate to="/dashboard/analytics" />;
   }
 
   return children;
@@ -76,16 +71,8 @@ function App() {
             <Route path="visitors" element={<Visitors />} />
             <Route path="content" element={<ContentManager />} />
             <Route path="security" element={<Security />} />
-            <Route path="owner-activity" element={
-              <ProtectedRoute adminOnly={true}>
-                <OwnerActivity />
-              </ProtectedRoute>
-            } />
-            <Route path="visitor-management" element={
-              <ProtectedRoute adminOnly={true}>
-                <VisitorManagement />
-              </ProtectedRoute>
-            } />
+            <Route path="owner-activity" element={<OwnerActivity />} />
+            <Route path="visitor-management" element={<VisitorManagement />} />
           </Route>
         </Routes>
       </Router>
