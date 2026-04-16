@@ -128,7 +128,7 @@ This project uses a modern **workspace setup** to keep everything organized.
 
 ---
 
-## 🚀 Installation & Setup Guide
+## 🧑‍💻 Installation & Setup Guide
 
 Want to run this ecosystem locally? Because this is a configured PNPM workspace, it takes less than two minutes.
 
@@ -195,7 +195,7 @@ If you choose to fork or clone this repository to use as your own portfolio, you
 
 <div align="center">
 
-### Built by [Yash RK Mishra](https://github.com/YashMishra0101) with AI tools 👨💻
+### Built by [Yash RK Mishra](https://github.com/YashMishra0101) with AI tools 👨‍💻
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/yash-mishra-356280223/)
 [![X](https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/YashRKMishra1)
