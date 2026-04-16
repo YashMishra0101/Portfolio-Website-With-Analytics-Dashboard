@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
-import { formatTimestamp } from "../utils/timestamp";
+import { tsToDate, formatTimestamp } from "../utils/timestamp";
 
 export default function Visitors() {
   const [visits, setVisits] = useState([]);
@@ -11,7 +11,13 @@ export default function Visitors() {
     const unsub = onSnapshot(
       q,
       (snapshot) => {
-        setVisits(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+        const data = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+        data.sort((a, b) => {
+          const timeA = tsToDate(a.timestamp, new Date(0)).getTime();
+          const timeB = tsToDate(b.timestamp, new Date(0)).getTime();
+          return timeB - timeA;
+        });
+        setVisits(data);
       },
       (error) => {
         console.error("Error fetching visitors:", error);

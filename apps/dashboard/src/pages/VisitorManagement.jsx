@@ -49,7 +49,13 @@ export default function VisitorManagement() {
         const unsub = onSnapshot(
             q,
             (snapshot) => {
-                setVisits(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+                const data = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+                data.sort((a, b) => {
+                    const timeA = tsToDate(a.timestamp, new Date(0)).getTime();
+                    const timeB = tsToDate(b.timestamp, new Date(0)).getTime();
+                    return timeB - timeA;
+                });
+                setVisits(data);
             },
             (error) => {
                 console.error("Error fetching visitors:", error);

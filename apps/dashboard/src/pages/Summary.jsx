@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
+import { tsToDate } from "../utils/timestamp";
 import {
   Users,
   Smartphone,
@@ -88,17 +89,7 @@ export default function Summary() {
         setError(null);
         const allData = snapshot.docs.map((doc) => {
           const data = doc.data();
-          // Handle both Firestore Timestamp (.toDate()) and
-          // plain objects {seconds, nanoseconds} written by Admin SDK during migration
-          let createdAt = new Date();
-          const ts = data.timestamp;
-          if (ts) {
-            if (typeof ts.toDate === "function") {
-              createdAt = ts.toDate();
-            } else if (ts.seconds !== undefined) {
-              createdAt = new Date(ts.seconds * 1000);
-            }
-          }
+          const createdAt = tsToDate(data.timestamp, new Date(0));
           return { ...data, createdAt, id: doc.id };
         });
 

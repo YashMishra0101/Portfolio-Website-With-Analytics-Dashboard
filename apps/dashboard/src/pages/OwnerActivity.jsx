@@ -45,6 +45,12 @@ export default function OwnerActivity() {
                 ...doc.data(),
             }));
 
+            data.sort((a, b) => {
+                const timeA = tsToDate(a.timestamp, new Date(0)).getTime();
+                const timeB = tsToDate(b.timestamp, new Date(0)).getTime();
+                return timeB - timeA;
+            });
+
             // Calculate stats
             const today = new Date();
             today.setHours(0, 0, 0, 0);

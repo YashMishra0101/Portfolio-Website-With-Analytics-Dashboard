@@ -1,24 +1,35 @@
-Copyright (c) 2026 Yash Mishra
+CUSTOM LICENSE (MIT-Style)
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Copyright (c) 2026 Yash RK Mishra
+All rights reserved.
 
-1. The above copyright notice and this permission notice shall be included in all
-   copies or substantial portions of the Software.
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-2. RESTRICTION ON PERSONAL DATA: You must NOT use, distribute, or display the 
-   original personal information, portfolio data, resumes, images, URLs, email 
-   addresses, or names included in this project. All personal content MUST be 
-   replaced with your own data prior to any public deployment or production use.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+1. COPYRIGHT NOTICE
+
+   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+
+2. LIMITATION OF LIABILITY & DISCLAIMER OF MISUSE
+
+   The original author, Yash RK Mishra, is NOT responsible or liable — in any form or under any circumstances — for any misuse of the software by any individual or organization, data breaches, unauthorized access, or privacy violations, security vulnerabilities that may exist within the code whether known or unknown at the time of release, illegal activities carried out using this software or any modified version of it, or any direct, indirect, incidental, special, or consequential damages arising from the use, inability to use, or modification of this software.
+
+   The author makes no guarantees that this code is free of bugs, security flaws, or vulnerabilities. If any issue exists in the code and causes harm, loss, or damage of any nature, the author bears no legal or moral responsibility whatsoever.
+
+   By using, forking, or deploying this software in any form, you fully accept sole responsibility for your own implementation, infrastructure setup, data security, and any consequences that arise therefrom.
+
+
+IMPORTANT NOTICE — PERSONAL USE & DATA RESPONSIBILITY
+
+   This project was built strictly for the author's personal use. If you choose to fork or clone this repository for your own purposes, you MUST completely remove all of the original author's personal information, emails, URLs, and images before deploying to any environment.
+
+   You will also need to replace the Firestore document structures with your own data schema so the Content Manager correctly maps to your information.
+
+   Failure to do so is a violation of this license and the author's privacy.
+
+
+DISCLAIMER OF WARRANTY
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
