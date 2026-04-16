@@ -5,7 +5,6 @@
 
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
-[![PWA](https://img.shields.io/badge/PWA-Installable-blueviolet?style=for-the-badge&logo=pwa&logoColor=white)](#)
 [![Firebase](https://img.shields.io/badge/Firebase-Firestore%20%2B%20Auth-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
 [![PNPM](https://img.shields.io/badge/PNPM-Workspaces-F69220?style=for-the-badge&logo=pnpm&logoColor=white)](https://pnpm.io)
 [![Open Source](https://img.shields.io/badge/Open%20Source-Yes-brightgreen?style=for-the-badge&logo=open-source-initiative&logoColor=white)](https://opensource.org/)
@@ -44,7 +43,6 @@ This repository contains a full-stack, integrated system built to serve as my pe
 It consists of two main applications built within a PNPM workspace:
 1. A **high-speed public portfolio** that silently tracks visitor data.
 2. A private, secure **Dashboard** that shows traffic in real-time and acts as a Content Management System (CMS) to update the public site instantly.
-3. **PWA Integration:** Install the system on both mobile (Android/iOS) and desktop (Windows/Mac) for a native experience with offline support.
 
 ---
 
