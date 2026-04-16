@@ -200,6 +200,6 @@ If you choose to fork or clone this repository to use as your own portfolio, you
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/yash-mishra-356280223/)
 [![X](https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/YashRKMishra1)
 
-**[⭐ Star this repository to show your support!](#)**
+**[⭐ Star this repository to show your support](#)**
 
 </div>
