@@ -20,7 +20,8 @@
     "react-simple-maps": "^3.0.0",
     "recharts": "^3.8.1",
     "tailwind-merge": "^3.5.0",
-    "ua-parser-js": "^2.0.9"
+    "ua-parser-js": "^2.0.9",
+    "workbox-window": "^7.4.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
