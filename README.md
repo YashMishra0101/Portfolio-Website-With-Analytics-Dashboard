@@ -186,16 +186,10 @@ This project was built primarily for personal use. However, if you find bugs or 
 
 ---
 
-## 📜 License Section
-
-**CUSTOM LICENSE (MIT-Style)**
-
-This project was built strictly for **personal use**. 
+## 📜 License
 
 ⚠️ **IMPORTANT NOTICE FOR FORKING:**
-If you choose to fork or clone this repository to use as your own portfolio, you **MUST completely remove all of the original author's personal information, emails, URLs, and images** before deploying to any environment. You will also need to replace the Firestore document structures with your own data schema.
-
-For full license details, including liability disclaimers, please see the [LICENSE](./LICENSE) file.
+If you choose to fork or clone this repository to use as your own portfolio, you **MUST completely remove all of the original author's personal information, emails, URLs, and images** before deploying to any environment. You will also need to replace the Firestore document structures with your own data schema. Please read the LICENSE carefully.
 
 <br/>
 
