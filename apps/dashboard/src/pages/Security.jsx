@@ -224,16 +224,16 @@ export default function Security() {
 
       {/* Desktop Table */}
       <div className="hidden md:block tactical-card overflow-x-auto">
-        <table className="w-full text-left font-mono min-w-[900px]">
+        <table className="w-full text-left font-mono min-w-[900px] table-fixed">
           <thead className="bg-zinc-950 border-b border-zinc-800 text-zinc-500 font-bold uppercase text-[10px] tracking-wider">
             <tr>
-              <th className="px-4 py-3">Timestamp</th>
-              <th className="px-4 py-3">Action</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Email</th>
-              <th className="px-4 py-3">Device Info</th>
-              <th className="px-4 py-3">IP Address</th>
-              <th className="px-4 py-3">
+              <th className="px-4 py-3 w-[15%]">Timestamp</th>
+              <th className="px-4 py-3 w-[10%]">Action</th>
+              <th className="px-4 py-3 w-[9%]">Status</th>
+              <th className="px-4 py-3 w-[16%]">Email</th>
+              <th className="px-4 py-3 w-[15%]">Device Info</th>
+              <th className="px-4 py-3 w-[16%]">IP Address</th>
+              <th className="px-4 py-3 w-[19%]">
                 <div className="flex flex-col items-center">
                   <span>Location</span>
                   <span className="text-[9px] font-normal opacity-70 whitespace-nowrap">
@@ -249,10 +249,10 @@ export default function Security() {
                 key={log.id}
                 className="hover:bg-zinc-800/50 transition-colors"
               >
-                <td className="px-4 py-2 text-zinc-400 text-[11px]">
+                <td className="px-4 py-2 text-zinc-400 text-[11px] align-top">
                   {formatTimestamp(log.timestamp)}
                 </td>
-                <td className="px-4 py-2 font-bold text-[11px]">
+                <td className="px-4 py-2 font-bold text-[11px] align-top">
                   <div className="flex flex-col">
                     <span className={`text-[11px] ${getActionColor(log.action)}`}>
                       {log.action.replace("_ATTEMPT", "")}
@@ -262,7 +262,7 @@ export default function Security() {
                     </span>
                   </div>
                 </td>
-                <td className="px-4 py-2">
+                <td className="px-4 py-2 align-top">
                   <span
                     className={`px-1.5 py-0.5 text-[10px] font-bold uppercase border ${getStatusClass(log.status)}`}
                   >
@@ -270,12 +270,12 @@ export default function Security() {
                   </span>
                 </td>
                 <td
-                  className="px-4 py-2 text-zinc-400 text-[11px] truncate max-w-[150px]"
+                  className="px-4 py-2 text-zinc-400 text-[11px] whitespace-normal break-all align-top"
                   title={log.userId}
                 >
                   {log.userId}
                 </td>
-                <td className="px-4 py-2">
+                <td className="px-4 py-2 align-top">
                   <div className="flex items-center gap-2">
                     {log.device?.type === "mobile" ? (
                       <Smartphone size={12} className="text-zinc-500" />
@@ -291,12 +291,12 @@ export default function Security() {
                   </div>
                 </td>
                 <td
-                  className="px-4 py-2 text-zinc-500 text-[11px] font-mono whitespace-nowrap"
+                  className="px-4 py-2 text-zinc-500 text-[11px] font-mono whitespace-normal break-all align-top"
                   title={log.ip}
                 >
                   {log.ip}
                 </td>
-                <td className="px-4 py-2 text-[11px]">
+                <td className="px-4 py-2 text-[11px] align-top">
                   {log.location ? (
                     <a
                       href={`https://www.google.com/maps?q=${log.location.lat},${log.location.lng}`}
