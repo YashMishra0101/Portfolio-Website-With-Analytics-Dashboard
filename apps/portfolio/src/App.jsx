@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { logVisit, db } from "./utils/analytics";
 import { doc, onSnapshot } from "firebase/firestore";
+import PWAInstallPrompt from "./components/PWAInstallPrompt";
 
 // --- Fallback / default config (used until Firebase loads) ---
 const DEFAULT_CONFIG = {
@@ -806,6 +807,7 @@ function App() {
           </div>
         </div>
       </div>
+      <PWAInstallPrompt />
     </div>
   );
 }
