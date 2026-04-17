@@ -139,7 +139,16 @@ cd Portfolio-Website-With-Analytics-Dashboard
 ```
 
 ### 2. Configure Environment Variables
-You must provide your own Firebase credentials. Create a `.env` file in the root directory and add:
+This system consists of two distinct applications that are designed to be deployed separately:
+- **The Frontend Portfolio:** The public-facing website your visitors see.
+- **The Admin Dashboard:** The private monitoring and content management system.
+
+To ensure both applications can communicate with your Firebase backend, you must configure environment variables for **each** app individually.
+
+1. Navigate to `apps/portfolio/` and copy the `.env.example` file to create a new `.env` file for the frontend.
+2. Navigate to `apps/dashboard/` and copy the `.env.example` file to create a new `.env` file for the admin panel.
+
+Open both `.env` files and add your Firebase project details:
 ```bash
 VITE_FIREBASE_API_KEY="..."
 VITE_FIREBASE_AUTH_DOMAIN="..."
@@ -149,12 +158,42 @@ VITE_FIREBASE_MESSAGING_SENDER_ID="..."
 VITE_FIREBASE_APP_ID="..."
 ```
 
-### 3. Install Dependencies
+### 3. Enable Authentication
+1. Open your Firebase project dashboard in your web browser.
+2. Looking at the menu on the left side, click on the **Build** dropdown and select **Authentication**.
+3. Go to the "Sign-in method" tab and turn on the **Email/Password** feature.
+4. **Create Your Account**: You must create your login email and password directly inside the Firebase Authentication console (in the "Users" tab). For security reasons, the app only has a "Login" page and does not have a public "Create Account" page. You will use these Firebase credentials to log into your Admin Dashboard.
+
+### 4. Configure Firestore Database Rules
+For your application to read and save data correctly when you first set it up, you must allow read/write access in your Firestore rules.
+1. In the Firebase console, go to **Build > Firestore Database**.
+2. Click on the **Rules** tab.
+3. In the code editor provided, change the default `false` value to `true` so it looks exactly like this:
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+```
+> [!WARNING]
+> This allows open access for local development. Before going live to the public, you should update these to secure production rules.
+
+### 5. Initialize Security Key
+For the admin dashboard to secure critical actions, you must manually set a static password inside your database.
+1. In Firestore, create a collection named `adminSecurityKey`.
+2. Create a document with the exact ID `adminKey`.
+3. Add a field named `key` (Type: String) and set its value to your secure password (e.g., `8175BSPA@&+?ctje`).
+
+### 6. Install Dependencies
 ```bash
 pnpm install
 ```
 
-### 4. Start Development Servers
+### 7. Start Development Servers
 This will boot up both the Portfolio and Dashboard development servers in parallel.
 ```bash
 pnpm run dev
