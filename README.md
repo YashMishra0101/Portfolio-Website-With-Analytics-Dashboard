@@ -64,6 +64,11 @@ In the frontend section of the portfolio website, I have included my experience,
 ### 🛡️ The Dashboard (Control Center)
 A fully private, high-security control panel built to monitor and manage the entire portfolio. It is securely locked behind Firebase Authentication and a custom two-factor security key.
 
+- **📱 Install Anywhere (Progressive Web App)** — Engineered with PWA support, allowing native-like installation. 
+  - **Mobile:** Open the hosted link in your browser, tap the browser menu, and select "**Add to Home screen**".
+  - **Desktop/Laptop:** Click the **Install** icon located directly inside the browser's URL address bar.
+  - > **⚠️ Browser Compatibility Note:** It is highly recommended to use **Google Chrome** for installation. Some browsers (like Brave) may occasionally block PWA prompts or hide the install buttons on both mobile and desktop platforms.
+
 #### A. Analytics Dashboard (Grouped Data)
 The Analytics engine provides clear insights into visitor information and how they use the site:
 - **Device & OS Info:** Detailed lists of visitor hardware like MacBook, Windows, Linux, Android, and iOS devices.

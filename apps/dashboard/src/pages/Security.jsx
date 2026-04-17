@@ -53,16 +53,18 @@ export default function Security() {
     const successLogins = logs.filter(
       (log) => log.action === "LOGIN" && log.status === "SUCCESS" && log.timestamp
     );
-    const latestByUser = new Map();
+    const latestByDevice = new Map();
     for (const log of successLogins) {
-      const userId = log.userId;
+      // Create a unique composite key encompassing User + IP + OS + Browser
+      // This ensures multiple devices on the same account are correctly counted as separate sessions.
+      const sessionKey = `${log.userId}-${log.ip}-${log.device?.os || 'unknown'}-${log.device?.browser || 'unknown'}`;
       const logTime = tsToDate(log.timestamp).getTime();
-      if (!latestByUser.has(userId) || logTime > tsToDate(latestByUser.get(userId).timestamp).getTime()) {
-        latestByUser.set(userId, log);
+      if (!latestByDevice.has(sessionKey) || logTime > tsToDate(latestByDevice.get(sessionKey).timestamp).getTime()) {
+        latestByDevice.set(sessionKey, log);
       }
     }
     let count = 0;
-    for (const log of latestByUser.values()) {
+    for (const log of latestByDevice.values()) {
       const loginTime = tsToDate(log.timestamp).getTime();
       if (now - loginTime < ADMIN_TTL) {
         count++;
