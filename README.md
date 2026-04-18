@@ -187,7 +187,24 @@ service cloud.firestore {
 }
 ```
 > [!WARNING]
-> This allows open access for local development. Before going live to the public, you should update these to secure production rules.
+> The `allow read, write: if true;` setting gives everyone open access. This is meant only for local testing.
+
+### Secure Your Database (For Production)
+Before going live to the public, you **must** update your database rules so unauthorized internet users cannot steal, delete, or break your portfolio data. 
+
+To secure your app so only your logged-in Admin Dashboard can access the database, replace the rules with this:
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      // Only allow access if the user is authenticated (logged in)
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
 
 ### 5. Initialize Security Key
 For the admin dashboard to secure critical actions, you must manually set a static password inside your database.
