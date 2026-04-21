@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'pwa-icon-512.png'],
       manifest: {
-        name: 'Dashboard V3 | Admin Control',
-        short_name: 'Admin V3',
-        description: 'Command center V3 for portfolio management and analytics',
+        name: 'Dashboard | Admin Control',
+        short_name: 'Admin',
+        description: 'Command center for portfolio management and analytics',
         theme_color: '#000000',
         background_color: '#000000',
         display: 'standalone',

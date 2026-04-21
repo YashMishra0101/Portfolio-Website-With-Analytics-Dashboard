@@ -136,7 +136,7 @@ export default function Layout() {
             <div className="w-1.5 h-1.5 bg-black"></div>
           </div>
           <span className="text-xs font-bold text-zinc-100 uppercase tracking-widest font-mono">
-            Portfolio Monitor V3
+            Portfolio Monitor
           </span>
         </div>
         <button

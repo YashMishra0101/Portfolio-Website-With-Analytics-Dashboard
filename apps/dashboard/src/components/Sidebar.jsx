@@ -66,7 +66,7 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
               <div className="w-2 h-2 bg-black"></div>
             </div>
             <span className="text-xs font-bold text-zinc-100 uppercase tracking-widest">
-              Portfolio Monitor V3
+              Portfolio Monitor
             </span>
           </div>
           {/* Mobile Close Button */}
@@ -114,7 +114,7 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
                 Administrator
               </p>
               <div className="mt-1.5 px-2 py-0.5 border font-mono text-[9px] font-bold uppercase tracking-widest w-fit bg-emerald-950/40 border-emerald-500/30 text-emerald-500">
-                FULL ACCESS / V3
+                FULL ACCESS
               </div>
             </div>
           </div>
