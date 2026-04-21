@@ -15,6 +15,7 @@ import Security from "./pages/Security";
 import OwnerActivity from "./pages/OwnerActivity";
 import VisitorManagement from "./pages/VisitorManagement";
 import { AuthProvider, useAuth } from "./context/AuthProvider";
+import { clearStoredAdminSession } from "./utils/sessionIdentity";
 
 // Admin-only Auth Guard
 const ProtectedRoute = ({ children }) => {
@@ -43,6 +44,7 @@ const ProtectedRoute = ({ children }) => {
     signOut(auth).then(() => {
       localStorage.removeItem("securityKeyVerified");
       localStorage.removeItem("sessionExpiry");
+      clearStoredAdminSession();
     }).catch(console.error);
 
     return <Navigate to="/" />;

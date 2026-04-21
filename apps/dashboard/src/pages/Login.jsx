@@ -5,6 +5,11 @@ import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { db, auth } from "../firebase";
 import { UAParser } from "ua-parser-js";
 import { ShieldCheck, AlertTriangle, Key } from "lucide-react";
+import {
+  clearStoredAdminSession,
+  createAdminSession,
+  persistAdminSession,
+} from "../utils/sessionIdentity";
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", pass: "" });
@@ -164,6 +169,9 @@ export default function Login() {
       const storedKey = keyDoc.data().key;
 
       if (securityKey === storedKey) {
+        const session = createAdminSession();
+        const expiryTime = session.startedAt + 30 * 24 * 60 * 60 * 1000;
+
         // Security key verified - NOW log LOGIN SUCCESS
         if (loginData) {
           try {
@@ -171,6 +179,11 @@ export default function Login() {
               action: "LOGIN",
               status: "SUCCESS",
               ...loginData,
+              sessionId: session.id,
+              clientId: session.clientId,
+              displayMode: session.displayMode,
+              sessionStartedAt: session.startedAt,
+              sessionExpiresAt: expiryTime,
               timestamp: serverTimestamp(),
             });
           } catch (err) {
@@ -179,9 +192,7 @@ export default function Login() {
         }
 
         // Set Session Expiry — 30 days for admin
-        const now = Date.now();
-        const expiryTime = now + 30 * 24 * 60 * 60 * 1000;
-
+        persistAdminSession(session);
         localStorage.setItem("sessionExpiry", expiryTime.toString());
         localStorage.setItem("securityKeyVerified", "true"); // Persist across tabs
 
@@ -215,6 +226,7 @@ export default function Login() {
           await signOut(auth);
           localStorage.removeItem("securityKeyVerified");
           localStorage.removeItem("sessionExpiry");
+          clearStoredAdminSession();
           sessionStorage.removeItem("securityKeyVerified");
           setTimeout(() => {
             setStatus("idle");
@@ -243,6 +255,7 @@ export default function Login() {
     await signOut(auth);
     localStorage.removeItem("securityKeyVerified");
     localStorage.removeItem("sessionExpiry");
+    clearStoredAdminSession();
     setStatus("idle");
     setSecurityKey("");
     setSecurityKeyError("");

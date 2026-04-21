@@ -6,6 +6,10 @@ import { db, auth } from "../firebase";
 import { signOut } from "firebase/auth";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { UAParser } from "ua-parser-js";
+import {
+  clearStoredAdminSession,
+  getStoredAdminSession,
+} from "../utils/sessionIdentity";
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -14,6 +18,7 @@ export default function Layout() {
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
+    const session = getStoredAdminSession();
 
     // Fetch IP Data (No location permission needed)
     const ipData = await (async () => {
@@ -97,6 +102,10 @@ export default function Layout() {
           browser: browser,
           model: deviceModel,
         },
+        sessionId: session.id,
+        clientId: session.clientId,
+        displayMode: session.displayMode,
+        sessionStartedAt: session.startedAt ? Number(session.startedAt) : null,
         userAgent: navigator.userAgent,
         timestamp: serverTimestamp(),
       });
@@ -107,6 +116,7 @@ export default function Layout() {
     localStorage.removeItem("sessionStart");
     localStorage.removeItem("securityKeyVerified");
     localStorage.removeItem("sessionExpiry");
+    clearStoredAdminSession();
     sessionStorage.removeItem("securityKeyVerified");
 
     // Delay SignOut to show "Logout Successful" message

@@ -9,6 +9,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { tsToDate, formatTimestamp } from "../utils/timestamp";
+import { getDisplayModeLabel } from "../utils/sessionIdentity";
 
 export default function Security() {
   const [logs, setLogs] = useState([]);
@@ -38,38 +39,59 @@ export default function Security() {
   }, []);
 
   /**
-   * Compute the number of currently ACTIVE sessions.
+   * Count active admin sessions, not broad device buckets.
    *
-   * Logic:
-   * 1. Group all SUCCESS-login logs by userId.
-   * 2. For each userId, take only the MOST RECENT success login.
-   * 3. Check whether the 30-day admin session has expired.
-   * 4. Count only the non-expired ones.
+   * New logs carry a sessionId, so login/logout events can be matched exactly.
+   * Older logs did not have one, so each successful legacy login is treated as
+   * its own session instead of merging same-IP Windows/browser rows together.
    */
   const ADMIN_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days in ms
 
   const activeSessionCount = (() => {
     const now = Date.now();
-    const successLogins = logs.filter(
-      (log) => log.action === "LOGIN" && log.status === "SUCCESS" && log.timestamp
+    const sessionEvents = logs.filter(
+      (log) =>
+        (log.action === "LOGIN" || log.action === "LOGOUT") &&
+        log.status === "SUCCESS" &&
+        log.timestamp
     );
-    const latestByDevice = new Map();
-    for (const log of successLogins) {
-      // Create a unique composite key encompassing User + IP + OS + Browser
-      // This ensures multiple devices on the same account are correctly counted as separate sessions.
-      const sessionKey = `${log.userId}-${log.ip}-${log.device?.os || 'unknown'}-${log.device?.browser || 'unknown'}`;
+
+    const latestBySession = new Map();
+    for (const log of sessionEvents) {
+      const sessionKey = log.sessionId
+        ? `session:${log.sessionId}`
+        : log.action === "LOGIN"
+          ? `legacy-login:${log.id}`
+          : null;
+
+      if (!sessionKey) continue;
+
       const logTime = tsToDate(log.timestamp).getTime();
-      if (!latestByDevice.has(sessionKey) || logTime > tsToDate(latestByDevice.get(sessionKey).timestamp).getTime()) {
-        latestByDevice.set(sessionKey, log);
+      const previousLog = latestBySession.get(sessionKey);
+      const previousTime = previousLog
+        ? tsToDate(previousLog.timestamp).getTime()
+        : 0;
+
+      if (!previousLog || logTime > previousTime) {
+        latestBySession.set(sessionKey, log);
       }
     }
+
     let count = 0;
-    for (const log of latestByDevice.values()) {
+    for (const log of latestBySession.values()) {
+      if (log.action !== "LOGIN") continue;
+
       const loginTime = tsToDate(log.timestamp).getTime();
-      if (now - loginTime < ADMIN_TTL) {
+      const expiresAt =
+        typeof log.sessionExpiresAt === "number"
+          ? log.sessionExpiresAt
+          : loginTime + ADMIN_TTL;
+
+      if (now < expiresAt) {
         count++;
       }
     }
+
     return count;
   })();
 
@@ -107,6 +129,11 @@ export default function Security() {
       return "bg-emerald-900/10 text-emerald-500 border-emerald-900/30";
     }
     return "bg-red-900/10 text-red-500 border-red-900/30";
+  };
+
+  const getDeviceMode = (log) => {
+    if (!log.displayMode) return null;
+    return getDisplayModeLabel(log.displayMode);
   };
 
   return (
@@ -196,6 +223,11 @@ export default function Security() {
                       ? log.device?.model
                       : log.device?.browser}
                   </span>
+                  {getDeviceMode(log) && (
+                    <span className="text-[9px] uppercase tracking-widest text-zinc-500">
+                      {getDeviceMode(log)}
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="col-span-2">
@@ -290,6 +322,11 @@ export default function Security() {
                         ? log.device?.model
                         : log.device?.browser || "Browser"}
                     </span>
+                    {getDeviceMode(log) && (
+                      <span className="text-[9px] uppercase tracking-widest text-zinc-600">
+                        {getDeviceMode(log)}
+                      </span>
+                    )}
                   </div>
                 </td>
                 <td
