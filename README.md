@@ -198,16 +198,17 @@ To secure your app so only your logged-in Admin Dashboard can access the databas
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-  
     // 1. Analytics system: Anyone can log a visit, but only you can read/edit them
-    match /visits/{docId} { 
-      allow create: if true; 
-      allow read, update, delete: if request.auth != null; 
+    match /visits/{docId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
     }
-    
-    // 2. Public Info: Anyone can view your portfolio data, but only you can edit
-    match /{collection}/{docId} {
-      allow read: if collection in ['config', 'projects', 'experience', 'socials'];
+
+    // 2. Public portfolio content: visitors can read the live content document only
+    match /portfolio/{docId} {
+      allow get: if docId == "config";
+      allow list: if false;
+      allow write: if request.auth != null;
     }
 
     // 3. Admin Lock: Everything else (admin_logs, security keys, editing) requires your login

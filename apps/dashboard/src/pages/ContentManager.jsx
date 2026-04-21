@@ -7,6 +7,9 @@ import {
   Eye, EyeOff, Settings, GitFork, Lock, Tag, Type, GitBranch,
 } from "lucide-react";
 
+const CONTENT_DOC_COLLECTION = "portfolio";
+const CONTENT_DOC_ID = "config";
+
 // ─── Canonical default shape (must mirror App.jsx DEFAULT_CONFIG) ─────────────
 const DEFAULT_CONTENT = {
   // Identity
@@ -206,7 +209,7 @@ export default function ContentManager() {
   // Real-time sync
   useEffect(() => {
     const unsub = onSnapshot(
-      doc(db, "portfolio", "config"),
+      doc(db, CONTENT_DOC_COLLECTION, CONTENT_DOC_ID),
       (snap) => {
         if (snap.exists()) {
           const normalized = normalizeContent(snap.data());
@@ -233,7 +236,7 @@ export default function ContentManager() {
     setSaving(true);
     setNotification({ type: "", text: "", durationMs: 0 });
     try {
-      await setDoc(doc(db, "portfolio", "config"), content);
+      await setDoc(doc(db, CONTENT_DOC_COLLECTION, CONTENT_DOC_ID), content);
       setSavedContent(content);
       setNotification({
         type: "success",

@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { logVisit, db } from "./utils/analytics";
 import { doc, onSnapshot } from "firebase/firestore";
 
+const CONTENT_DOC_COLLECTION = "portfolio";
+const CONTENT_DOC_ID = "config";
+
 // --- Fallback / default config (used until Firebase loads) ---
 const DEFAULT_CONFIG = {
   name: "Yash.RK.Mishra",
@@ -142,7 +145,7 @@ function App() {
   useEffect(() => {
     if (!db) return;
     const unsub = onSnapshot(
-      doc(db, "portfolio", "config"),
+      doc(db, CONTENT_DOC_COLLECTION, CONTENT_DOC_ID),
       (docSnap) => {
         if (docSnap.exists()) {
           setConfig(mergeConfig(docSnap.data()));
