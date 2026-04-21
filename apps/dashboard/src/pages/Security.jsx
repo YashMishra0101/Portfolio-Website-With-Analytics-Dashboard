@@ -39,15 +39,14 @@ export default function Security() {
   }, []);
 
   /**
-   * Count active admin sessions, not broad device buckets.
+   * Count active devices, not just individual sessions.
    *
-   * New logs carry a sessionId, so login/logout events can be matched exactly.
-   * Older logs did not have one, so each successful legacy login is treated as
-   * its own session instead of merging same-IP Windows/browser rows together.
+   * A device is considered active if it has at least one active, unexpired session.
+   * Devices are uniquely identified by a combination of their IP address, OS, and model/browser.
    */
   const ADMIN_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days in ms
 
-  const activeSessionCount = (() => {
+  const activeDeviceCount = (() => {
     const now = Date.now();
     const sessionEvents = logs.filter(
       (log) =>
@@ -77,7 +76,8 @@ export default function Security() {
       }
     }
 
-    let count = 0;
+    const activeDevices = new Set();
+    
     for (const log of latestBySession.values()) {
       if (log.action !== "LOGIN") continue;
 
@@ -88,11 +88,18 @@ export default function Security() {
           : loginTime + ADMIN_TTL;
 
       if (now < expiresAt) {
-        count++;
+        const ip = log.ip || "unknown-ip";
+        const os = log.device?.os || "unknown-os";
+        const modelOrBrowser = log.device?.model !== "PC/Mac" && log.device?.model 
+          ? log.device?.model 
+          : (log.device?.browser || "unknown-browser");
+          
+        const deviceKey = `${ip}-${os}-${modelOrBrowser}`;
+        activeDevices.add(deviceKey);
       }
     }
 
-    return count;
+    return activeDevices.size;
   })();
 
 
@@ -145,17 +152,17 @@ export default function Security() {
             Activity History
           </p>
         </div>
-        {/* Active Sessions Indicator */}
+        {/* Active Devices Indicator */}
         <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-900/15 border border-emerald-900/30 rounded-sm shrink-0">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </span>
           <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500">
-            Active Sessions:
+            Active Devices:
           </span>
           <span className="text-[11px] font-bold font-mono text-emerald-400">
-            {activeSessionCount}
+            {activeDeviceCount}
           </span>
         </div>
       </div>
