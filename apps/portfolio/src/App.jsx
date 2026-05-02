@@ -75,32 +75,32 @@ function mergeConfig(firebaseData) {
     sections: { ...DEFAULT_CONFIG.sections, ...(firebaseData.sections || {}) },
     experience: Array.isArray(firebaseData.experience)
       ? firebaseData.experience.map((item) => ({
-          role: item?.role || "",
-          company: item?.company || "",
-          location: item?.location || "",
-          duration: item?.duration || "",
-          type: item?.type || "Remote",
-          experienceType: item?.experienceType || "Job",
-        }))
+        role: item?.role || "",
+        company: item?.company || "",
+        location: item?.location || "",
+        duration: item?.duration || "",
+        type: item?.type || "Remote",
+        experienceType: item?.experienceType || "Job",
+      }))
       : DEFAULT_CONFIG.experience,
     projects: Array.isArray(firebaseData.projects)
       ? firebaseData.projects.map((p) => ({
-          ...p,
-          link: p.link && p.link.trim() !== "" ? p.link.trim() : null,
-          tech: Array.isArray(p.tech) ? p.tech : [],
-        }))
+        ...p,
+        link: p.link && p.link.trim() !== "" ? p.link.trim() : null,
+        tech: Array.isArray(p.tech) ? p.tech : [],
+      }))
       : DEFAULT_CONFIG.projects,
     openSourceContributions: Array.isArray(firebaseData.openSourceContributions)
       ? firebaseData.openSourceContributions
-          .map((item) => ({
-            companyName: typeof item?.companyName === "string" ? item.companyName.trim() : "",
-            link: typeof item?.link === "string" ? item.link.trim() : "",
-          }))
-          .filter((item) => item.companyName !== "")
-          .map((item) => ({
-            ...item,
-            link: isValidHttpUrl(item.link) ? item.link : "",
-          }))
+        .map((item) => ({
+          companyName: typeof item?.companyName === "string" ? item.companyName.trim() : "",
+          link: typeof item?.link === "string" ? item.link.trim() : "",
+        }))
+        .filter((item) => item.companyName !== "")
+        .map((item) => ({
+          ...item,
+          link: isValidHttpUrl(item.link) ? item.link : "",
+        }))
       : DEFAULT_CONFIG.openSourceContributions,
   };
 }
@@ -229,7 +229,7 @@ function App() {
               <div className="w-36 h-36 relative group-hover:scale-105 transition-all duration-500">
                 <div className="absolute inset-[6px] rounded-full overflow-hidden shadow-lg z-0">
                   <img
-                    src="/profile.jpg"
+                    src="/profile-crop.png"
                     alt="Profile"
                     className="w-full h-full object-cover"
                   />
@@ -319,9 +319,8 @@ function App() {
             href={resumeAvailable ? resumeUrl : "#"}
             target={resumeAvailable ? "_blank" : "_self"}
             rel="noopener noreferrer"
-            className={`bento-card rounded-[2rem] p-6 flex flex-col justify-center items-center gap-4 group reveal relative overflow-hidden ${
-              resumeAvailable ? "cursor-pointer" : "cursor-not-allowed opacity-75"
-            }`}
+            className={`bento-card rounded-[2rem] p-6 flex flex-col justify-center items-center gap-4 group reveal relative overflow-hidden ${resumeAvailable ? "cursor-pointer" : "cursor-not-allowed opacity-75"
+              }`}
             onClick={(e) => { if (!resumeAvailable) e.preventDefault(); }}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-orange-600/10 dark:from-zinc-500/10 dark:to-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>

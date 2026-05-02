@@ -78,22 +78,22 @@ function normalizeContent(data) {
     sections: { ...DEFAULT_CONTENT.sections, ...(data.sections || {}) },
     experience: Array.isArray(data.experience)
       ? data.experience.map((item) => ({
-          role: item?.role || "",
-          company: item?.company || "",
-          location: item?.location || "",
-          duration: item?.duration || "",
-          type: item?.type || "Remote",
-          experienceType: item?.experienceType || "Job",
-        }))
+        role: item?.role || "",
+        company: item?.company || "",
+        location: item?.location || "",
+        duration: item?.duration || "",
+        type: item?.type || "Remote",
+        experienceType: item?.experienceType || "Job",
+      }))
       : DEFAULT_CONTENT.experience,
     projects: Array.isArray(data.projects)
       ? data.projects.map((p) => ({ description: "", ...p, tech: Array.isArray(p.tech) ? p.tech : [], link: p.link || "" }))
       : DEFAULT_CONTENT.projects,
     openSourceContributions: Array.isArray(data.openSourceContributions)
       ? data.openSourceContributions.map((item) => ({
-          companyName: typeof item?.companyName === "string" ? item.companyName : "",
-          link: typeof item?.link === "string" ? item.link : "",
-        }))
+        companyName: typeof item?.companyName === "string" ? item.companyName : "",
+        link: typeof item?.link === "string" ? item.link : "",
+      }))
       : DEFAULT_CONTENT.openSourceContributions,
   };
 }
@@ -362,552 +362,551 @@ export default function ContentManager() {
 
       <form onSubmit={handleSave} className="flex flex-col gap-5 w-full">
 
-          {/* ══════════════════════════════════════════════════════════════
+        {/* ══════════════════════════════════════════════════════════════
             §1  IDENTITY CORE
         ══════════════════════════════════════════════════════════════ */}
-          <SectionCard>
-            <SectionHeader icon={<User size={13} />} label="Identity Core" color="emerald" badge="text · links" />
+        <SectionCard>
+          <SectionHeader icon={<User size={13} />} label="Identity Core" color="emerald" badge="text · links" />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Full Name">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={content.name} onChange={(e) => updateField("name", e.target.value)} />
-              </Field>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Field label="Full Name">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={content.name} onChange={(e) => updateField("name", e.target.value)} />
+            </Field>
 
-              <Field label="Specialization" hint="Shown below your name on the portfolio">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={content.specialization}
-                  onChange={(e) => updateField("specialization", e.target.value)}
-                  placeholder="e.g. Full Stack Developer" />
-              </Field>
+            <Field label="Specialization" hint="Shown below your name on the portfolio">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={content.specialization}
+                onChange={(e) => updateField("specialization", e.target.value)}
+                placeholder="e.g. Full Stack Developer" />
+            </Field>
 
-              <Field label="Availability Status" className="md:col-span-2"
-                hint="Text inside the animated green badge">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={content.status} onChange={(e) => updateField("status", e.target.value)} />
-              </Field>
+            <Field label="Availability Status" className="md:col-span-2"
+              hint="Text inside the animated green badge">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={content.status} onChange={(e) => updateField("status", e.target.value)} />
+            </Field>
 
-              <Field label="Biography" className="md:col-span-2">
-                <textarea rows={3} readOnly={isReadOnly} className="tactical-input resize-none"
-                  value={content.bio} onChange={(e) => updateField("bio", e.target.value)} />
-              </Field>
+            <Field label="Biography" className="md:col-span-2">
+              <textarea rows={3} readOnly={isReadOnly} className="tactical-input resize-none"
+                value={content.bio} onChange={(e) => updateField("bio", e.target.value)} />
+            </Field>
 
-              <Field label="Bio Highlight Keywords" className="md:col-span-2"
-                hint="Comma-separated — these words appear accented (coloured) inside the bio">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={content.bioHighlightKeywords || ""}
-                  onChange={(e) => updateField("bioHighlightKeywords", e.target.value)}
-                  placeholder="MERN Stack,TypeScript" />
-              </Field>
+            <Field label="Bio Highlight Keywords" className="md:col-span-2"
+              hint="Comma-separated — these words appear accented (coloured) inside the bio">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={content.bioHighlightKeywords || ""}
+                onChange={(e) => updateField("bioHighlightKeywords", e.target.value)}
+                placeholder="MERN Stack,TypeScript" />
+            </Field>
 
-              <Field label="Location String">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={content.location} onChange={(e) => updateField("location", e.target.value)} />
-              </Field>
-            </div>
-          </SectionCard>
+            <Field label="Location String">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={content.location} onChange={(e) => updateField("location", e.target.value)} />
+            </Field>
+          </div>
+        </SectionCard>
 
-          {/* ══════════════════════════════════════════════════════════════
+        {/* ══════════════════════════════════════════════════════════════
             §8.1  OPEN SOURCE CONTRIBUTIONS
         ══════════════════════════════════════════════════════════════ */}
-          <SectionCard>
-            <div className="flex items-center justify-between">
-              <SectionHeader
-                icon={<GitBranch size={13} />}
-                label="Open Source Contributions"
-                color="cyan"
-                badge={`${content.openSourceContributions?.length ?? 0} entries`}
-              />
-              {!isReadOnly && (
-                <button
-                  type="button"
-                  onClick={addOpenSourceContribution}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-950/30 border border-cyan-700/60 text-cyan-400 text-xs font-mono uppercase hover:bg-cyan-900/40 transition-colors"
-                >
-                  <Plus size={11} /> Add
-                </button>
-              )}
-            </div>
-
-            {content.openSourceContributions?.length === 0 && (
-              <p className="text-[10px] text-zinc-600 font-mono text-center py-4">
-                No contributions added yet. Click "Add" to create one.
-              </p>
+        <SectionCard>
+          <div className="flex items-center justify-between">
+            <SectionHeader
+              icon={<GitBranch size={13} />}
+              label="Open Source Contributions"
+              color="cyan"
+              badge={`${content.openSourceContributions?.length ?? 0} entries`}
+            />
+            {!isReadOnly && (
+              <button
+                type="button"
+                onClick={addOpenSourceContribution}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-950/30 border border-cyan-700/60 text-cyan-400 text-xs font-mono uppercase hover:bg-cyan-900/40 transition-colors"
+              >
+                <Plus size={11} /> Add
+              </button>
             )}
+          </div>
 
-            <div className="space-y-3">
-              {content.openSourceContributions?.map((item, i) => (
-                <div key={i} className="border border-zinc-800/80 bg-zinc-900/20 rounded-sm">
-                  <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800/60">
-                    <span className="text-[9px] text-zinc-600 font-mono uppercase tracking-widest">
-                      Contribution #{i + 1}
-                      {item.companyName && <span className="text-zinc-500 ml-2 normal-case">— {item.companyName}</span>}
-                    </span>
-                    {!isReadOnly && (
-                      <div className="flex items-center gap-0.5">
-                        <button
-                          type="button"
-                          onClick={() => moveOpenSourceContribution(i, -1)}
-                          disabled={i === 0}
-                          className="p-1.5 text-zinc-500 hover:text-cyan-400 hover:bg-cyan-950/30 transition-colors disabled:opacity-25 disabled:cursor-not-allowed rounded-sm"
-                          title="Move Up"
-                        >
-                          <ArrowUp size={12} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => moveOpenSourceContribution(i, 1)}
-                          disabled={i === (content.openSourceContributions?.length ?? 1) - 1}
-                          className="p-1.5 text-zinc-500 hover:text-cyan-400 hover:bg-cyan-950/30 transition-colors disabled:opacity-25 disabled:cursor-not-allowed rounded-sm"
-                          title="Move Down"
-                        >
-                          <ArrowDown size={12} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => removeOpenSourceContribution(i)}
-                          className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-950/30 transition-colors rounded-sm"
-                          title="Delete"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
+          {content.openSourceContributions?.length === 0 && (
+            <p className="text-[10px] text-zinc-600 font-mono text-center py-4">
+              No contributions added yet. Click "Add" to create one.
+            </p>
+          )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4">
-                    <Field label="Company Name">
-                      <input
-                        type="text"
-                        readOnly={isReadOnly}
-                        className="tactical-input"
-                        value={item.companyName || ""}
-                        onChange={(e) => updateOpenSourceContribution(i, "companyName", e.target.value)}
-                        placeholder="e.g. Vercel"
-                      />
-                    </Field>
-                    <Field label="Contribution Link" hint="Must be a valid public URL">
-                      <input
-                        type="url"
-                        readOnly={isReadOnly}
-                        className="tactical-input"
-                        value={item.link || ""}
-                        onChange={(e) => updateOpenSourceContribution(i, "link", e.target.value)}
-                        placeholder="https://..."
-                      />
-                    </Field>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </SectionCard>
-
-          {/* ══════════════════════════════════════════════════════════════
-            §4  SOCIAL / UPLINK CHANNELS
-        ══════════════════════════════════════════════════════════════ */}
-          <SectionCard>
-            <SectionHeader icon={<LinkIcon size={13} />} label="Uplink Channels" color="blue" badge="links" />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="GitHub URL">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={content.socials?.github || ""} onChange={(e) => updateSocial("github", e.target.value)} />
-              </Field>
-              <Field label="LinkedIn URL">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={content.socials?.linkedin || ""} onChange={(e) => updateSocial("linkedin", e.target.value)} />
-              </Field>
-              <Field label="Twitter (X) URL">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={content.socials?.twitter || ""} onChange={(e) => updateSocial("twitter", e.target.value)} />
-              </Field>
-              <Field label="Email Address">
-                <input type="email" readOnly={isReadOnly} className="tactical-input"
-                  value={content.socials?.email || ""} onChange={(e) => updateSocial("email", e.target.value)} />
-              </Field>
-            </div>
-          </SectionCard>
-
-          {/* ══════════════════════════════════════════════════════════════
-            §7  EXPERIENCE RECORDS
-        ══════════════════════════════════════════════════════════════ */}
-          <SectionCard>
-            <div className="flex items-center justify-between">
-              <SectionHeader icon={<Briefcase size={13} />} label="Experience Records" color="purple" badge={`${content.experience?.length ?? 0} entries`} />
-              {!isReadOnly && (
-                <button type="button" onClick={addExperience}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-950/30 border border-purple-700/60 text-purple-400 text-xs font-mono uppercase hover:bg-purple-900/40 transition-colors">
-                  <Plus size={11} /> Add
-                </button>
-              )}
-            </div>
-
-            {content.experience?.length === 0 && (
-              <p className="text-[10px] text-zinc-600 font-mono text-center py-4">
-                No experience entries. Click "Add" to create one.
-              </p>
-            )}
-
-            <div className="space-y-3">
-              {content.experience?.map((exp, i) => (
-                <div key={i} className="border border-zinc-800/80 bg-zinc-900/20 rounded-sm">
-                  {/* Row header */}
-                  <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800/60">
-                    <span className="text-[9px] text-zinc-600 font-mono uppercase tracking-widest">
-                      Experience #{i + 1}
-                      {exp.role && <span className="text-zinc-500 ml-2 normal-case">— {exp.role}</span>}
-                    </span>
-                    {!isReadOnly && (
-                      <div className="flex items-center gap-0.5">
-                        <button type="button" onClick={() => moveExperience(i, -1)} disabled={i === 0}
-                          className="p-1.5 text-zinc-500 hover:text-purple-400 hover:bg-purple-950/30 transition-colors disabled:opacity-25 disabled:cursor-not-allowed rounded-sm" title="Move Up">
-                          <ArrowUp size={12} />
-                        </button>
-                        <button type="button" onClick={() => moveExperience(i, 1)} disabled={i === (content.experience?.length ?? 1) - 1}
-                          className="p-1.5 text-zinc-500 hover:text-purple-400 hover:bg-purple-950/30 transition-colors disabled:opacity-25 disabled:cursor-not-allowed rounded-sm" title="Move Down">
-                          <ArrowDown size={12} />
-                        </button>
-                        <button type="button" onClick={() => removeExperience(i)}
-                          className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-950/30 transition-colors rounded-sm" title="Delete">
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  {/* Fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4">
-                    <Field label="Role"><input type="text" readOnly={isReadOnly} className="tactical-input" value={exp.role} onChange={(e) => updateExperience(i, "role", e.target.value)} /></Field>
-                    <Field label="Company"><input type="text" readOnly={isReadOnly} className="tactical-input" value={exp.company} onChange={(e) => updateExperience(i, "company", e.target.value)} /></Field>
-                    <Field label="Location"><input type="text" readOnly={isReadOnly} className="tactical-input" value={exp.location} onChange={(e) => updateExperience(i, "location", e.target.value)} /></Field>
-                    <Field label="Duration"><input type="text" readOnly={isReadOnly} className="tactical-input" value={exp.duration} onChange={(e) => updateExperience(i, "duration", e.target.value)} /></Field>
-                    <Field label="Experience Type">
-                      <select
-                        disabled={isReadOnly}
-                        className="tactical-input"
-                        value={exp.experienceType || "Job"}
-                        onChange={(e) => updateExperience(i, "experienceType", e.target.value)}
+          <div className="space-y-3">
+            {content.openSourceContributions?.map((item, i) => (
+              <div key={i} className="border border-zinc-800/80 bg-zinc-900/20 rounded-sm">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800/60">
+                  <span className="text-[9px] text-zinc-600 font-mono uppercase tracking-widest">
+                    Contribution #{i + 1}
+                    {item.companyName && <span className="text-zinc-500 ml-2 normal-case">— {item.companyName}</span>}
+                  </span>
+                  {!isReadOnly && (
+                    <div className="flex items-center gap-0.5">
+                      <button
+                        type="button"
+                        onClick={() => moveOpenSourceContribution(i, -1)}
+                        disabled={i === 0}
+                        className="p-1.5 text-zinc-500 hover:text-cyan-400 hover:bg-cyan-950/30 transition-colors disabled:opacity-25 disabled:cursor-not-allowed rounded-sm"
+                        title="Move Up"
                       >
-                        <option value="Job">Job</option>
-                        <option value="Internship">Internship</option>
-                        <option value="Freelancing">Freelancing</option>
-                        <option value="Contract-Based">Contract-Based</option>
-                      </select>
-                    </Field>
-                    <Field label="Work Type">
-                      <select disabled={isReadOnly} className="tactical-input" value={exp.type} onChange={(e) => updateExperience(i, "type", e.target.value)}>
-                        <option value="Remote">Remote</option>
-                        <option value="In Office">In Office</option>
-                        <option value="Hybrid">Hybrid</option>
-                      </select>
-                    </Field>
-                  </div>
+                        <ArrowUp size={12} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveOpenSourceContribution(i, 1)}
+                        disabled={i === (content.openSourceContributions?.length ?? 1) - 1}
+                        className="p-1.5 text-zinc-500 hover:text-cyan-400 hover:bg-cyan-950/30 transition-colors disabled:opacity-25 disabled:cursor-not-allowed rounded-sm"
+                        title="Move Down"
+                      >
+                        <ArrowDown size={12} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeOpenSourceContribution(i)}
+                        className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-950/30 transition-colors rounded-sm"
+                        title="Delete"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          </SectionCard>
 
-          {/* ══════════════════════════════════════════════════════════════
-            §8  PROJECT REGISTRY
-        ══════════════════════════════════════════════════════════════ */}
-          <SectionCard>
-            <div className="flex items-center justify-between">
-              <SectionHeader icon={<Code size={13} />} label="Project Registry" color="cyan" badge={`${content.projects?.length ?? 0} projects`} />
-              {!isReadOnly && (
-                <button type="button" onClick={addProject}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-950/30 border border-cyan-700/60 text-cyan-400 text-xs font-mono uppercase hover:bg-cyan-900/40 transition-colors">
-                  <Plus size={11} /> Add
-                </button>
-              )}
-            </div>
-
-            {content.projects?.length === 0 && (
-              <p className="text-[10px] text-zinc-600 font-mono text-center py-4">
-                No projects. Click "Add" to create one.
-              </p>
-            )}
-
-            <div className="space-y-3">
-              {content.projects?.map((proj, i) => (
-                <div key={i} className="border border-zinc-800/80 bg-zinc-900/20 rounded-sm">
-                  {/* Row header */}
-                  <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800/60">
-                    <span className="text-[9px] text-zinc-600 font-mono uppercase tracking-widest">
-                      Project #{i + 1}
-                      {proj.title && <span className="text-zinc-500 ml-2 normal-case">— {proj.title}</span>}
-                      {proj.status && (
-                        <span className={`ml-2 text-[8px] px-1.5 py-0.5 rounded-sm border ${proj.status === "Completed" ? "border-emerald-800/60 text-emerald-600 bg-emerald-950/20"
-                            : proj.status === "In Development" ? "border-amber-800/60 text-amber-600 bg-amber-950/20"
-                              : "b  order-zinc-700/60 text-zinc-600"
-                          }`}>{proj.status}</span>
-                      )}
-                    </span>
-                    {!isReadOnly && (
-                      <div className="flex items-center gap-0.5">
-                        <button type="button" onClick={() => moveProject(i, -1)} disabled={i === 0}
-                          className="p-1.5 text-zinc-500 hover:text-cyan-400 hover:bg-cyan-950/30 transition-colors disabled:opacity-25 disabled:cursor-not-allowed rounded-sm" title="Move Up">
-                          <ArrowUp size={12} />
-                        </button>
-                        <button type="button" onClick={() => moveProject(i, 1)} disabled={i === (content.projects?.length ?? 1) - 1}
-                          className="p-1.5 text-zinc-500 hover:text-cyan-400 hover:bg-cyan-950/30 transition-colors disabled:opacity-25 disabled:cursor-not-allowed rounded-sm" title="Move Down">
-                          <ArrowDown size={12} />
-                        </button>
-                        <button type="button" onClick={() => removeProject(i)}
-                          className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-950/30 transition-colors rounded-sm" title="Delete">
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  {/* Fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4">
-                    <Field label="Title">
-                      <input type="text" readOnly={isReadOnly} className="tactical-input" value={proj.title}
-                        onChange={(e) => updateProject(i, "title", e.target.value)} />
-                    </Field>
-                    <Field label="Status">
-                      <select disabled={isReadOnly} className="tactical-input" value={proj.status}
-                        onChange={(e) => updateProject(i, "status", e.target.value)}>
-                        <option value="In Development">In Development</option>
-                        <option value="Completed">Completed</option>
-                        <option value="On Hold">On Hold</option>
-                        <option value="Planning">Planning</option>
-                      </select>
-                    </Field>
-                    <Field label="Description" className="md:col-span-2" hint="Leave empty to hide on frontend">
-                      <textarea rows={2} readOnly={isReadOnly} className="tactical-input resize-none"
-                        value={proj.description || ""}
-                        onChange={(e) => updateProject(i, "description", e.target.value)}
-                        placeholder="Brief description of the project..." />
-                    </Field>
-                    <Field label="Project Link" hint="Leave blank to hide 'View Project' button">
-                      <input type="text" readOnly={isReadOnly} className="tactical-input"
-                        value={proj.link || ""} onChange={(e) => updateProject(i, "link", e.target.value)}
-                        placeholder="https://..." />
-                    </Field>
-                    <Field label="Tech Stack" hint="Comma-separated">
-                      <input type="text" readOnly={isReadOnly} className="tactical-input"
-                        value={proj.tech?.join(", ") || ""}
-                        onChange={(e) => updateProject(i, "tech", e.target.value.split(",").map((t) => t.trim()).filter(Boolean))}
-                        placeholder="React, Node.js, MongoDB" />
-                    </Field>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </SectionCard>
-
-          {/* ══════════════════════════════════════════════════════════════
-            §3  GITHUB SETTINGS
-        ══════════════════════════════════════════════════════════════ */}
-          <SectionCard>
-            <SectionHeader icon={<GitFork size={13} />} label="GitHub Settings" color="zinc" badge="text" />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="GitHub Username" hint="Drives all three stats widget images">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={content.githubUsername || ""}
-                  onChange={(e) => updateField("githubUsername", e.target.value)}
-                  placeholder="YashMishra0101" />
-              </Field>
-
-              <Field label="GitHub Stats Subtitle" hint="Small text under 'GitHub Stats' heading">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={content.githubStatsSubtitle || ""}
-                  onChange={(e) => updateField("githubStatsSubtitle", e.target.value)}
-                  placeholder="Proof I am a Developer" />
-              </Field>
-
-              <Field label="Section Heading" hint="The visible 'GitHub Stats' title">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={L.githubStatsSectionTitle || ""}
-                  onChange={(e) => updateLabel("githubStatsSectionTitle", e.target.value)}
-                  placeholder="GitHub Stats" />
-              </Field>
-
-              <Field label="'View Profile' Button Text">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={L.viewProfileBtn || ""}
-                  onChange={(e) => updateLabel("viewProfileBtn", e.target.value)}
-                  placeholder="View Profile" />
-              </Field>
-            </div>
-          </SectionCard>
-
-          {/* ══════════════════════════════════════════════════════════════
-            §5  SECTION LABELS (headings + button texts)
-        ══════════════════════════════════════════════════════════════ */}
-          <SectionCard>
-            <SectionHeader icon={<Type size={13} />} label="Section Labels &amp; Button Text" color="violet" badge="text" />
-            <p className="text-[9px] text-zinc-600 font-mono">
-              All visible headings and button labels used across the portfolio.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Tech Stack — Section Heading">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={L.techStackSectionTitle || ""}
-                  onChange={(e) => updateLabel("techStackSectionTitle", e.target.value)}
-                  placeholder="Tech Stack" />
-              </Field>
-              <Field label="Experience — Section Heading">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={L.experienceSectionTitle || ""}
-                  onChange={(e) => updateLabel("experienceSectionTitle", e.target.value)}
-                  placeholder="Experience" />
-              </Field>
-              <Field label="Projects — Section Heading">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={L.projectsSectionTitle || ""}
-                  onChange={(e) => updateLabel("projectsSectionTitle", e.target.value)}
-                  placeholder="Projects" />
-              </Field>
-              <Field label="Connect — Section Heading">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={L.connectSectionTitle || ""}
-                  onChange={(e) => updateLabel("connectSectionTitle", e.target.value)}
-                  placeholder="Connect With Me" />
-              </Field>
-              <Field label="'View Project' Button Text" hint="On each project card">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={L.viewProjectBtn || ""}
-                  onChange={(e) => updateLabel("viewProjectBtn", e.target.value)}
-                  placeholder="View Project" />
-              </Field>
-            </div>
-          </SectionCard>
-
-          {/* ══════════════════════════════════════════════════════════════
-            §6  SECTION VISIBILITY
-        ══════════════════════════════════════════════════════════════ */}
-          <SectionCard>
-            <SectionHeader icon={<Settings size={13} />} label="Section Visibility" color="orange" />
-            <p className="text-[9px] text-zinc-600 font-mono">
-              Toggle individual sections on the portfolio. Inactive sections are completely hidden from visitors.
-            </p>
-            <div className="flex flex-wrap gap-2 pt-1">
-              {[
-                { key: "showTechStack", label: "Tech Stack" },
-                { key: "showExperience", label: "Experience" },
-                { key: "showGithubStats", label: "GitHub Stats" },
-                { key: "showProjects", label: "Projects" },
-                { key: "showConnect", label: "Connect" },
-              ].map(({ key, label }) => (
-                <VisibilityToggle key={key} field={key} label={label}
-                  value={content.sections?.[key] ?? true}
-                  onChange={updateSection} disabled={isReadOnly} />
-              ))}
-            </div>
-          </SectionCard>
-
-          {/* ══════════════════════════════════════════════════════════════
-            §9  MEDIA ASSETS — READ ONLY
-        ══════════════════════════════════════════════════════════════ */}
-          <SectionCard>
-            <SectionHeader icon={<ImageOff size={13} />} label="Media Assets" color="zinc" badge="read only" />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Profile Picture" readOnlyField>
-                <input type="text" readOnly className="tactical-input opacity-40 cursor-not-allowed select-none" value="/profile.jpg" />
-              </Field>
-              <Field label="Tech Stack Icons" readOnlyField>
-                <input type="text" readOnly className="tactical-input opacity-40 cursor-not-allowed select-none" value="15 icons — managed in code" />
-              </Field>
-            </div>
-            <p className="text-[9px] text-zinc-600 font-mono leading-relaxed">
-              These assets are managed directly in the frontend code and cannot be changed via the dashboard
-              on the Firebase free plan. To enable dynamic image uploads, upgrade to the Firebase Blaze (pay-as-you-go) plan.
-            </p>
-          </SectionCard>
-
-
-          {/* ══════════════════════════════════════════════════════════════
-            §10 FOOTER CONFIGURATION
-        ══════════════════════════════════════════════════════════════ */}
-          <SectionCard>
-            <SectionHeader icon={<Type size={13} />} label="Footer Configuration" color="blue" badge="text" />
-            <Field label="Footer Tagline Text" hint="Bottom tagline linked to the frontend footer">
-              <input type="text" readOnly={isReadOnly} className="tactical-input"
-                value={content.tagline || ""}
-                onChange={(e) => updateField("tagline", e.target.value)}
-                placeholder="Learning · Building · Improving" />
-            </Field>
-          </SectionCard>
-          
-          {/* ══════════════════════════════════════════════════════════════
-            §2  RESUME CARD
-        ══════════════════════════════════════════════════════════════ */}
-          <SectionCard>
-            <SectionHeader icon={<Tag size={13} />} label="Resume Card" color="orange" badge="text · links" />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Resume URL" hint="Direct link to the PDF — leave blank if not hosted">
-                <input type="text" readOnly={isReadOnly} className="tactical-input"
-                  value={content.resumeUrl} onChange={(e) => updateField("resumeUrl", e.target.value)}
-                  placeholder="https://... or /resume.pdf" />
-              </Field>
-
-              <Field label="Resume Available">
-                <button
-                  type="button"
-                  disabled={isReadOnly}
-                  onClick={() => updateField("resumeAvailable", !content.resumeAvailable)}
-                  className={`mt-0.5 px-4 py-2 font-mono text-xs uppercase tracking-wider border transition-all w-full text-left ${content.resumeAvailable
-                      ? "bg-emerald-950/30 border-emerald-700/70 text-emerald-400"
-                      : "bg-red-950/30 border-red-700/70 text-red-400"
-                    } ${isReadOnly ? "opacity-40 cursor-not-allowed" : "hover:opacity-80"}`}
-                >
-                  {content.resumeAvailable ? "✓ Available — card is clickable" : "✗ Not Available — card is disabled"}
-                </button>
-              </Field>
-
-              {/* Label controls */}
-              <div className="md:col-span-2">
-                <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest mb-3">
-                  — Resume Card UI Labels —
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <Field label="Card Title" hint="Heading on resume card">
-                    <input type="text" readOnly={isReadOnly} className="tactical-input"
-                      value={L.resumeCardTitle || ""}
-                      onChange={(e) => updateLabel("resumeCardTitle", e.target.value)}
-                      placeholder="Resume" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4">
+                  <Field label="Company Name">
+                    <input
+                      type="text"
+                      readOnly={isReadOnly}
+                      className="tactical-input"
+                      value={item.companyName || ""}
+                      onChange={(e) => updateOpenSourceContribution(i, "companyName", e.target.value)}
+                      placeholder="e.g. Vercel"
+                    />
                   </Field>
-                  <Field label="Card Subtitle" hint="'Download CV' text">
-                    <input type="text" readOnly={isReadOnly} className="tactical-input"
-                      value={L.resumeCardSubtitle || ""}
-                      onChange={(e) => updateLabel("resumeCardSubtitle", e.target.value)}
-                      placeholder="Download CV" />
-                  </Field>
-                  <Field label="Not Available Text">
-                    <input type="text" readOnly={isReadOnly} className="tactical-input"
-                      value={L.resumeNotAvailable || ""}
-                      onChange={(e) => updateLabel("resumeNotAvailable", e.target.value)}
-                      placeholder="Not Available" />
+                  <Field label="Contribution Link" hint="Must be a valid public URL">
+                    <input
+                      type="url"
+                      readOnly={isReadOnly}
+                      className="tactical-input"
+                      value={item.link || ""}
+                      onChange={(e) => updateOpenSourceContribution(i, "link", e.target.value)}
+                      placeholder="https://..."
+                    />
                   </Field>
                 </div>
               </div>
-            </div>
-          </SectionCard>
-
-
-          {/* ── Save button ── */}
-          <div className="flex flex-col gap-3 pt-4 border-t border-zinc-900">
-            {isReadOnly && (
-              <span className="text-[10px] text-zinc-600 font-mono uppercase tracking-widest flex items-center gap-1.5">
-                <Lock size={11} /> Viewer mode — saving disabled
-              </span>
-            )}
-            <button
-              type="submit"
-              disabled={saving || isReadOnly || !isDirty}
-              className={`ml-auto btn-tactical flex items-center gap-2 px-10 group ${
-                isReadOnly || !isDirty ? "opacity-40 cursor-not-allowed" : ""
-              }`}
-            >
-              <Save size={15} className={saving ? "animate-spin" : "group-hover:scale-110 transition-transform"} />
-              {saving ? "Saving..." : isReadOnly ? "Read Only" : !isDirty ? "No Changes" : "Save Configuration"}
-            </button>
+            ))}
           </div>
+        </SectionCard>
+
+        {/* ══════════════════════════════════════════════════════════════
+            §4  SOCIAL / UPLINK CHANNELS
+        ══════════════════════════════════════════════════════════════ */}
+        <SectionCard>
+          <SectionHeader icon={<LinkIcon size={13} />} label="Uplink Channels" color="blue" badge="links" />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Field label="GitHub URL">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={content.socials?.github || ""} onChange={(e) => updateSocial("github", e.target.value)} />
+            </Field>
+            <Field label="LinkedIn URL">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={content.socials?.linkedin || ""} onChange={(e) => updateSocial("linkedin", e.target.value)} />
+            </Field>
+            <Field label="Twitter (X) URL">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={content.socials?.twitter || ""} onChange={(e) => updateSocial("twitter", e.target.value)} />
+            </Field>
+            <Field label="Email Address">
+              <input type="email" readOnly={isReadOnly} className="tactical-input"
+                value={content.socials?.email || ""} onChange={(e) => updateSocial("email", e.target.value)} />
+            </Field>
+          </div>
+        </SectionCard>
+
+        {/* ══════════════════════════════════════════════════════════════
+            §7  EXPERIENCE RECORDS
+        ══════════════════════════════════════════════════════════════ */}
+        <SectionCard>
+          <div className="flex items-center justify-between">
+            <SectionHeader icon={<Briefcase size={13} />} label="Experience Records" color="purple" badge={`${content.experience?.length ?? 0} entries`} />
+            {!isReadOnly && (
+              <button type="button" onClick={addExperience}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-950/30 border border-purple-700/60 text-purple-400 text-xs font-mono uppercase hover:bg-purple-900/40 transition-colors">
+                <Plus size={11} /> Add
+              </button>
+            )}
+          </div>
+
+          {content.experience?.length === 0 && (
+            <p className="text-[10px] text-zinc-600 font-mono text-center py-4">
+              No experience entries. Click "Add" to create one.
+            </p>
+          )}
+
+          <div className="space-y-3">
+            {content.experience?.map((exp, i) => (
+              <div key={i} className="border border-zinc-800/80 bg-zinc-900/20 rounded-sm">
+                {/* Row header */}
+                <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800/60">
+                  <span className="text-[9px] text-zinc-600 font-mono uppercase tracking-widest">
+                    Experience #{i + 1}
+                    {exp.role && <span className="text-zinc-500 ml-2 normal-case">— {exp.role}</span>}
+                  </span>
+                  {!isReadOnly && (
+                    <div className="flex items-center gap-0.5">
+                      <button type="button" onClick={() => moveExperience(i, -1)} disabled={i === 0}
+                        className="p-1.5 text-zinc-500 hover:text-purple-400 hover:bg-purple-950/30 transition-colors disabled:opacity-25 disabled:cursor-not-allowed rounded-sm" title="Move Up">
+                        <ArrowUp size={12} />
+                      </button>
+                      <button type="button" onClick={() => moveExperience(i, 1)} disabled={i === (content.experience?.length ?? 1) - 1}
+                        className="p-1.5 text-zinc-500 hover:text-purple-400 hover:bg-purple-950/30 transition-colors disabled:opacity-25 disabled:cursor-not-allowed rounded-sm" title="Move Down">
+                        <ArrowDown size={12} />
+                      </button>
+                      <button type="button" onClick={() => removeExperience(i)}
+                        className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-950/30 transition-colors rounded-sm" title="Delete">
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {/* Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4">
+                  <Field label="Role"><input type="text" readOnly={isReadOnly} className="tactical-input" value={exp.role} onChange={(e) => updateExperience(i, "role", e.target.value)} /></Field>
+                  <Field label="Company"><input type="text" readOnly={isReadOnly} className="tactical-input" value={exp.company} onChange={(e) => updateExperience(i, "company", e.target.value)} /></Field>
+                  <Field label="Location"><input type="text" readOnly={isReadOnly} className="tactical-input" value={exp.location} onChange={(e) => updateExperience(i, "location", e.target.value)} /></Field>
+                  <Field label="Duration"><input type="text" readOnly={isReadOnly} className="tactical-input" value={exp.duration} onChange={(e) => updateExperience(i, "duration", e.target.value)} /></Field>
+                  <Field label="Experience Type">
+                    <select
+                      disabled={isReadOnly}
+                      className="tactical-input"
+                      value={exp.experienceType || "Job"}
+                      onChange={(e) => updateExperience(i, "experienceType", e.target.value)}
+                    >
+                      <option value="Job">Job</option>
+                      <option value="Internship">Internship</option>
+                      <option value="Freelancing">Freelancing</option>
+                      <option value="Contract-Based">Contract-Based</option>
+                    </select>
+                  </Field>
+                  <Field label="Work Type">
+                    <select disabled={isReadOnly} className="tactical-input" value={exp.type} onChange={(e) => updateExperience(i, "type", e.target.value)}>
+                      <option value="Remote">Remote</option>
+                      <option value="In Office">In Office</option>
+                      <option value="Hybrid">Hybrid</option>
+                    </select>
+                  </Field>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+
+        {/* ══════════════════════════════════════════════════════════════
+            §8  PROJECT REGISTRY
+        ══════════════════════════════════════════════════════════════ */}
+        <SectionCard>
+          <div className="flex items-center justify-between">
+            <SectionHeader icon={<Code size={13} />} label="Project Registry" color="cyan" badge={`${content.projects?.length ?? 0} projects`} />
+            {!isReadOnly && (
+              <button type="button" onClick={addProject}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-950/30 border border-cyan-700/60 text-cyan-400 text-xs font-mono uppercase hover:bg-cyan-900/40 transition-colors">
+                <Plus size={11} /> Add
+              </button>
+            )}
+          </div>
+
+          {content.projects?.length === 0 && (
+            <p className="text-[10px] text-zinc-600 font-mono text-center py-4">
+              No projects. Click "Add" to create one.
+            </p>
+          )}
+
+          <div className="space-y-3">
+            {content.projects?.map((proj, i) => (
+              <div key={i} className="border border-zinc-800/80 bg-zinc-900/20 rounded-sm">
+                {/* Row header */}
+                <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800/60">
+                  <span className="text-[9px] text-zinc-600 font-mono uppercase tracking-widest">
+                    Project #{i + 1}
+                    {proj.title && <span className="text-zinc-500 ml-2 normal-case">— {proj.title}</span>}
+                    {proj.status && (
+                      <span className={`ml-2 text-[8px] px-1.5 py-0.5 rounded-sm border ${proj.status === "Completed" ? "border-emerald-800/60 text-emerald-600 bg-emerald-950/20"
+                        : proj.status === "In Development" ? "border-amber-800/60 text-amber-600 bg-amber-950/20"
+                          : "b  order-zinc-700/60 text-zinc-600"
+                        }`}>{proj.status}</span>
+                    )}
+                  </span>
+                  {!isReadOnly && (
+                    <div className="flex items-center gap-0.5">
+                      <button type="button" onClick={() => moveProject(i, -1)} disabled={i === 0}
+                        className="p-1.5 text-zinc-500 hover:text-cyan-400 hover:bg-cyan-950/30 transition-colors disabled:opacity-25 disabled:cursor-not-allowed rounded-sm" title="Move Up">
+                        <ArrowUp size={12} />
+                      </button>
+                      <button type="button" onClick={() => moveProject(i, 1)} disabled={i === (content.projects?.length ?? 1) - 1}
+                        className="p-1.5 text-zinc-500 hover:text-cyan-400 hover:bg-cyan-950/30 transition-colors disabled:opacity-25 disabled:cursor-not-allowed rounded-sm" title="Move Down">
+                        <ArrowDown size={12} />
+                      </button>
+                      <button type="button" onClick={() => removeProject(i)}
+                        className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-950/30 transition-colors rounded-sm" title="Delete">
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {/* Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4">
+                  <Field label="Title">
+                    <input type="text" readOnly={isReadOnly} className="tactical-input" value={proj.title}
+                      onChange={(e) => updateProject(i, "title", e.target.value)} />
+                  </Field>
+                  <Field label="Status">
+                    <select disabled={isReadOnly} className="tactical-input" value={proj.status}
+                      onChange={(e) => updateProject(i, "status", e.target.value)}>
+                      <option value="In Development">In Development</option>
+                      <option value="Completed">Completed</option>
+                      <option value="On Hold">On Hold</option>
+                      <option value="Planning">Planning</option>
+                    </select>
+                  </Field>
+                  <Field label="Description" className="md:col-span-2" hint="Leave empty to hide on frontend">
+                    <textarea rows={2} readOnly={isReadOnly} className="tactical-input resize-none"
+                      value={proj.description || ""}
+                      onChange={(e) => updateProject(i, "description", e.target.value)}
+                      placeholder="Brief description of the project..." />
+                  </Field>
+                  <Field label="Project Link" hint="Leave blank to hide 'View Project' button">
+                    <input type="text" readOnly={isReadOnly} className="tactical-input"
+                      value={proj.link || ""} onChange={(e) => updateProject(i, "link", e.target.value)}
+                      placeholder="https://..." />
+                  </Field>
+                  <Field label="Tech Stack" hint="Comma-separated">
+                    <input type="text" readOnly={isReadOnly} className="tactical-input"
+                      value={proj.tech?.join(", ") || ""}
+                      onChange={(e) => updateProject(i, "tech", e.target.value.split(",").map((t) => t.trim()).filter(Boolean))}
+                      placeholder="React, Node.js, MongoDB" />
+                  </Field>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+
+        {/* ══════════════════════════════════════════════════════════════
+            §3  GITHUB SETTINGS
+        ══════════════════════════════════════════════════════════════ */}
+        <SectionCard>
+          <SectionHeader icon={<GitFork size={13} />} label="GitHub Settings" color="zinc" badge="text" />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Field label="GitHub Username" hint="Drives all three stats widget images">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={content.githubUsername || ""}
+                onChange={(e) => updateField("githubUsername", e.target.value)}
+                placeholder="YashMishra0101" />
+            </Field>
+
+            <Field label="GitHub Stats Subtitle" hint="Small text under 'GitHub Stats' heading">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={content.githubStatsSubtitle || ""}
+                onChange={(e) => updateField("githubStatsSubtitle", e.target.value)}
+                placeholder="Proof I am a Developer" />
+            </Field>
+
+            <Field label="Section Heading" hint="The visible 'GitHub Stats' title">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={L.githubStatsSectionTitle || ""}
+                onChange={(e) => updateLabel("githubStatsSectionTitle", e.target.value)}
+                placeholder="GitHub Stats" />
+            </Field>
+
+            <Field label="'View Profile' Button Text">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={L.viewProfileBtn || ""}
+                onChange={(e) => updateLabel("viewProfileBtn", e.target.value)}
+                placeholder="View Profile" />
+            </Field>
+          </div>
+        </SectionCard>
+
+        {/* ══════════════════════════════════════════════════════════════
+            §5  SECTION LABELS (headings + button texts)
+        ══════════════════════════════════════════════════════════════ */}
+        <SectionCard>
+          <SectionHeader icon={<Type size={13} />} label="Section Labels &amp; Button Text" color="violet" badge="text" />
+          <p className="text-[9px] text-zinc-600 font-mono">
+            All visible headings and button labels used across the portfolio.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Field label="Tech Stack — Section Heading">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={L.techStackSectionTitle || ""}
+                onChange={(e) => updateLabel("techStackSectionTitle", e.target.value)}
+                placeholder="Tech Stack" />
+            </Field>
+            <Field label="Experience — Section Heading">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={L.experienceSectionTitle || ""}
+                onChange={(e) => updateLabel("experienceSectionTitle", e.target.value)}
+                placeholder="Experience" />
+            </Field>
+            <Field label="Projects — Section Heading">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={L.projectsSectionTitle || ""}
+                onChange={(e) => updateLabel("projectsSectionTitle", e.target.value)}
+                placeholder="Projects" />
+            </Field>
+            <Field label="Connect — Section Heading">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={L.connectSectionTitle || ""}
+                onChange={(e) => updateLabel("connectSectionTitle", e.target.value)}
+                placeholder="Connect With Me" />
+            </Field>
+            <Field label="'View Project' Button Text" hint="On each project card">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={L.viewProjectBtn || ""}
+                onChange={(e) => updateLabel("viewProjectBtn", e.target.value)}
+                placeholder="View Project" />
+            </Field>
+          </div>
+        </SectionCard>
+
+        {/* ══════════════════════════════════════════════════════════════
+            §6  SECTION VISIBILITY
+        ══════════════════════════════════════════════════════════════ */}
+        <SectionCard>
+          <SectionHeader icon={<Settings size={13} />} label="Section Visibility" color="orange" />
+          <p className="text-[9px] text-zinc-600 font-mono">
+            Toggle individual sections on the portfolio. Inactive sections are completely hidden from visitors.
+          </p>
+          <div className="flex flex-wrap gap-2 pt-1">
+            {[
+              { key: "showTechStack", label: "Tech Stack" },
+              { key: "showExperience", label: "Experience" },
+              { key: "showGithubStats", label: "GitHub Stats" },
+              { key: "showProjects", label: "Projects" },
+              { key: "showConnect", label: "Connect" },
+            ].map(({ key, label }) => (
+              <VisibilityToggle key={key} field={key} label={label}
+                value={content.sections?.[key] ?? true}
+                onChange={updateSection} disabled={isReadOnly} />
+            ))}
+          </div>
+        </SectionCard>
+
+        {/* ══════════════════════════════════════════════════════════════
+            §9  MEDIA ASSETS — READ ONLY
+        ══════════════════════════════════════════════════════════════ */}
+        <SectionCard>
+          <SectionHeader icon={<ImageOff size={13} />} label="Media Assets" color="zinc" badge="read only" />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Field label="Profile Picture" readOnlyField>
+              <input type="text" readOnly className="tactical-input opacity-40 cursor-not-allowed select-none" value="/profile.jpg" />
+            </Field>
+            <Field label="Tech Stack Icons" readOnlyField>
+              <input type="text" readOnly className="tactical-input opacity-40 cursor-not-allowed select-none" value="15 icons — managed in code" />
+            </Field>
+          </div>
+          <p className="text-[9px] text-zinc-600 font-mono leading-relaxed">
+            These assets are managed directly in the frontend code and cannot be changed via the dashboard
+            on the Firebase free plan. To enable dynamic image uploads, upgrade to the Firebase Blaze (pay-as-you-go) plan.
+          </p>
+        </SectionCard>
+
+
+        {/* ══════════════════════════════════════════════════════════════
+            §10 FOOTER CONFIGURATION
+        ══════════════════════════════════════════════════════════════ */}
+        <SectionCard>
+          <SectionHeader icon={<Type size={13} />} label="Footer Configuration" color="blue" badge="text" />
+          <Field label="Footer Tagline Text" hint="Bottom tagline linked to the frontend footer">
+            <input type="text" readOnly={isReadOnly} className="tactical-input"
+              value={content.tagline || ""}
+              onChange={(e) => updateField("tagline", e.target.value)}
+              placeholder="Learning · Building · Improving" />
+          </Field>
+        </SectionCard>
+
+        {/* ══════════════════════════════════════════════════════════════
+            §2  RESUME CARD
+        ══════════════════════════════════════════════════════════════ */}
+        <SectionCard>
+          <SectionHeader icon={<Tag size={13} />} label="Resume Card" color="orange" badge="text · links" />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Field label="Resume URL" hint="Direct link to the PDF — leave blank if not hosted">
+              <input type="text" readOnly={isReadOnly} className="tactical-input"
+                value={content.resumeUrl} onChange={(e) => updateField("resumeUrl", e.target.value)}
+                placeholder="https://... or /resume.pdf" />
+            </Field>
+
+            <Field label="Resume Available">
+              <button
+                type="button"
+                disabled={isReadOnly}
+                onClick={() => updateField("resumeAvailable", !content.resumeAvailable)}
+                className={`mt-0.5 px-4 py-2 font-mono text-xs uppercase tracking-wider border transition-all w-full text-left ${content.resumeAvailable
+                  ? "bg-emerald-950/30 border-emerald-700/70 text-emerald-400"
+                  : "bg-red-950/30 border-red-700/70 text-red-400"
+                  } ${isReadOnly ? "opacity-40 cursor-not-allowed" : "hover:opacity-80"}`}
+              >
+                {content.resumeAvailable ? "✓ Available — card is clickable" : "✗ Not Available — card is disabled"}
+              </button>
+            </Field>
+
+            {/* Label controls */}
+            <div className="md:col-span-2">
+              <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest mb-3">
+                — Resume Card UI Labels —
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <Field label="Card Title" hint="Heading on resume card">
+                  <input type="text" readOnly={isReadOnly} className="tactical-input"
+                    value={L.resumeCardTitle || ""}
+                    onChange={(e) => updateLabel("resumeCardTitle", e.target.value)}
+                    placeholder="Resume" />
+                </Field>
+                <Field label="Card Subtitle" hint="'Download CV' text">
+                  <input type="text" readOnly={isReadOnly} className="tactical-input"
+                    value={L.resumeCardSubtitle || ""}
+                    onChange={(e) => updateLabel("resumeCardSubtitle", e.target.value)}
+                    placeholder="Download CV" />
+                </Field>
+                <Field label="Not Available Text">
+                  <input type="text" readOnly={isReadOnly} className="tactical-input"
+                    value={L.resumeNotAvailable || ""}
+                    onChange={(e) => updateLabel("resumeNotAvailable", e.target.value)}
+                    placeholder="Not Available" />
+                </Field>
+              </div>
+            </div>
+          </div>
+        </SectionCard>
+
+
+        {/* ── Save button ── */}
+        <div className="flex flex-col gap-3 pt-4 border-t border-zinc-900">
+          {isReadOnly && (
+            <span className="text-[10px] text-zinc-600 font-mono uppercase tracking-widest flex items-center gap-1.5">
+              <Lock size={11} /> Viewer mode — saving disabled
+            </span>
+          )}
+          <button
+            type="submit"
+            disabled={saving || isReadOnly || !isDirty}
+            className={`ml-auto btn-tactical flex items-center gap-2 px-10 group ${isReadOnly || !isDirty ? "opacity-40 cursor-not-allowed" : ""
+              }`}
+          >
+            <Save size={15} className={saving ? "animate-spin" : "group-hover:scale-110 transition-transform"} />
+            {saving ? "Saving..." : isReadOnly ? "Read Only" : !isDirty ? "No Changes" : "Save Configuration"}
+          </button>
+        </div>
       </form>
 
 
