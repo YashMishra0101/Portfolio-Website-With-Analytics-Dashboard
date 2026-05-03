@@ -229,7 +229,7 @@ function App() {
               <div className="w-36 h-36 relative group-hover:scale-105 transition-all duration-500">
                 <div className="absolute inset-[6px] rounded-full overflow-hidden shadow-lg z-0">
                   <img
-                    src="/my-profile.png"
+                    src="/my-profile.png?v=2"
                     alt="Profile"
                     className="w-full h-full object-cover"
                   />
