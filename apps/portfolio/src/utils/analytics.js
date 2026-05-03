@@ -456,7 +456,6 @@ export const logVisit = async () => {
   const now = Date.now();
 
   if (lastVisitTime && (now - parseInt(lastVisitTime)) < 5000) {
-    console.log("Analytics: Visit already logged recently, skipping duplicate");
     return;
   }
 
@@ -507,15 +506,7 @@ export const logVisit = async () => {
       ...visitData,
       type: "visit",
     });
-    console.log("✅ Analytics: Visit logged successfully", {
-      ip: geo.ip,
-      city: geo.city,
-      os: os,
-      source: trafficSource.source,
-      medium: trafficSource.medium,
-      method: trafficSource.method,
-      device: getDeviceType()
-    });
+
   } catch (error) {
     console.error("❌ Analytics: Failed to log visit", error);
     console.error("Visit data:", visitData);
