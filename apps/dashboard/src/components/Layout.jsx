@@ -113,9 +113,7 @@ export default function Layout() {
       console.error("Logout Log Failed", err);
     }
 
-    localStorage.removeItem("sessionStart");
     localStorage.removeItem("securityKeyVerified");
-    localStorage.removeItem("sessionExpiry");
     clearStoredAdminSession();
     sessionStorage.removeItem("securityKeyVerified");
 

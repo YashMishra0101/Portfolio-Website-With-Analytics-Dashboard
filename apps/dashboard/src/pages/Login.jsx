@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useAuth } from "../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import { collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
@@ -26,15 +27,14 @@ export default function Login() {
   const isSubmittingRef = useRef(false);
   const navigate = useNavigate();
 
+  // If the user is already authenticated and has verified their security key,
+  // redirect them straight to the dashboard — no expiry check needed.
+  // Firebase manages token validity; we only verify the security key flag.
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        // Check if security key was verified in this session and if session is valid
         const securityVerified = localStorage.getItem("securityKeyVerified");
-        const sessionExpiry = localStorage.getItem("sessionExpiry");
-        const now = Date.now();
-
-        if (securityVerified === "true" && sessionExpiry && now < parseInt(sessionExpiry)) {
+        if (securityVerified === "true") {
           navigate("/dashboard");
         }
       }
@@ -170,9 +170,10 @@ export default function Login() {
 
       if (securityKey === storedKey) {
         const session = createAdminSession();
-        const expiryTime = session.startedAt + 30 * 24 * 60 * 60 * 1000;
 
-        // Security key verified - NOW log LOGIN SUCCESS
+        // Security key verified — log LOGIN SUCCESS.
+        // Session has no fixed expiry; Firebase manages token validity.
+        // Users remain logged in until manual logout or Firebase invalidation.
         if (loginData) {
           try {
             await addDoc(collection(db, "admin_logs"), {
@@ -183,7 +184,6 @@ export default function Login() {
               clientId: session.clientId,
               displayMode: session.displayMode,
               sessionStartedAt: session.startedAt,
-              sessionExpiresAt: expiryTime,
               timestamp: serverTimestamp(),
             });
           } catch (err) {
@@ -191,9 +191,9 @@ export default function Login() {
           }
         }
 
-        // Set Session Expiry — 30 days for admin
+        // Persist session metadata and security verification flag.
+        // No sessionExpiry is stored — sessions are indefinite until manual logout.
         persistAdminSession(session);
-        localStorage.setItem("sessionExpiry", expiryTime.toString());
         localStorage.setItem("securityKeyVerified", "true"); // Persist across tabs
 
         isSubmittingRef.current = false;
@@ -225,7 +225,6 @@ export default function Login() {
           setLoading(false);
           await signOut(auth);
           localStorage.removeItem("securityKeyVerified");
-          localStorage.removeItem("sessionExpiry");
           clearStoredAdminSession();
           sessionStorage.removeItem("securityKeyVerified");
           setTimeout(() => {
@@ -254,7 +253,6 @@ export default function Login() {
   const handleBackToLogin = async () => {
     await signOut(auth);
     localStorage.removeItem("securityKeyVerified");
-    localStorage.removeItem("sessionExpiry");
     clearStoredAdminSession();
     setStatus("idle");
     setSecurityKey("");
