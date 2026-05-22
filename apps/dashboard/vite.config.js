@@ -11,6 +11,7 @@ export default defineConfig({
       manifest: {
         name: 'Dashboard',
         short_name: 'Dashboard',
+        version: '4.0.0',
         description: 'Admin control center for portfolio management and analytics',
         theme_color: '#000000',
         background_color: '#000000',
