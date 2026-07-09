@@ -8,7 +8,12 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-2. LIMITATION OF LIABILITY & DISCLAIMER OF MISUSE
+2. ATTRIBUTION REQUIREMENT
+
+   Any use, modification, or distribution of this Software must provide clear and visible attribution to the original author by including a link to the original GitHub repository in the documentation, README, or an appropriate
+   "About" or credits section of the derived work:https://github.com/YashMishra0101/Personal-Task-Manager
+
+3. LIMITATION OF LIABILITY AND DISCLAIMER OF MISUSE
 
 The original author, Yash RK Mishra, is NOT responsible or liable in any form or under any circumstances — for any misuse of the software by any individual or organization, data breaches, unauthorized access, or privacy violations, security vulnerabilities that may exist within the code whether known or unknown at the time of release, illegal activities carried out using this software or any modified version of it, or any direct, indirect, incidental, special, or consequential damages arising from the use, inability to use, or modification of this software.
 
