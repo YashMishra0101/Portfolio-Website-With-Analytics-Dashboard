@@ -3,12 +3,14 @@
 # Portfolio-Website-With-Analytics-Dashboard
 **A professional, dual-application system combining a high-speed public portfolio with a secure, real-time analytics and content management dashboard.**
 
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
-[![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
+[![React](https://img.shields.io/badge/React-Framework-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-Build%20Tool-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 [![Firebase](https://img.shields.io/badge/Firebase-Firestore%20%2B%20Auth-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
 [![PNPM](https://img.shields.io/badge/PNPM-Workspaces-F69220?style=for-the-badge&logo=pnpm&logoColor=white)](https://pnpm.io)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![Open Source](https://img.shields.io/badge/Open%20Source-Yes-brightgreen?style=for-the-badge&logo=open-source-initiative&logoColor=white)](https://opensource.org/)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg?style=for-the-badge)](https://github.com/YashMishra0101/Personal-Task-Manager/graphs/commit-activity)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg?style=for-the-badge)](https://github.com/YashMishra0101/Personal-Task-Manager/pulls)
 
 
 *“The goal is to turn data into information, and information into insight.”*
