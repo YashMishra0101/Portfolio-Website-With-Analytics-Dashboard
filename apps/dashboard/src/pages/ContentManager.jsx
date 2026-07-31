@@ -16,8 +16,8 @@ const DEFAULT_CONTENT = {
   name: "Yash.RK.Mishra",
   specialization: "Full Stack Developer",
   location: "Based in India",
-  bio: "Full Stack Developer ready to build scalable web applications using TypeScript and MERN-PERN Stack.",
-  bioHighlightKeywords: "TypeScript,MERN-PERN",
+  bio: "Full Stack Developer ready to build scalable web applications using the MERN Stack and TypeScript.",
+  bioHighlightKeywords: "MERN Stack,TypeScript",
   status: "Actively seeking new job opportunities",
   tagline: "Learning · Building · Improving",
   // Resume

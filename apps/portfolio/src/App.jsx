@@ -1,9 +1,57 @@
 import { useState, useEffect } from "react";
 import { logVisit, db } from "./utils/analytics";
 import { doc, onSnapshot } from "firebase/firestore";
+import {
+  BriefcaseBusiness,
+  Building2,
+  Code2,
+  Database,
+  ExternalLink,
+  FileDown,
+  GitBranch,
+  IdCard,
+  Laptop,
+  Layers,
+  Mail,
+  MapPin,
+  Rocket,
+  Share2,
+} from "lucide-react";
 
 const CONTENT_DOC_COLLECTION = "portfolio";
 const CONTENT_DOC_ID = "config";
+
+function TechBadge({ children, className = "" }) {
+  return (
+    <span className={`inline-flex items-center justify-center font-bold leading-none ${className}`}>
+      {children}
+    </span>
+  );
+}
+
+function XLogo({ className = "" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+      <path d="M14.2 10.5 22.8 1h-2.1l-7.5 8.2L7.3 1H.5l9 12.4L.5 23h2.1l7.9-8.5 6.2 8.5h6.8l-9.3-12.5Zm-2.8 3-1-1.4L3.2 2.6h3.1l5.8 7.8 1 1.4 7.6 9.8h-3.1l-6.2-8.1Z" />
+    </svg>
+  );
+}
+
+function GithubLogo({ className = "" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+      <path d="M12 .5C5.7.5.6 5.6.6 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 .1.8 1.8 3.3 1.3.1-.8.4-1.3.8-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.6.1-3.2 0 0 1-.3 3.2 1.2.9-.3 1.9-.4 2.9-.4s2 .1 2.9.4c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.4 5.6 18.3.5 12 .5Z" />
+    </svg>
+  );
+}
+
+function LinkedinLogo({ className = "" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+      <path d="M4.98 3.5A2.5 2.5 0 1 1 0 3.5a2.5 2.5 0 0 1 4.98 0ZM.44 8.25h4.08V24H.44V8.25Zm7.15 0h3.91v2.15h.06c.54-1.03 1.88-2.12 3.87-2.12 4.14 0 4.9 2.73 4.9 6.27V24h-4.08v-8.38c0-2-.04-4.57-2.78-4.57-2.79 0-3.22 2.18-3.22 4.43V24H7.59V8.25Z" />
+    </svg>
+  );
+}
 
 // --- Fallback / default config (used until Firebase loads) ---
 const DEFAULT_CONFIG = {
@@ -17,7 +65,7 @@ const DEFAULT_CONFIG = {
   githubUsername: "YashMishra0101",
   tagline: "Learning · Building · Improving",
   githubStatsSubtitle: "Proof I am a Developer",
-  bioHighlightKeywords: "TypeScript,MERN-PERN",
+  bioHighlightKeywords: "TypeScript,MERN-PERN Stack",
   // All UI labels — fully controllable from dashboard
   labels: {
     resumeCardTitle: "Resume",
@@ -108,12 +156,17 @@ function mergeConfig(firebaseData) {
 /** Highlight specific keywords inside bio text */
 function HighlightedBio({ text, keywords }) {
   if (!text) return null;
-  if (!keywords || keywords.trim() === "") return <>{text}</>;
 
-  const words = keywords
+  const words = [
+    ...(keywords || "")
     .split(",")
     .map((k) => k.trim())
-    .filter(Boolean);
+      .filter(Boolean),
+    "TypeScript",
+    "MERN-PERN Stack",
+  ].filter((word, index, allWords) =>
+    allWords.findIndex((item) => item.toLowerCase() === word.toLowerCase()) === index
+  );
   if (words.length === 0) return <>{text}</>;
 
   const pattern = new RegExp(`(${words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
@@ -262,7 +315,7 @@ function App() {
               {/* Location + Social Icons */}
               <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 flex-wrap">
                 <div className="flex items-center gap-2 text-sm font-medium text-sub/80">
-                  <i className="fas fa-map-marker-alt text-accent"></i>
+                  <MapPin className="h-4 w-4 text-accent" aria-hidden="true" />
                   <span>{location}</span>
                 </div>
 
@@ -273,7 +326,7 @@ function App() {
                       className="w-7 h-7 rounded-lg bg-[#EA4335] flex items-center justify-center text-white hover:opacity-80 transition-all duration-300"
                       title="Email"
                     >
-                      <i className="fas fa-envelope text-xs"></i>
+                      <Mail className="h-3.5 w-3.5" aria-hidden="true" />
                     </a>
                   )}
                   {socials?.linkedin && (
@@ -284,7 +337,7 @@ function App() {
                       className="w-7 h-7 rounded-lg bg-[#0A66C2] flex items-center justify-center text-white hover:opacity-80 transition-all duration-300"
                       title="LinkedIn"
                     >
-                      <i className="fab fa-linkedin-in text-xs"></i>
+                      <LinkedinLogo className="h-3.5 w-3.5" />
                     </a>
                   )}
                   {socials?.github && (
@@ -295,7 +348,7 @@ function App() {
                       className="w-7 h-7 rounded-lg bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-zinc-800 dark:text-white hover:opacity-80 transition-all duration-300"
                       title="GitHub"
                     >
-                      <i className="fab fa-github text-xs"></i>
+                      <GithubLogo className="h-3.5 w-3.5" />
                     </a>
                   )}
                   {socials?.twitter && (
@@ -306,7 +359,7 @@ function App() {
                       className="w-7 h-7 rounded-lg bg-black flex items-center justify-center text-white hover:opacity-80 transition-all duration-300"
                       title="Twitter"
                     >
-                      <i className="fa-brands fa-x-twitter text-xs"></i>
+                      <XLogo className="h-3.5 w-3.5" />
                     </a>
                   )}
                 </div>
@@ -326,7 +379,7 @@ function App() {
             <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-orange-600/10 dark:from-zinc-500/10 dark:to-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <div className="relative">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-600 text-white flex items-center justify-center text-2xl shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <i className="fas fa-file-arrow-down"></i>
+                <FileDown className="h-8 w-8" aria-hidden="true" />
               </div>
             </div>
             <div className="text-center relative z-10">
@@ -347,7 +400,7 @@ function App() {
             <div className="bento-card md:col-span-3 rounded-[2rem] p-6 reveal flex flex-col">
               <h3 className="font-bold text-xl mb-5 flex items-center gap-3">
                 <span className="text-accent text-2xl">
-                  <i className="fas fa-layer-group"></i>
+                  <Layers className="h-7 w-7" aria-hidden="true" />
                 </span>
                 <span className="text-gradient">{L.techStackSectionTitle}</span>
               </h3>
@@ -356,7 +409,7 @@ function App() {
                 {/* JavaScript */}
                 <div className="tech-icon hover-bounce flex flex-col items-center gap-2">
                   <div className="w-10 h-10 flex items-center justify-center">
-                    <i className="fab fa-js text-3xl text-yellow-400 drop-shadow-md"></i>
+                    <TechBadge className="h-8 w-8 rounded-sm bg-yellow-400 text-base text-zinc-950 drop-shadow-md">JS</TechBadge>
                   </div>
                   <span className="text-xs font-medium text-sub">JavaScript</span>
                 </div>
@@ -376,7 +429,12 @@ function App() {
                 {/* React */}
                 <div className="tech-icon flex flex-col items-center gap-2">
                   <div className="w-10 h-10 flex items-center justify-center">
-                    <i className="fab fa-react text-3xl text-blue-400 drop-shadow-md animate-[spin_10s_linear_infinite]"></i>
+                    <svg className="h-9 w-9 text-blue-400 drop-shadow-md animate-[spin_10s_linear_infinite]" viewBox="0 0 64 64" aria-hidden="true" fill="none">
+                      <circle cx="32" cy="32" r="5.2" fill="currentColor" />
+                      <ellipse cx="32" cy="32" rx="27" ry="10.5" stroke="currentColor" strokeWidth="3" />
+                      <ellipse cx="32" cy="32" rx="27" ry="10.5" stroke="currentColor" strokeWidth="3" transform="rotate(60 32 32)" />
+                      <ellipse cx="32" cy="32" rx="27" ry="10.5" stroke="currentColor" strokeWidth="3" transform="rotate(120 32 32)" />
+                    </svg>
                   </div>
                   <span className="text-xs font-medium text-sub">React</span>
                 </div>
@@ -384,7 +442,7 @@ function App() {
                 {/* Node.js */}
                 <div className="tech-icon flex flex-col items-center gap-2">
                   <div className="w-10 h-10 flex items-center justify-center">
-                    <i className="fab fa-node text-3xl text-green-500 drop-shadow-md"></i>
+                    <TechBadge className="text-sm text-green-500 drop-shadow-md">node</TechBadge>
                   </div>
                   <span className="text-xs font-medium text-sub">Node.js</span>
                 </div>
@@ -403,9 +461,17 @@ function App() {
                 {/* MongoDB */}
                 <div className="tech-icon hover-bounce flex flex-col items-center gap-2">
                   <div className="w-10 h-10 flex items-center justify-center">
-                    <i className="fas fa-database text-3xl text-green-600 drop-shadow-md"></i>
+                    <Database className="h-8 w-8 text-green-600 drop-shadow-md" aria-hidden="true" />
                   </div>
                   <span className="text-xs font-medium text-sub">MongoDB</span>
+                </div>
+
+                {/* PostgreSQL */}
+                <div className="tech-icon hover-bounce flex flex-col items-center gap-2">
+                  <div className="w-10 h-10 flex items-center justify-center">
+                    <TechBadge className="h-8 w-8 rounded-lg bg-[#336791] text-sm text-white drop-shadow-md">PG</TechBadge>
+                  </div>
+                  <span className="text-xs font-medium text-sub">PostgreSQL</span>
                 </div>
 
                 {/* Mongoose */}
@@ -414,6 +480,16 @@ function App() {
                     <span className="text-3xl font-bold text-[#880000] drop-shadow-md tracking-tighter">M</span>
                   </div>
                   <span className="text-xs font-medium text-sub">Mongoose</span>
+                </div>
+
+                {/* Prisma */}
+                <div className="tech-icon flex flex-col items-center gap-2">
+                  <div className="w-10 h-10 flex items-center justify-center">
+                    <svg className="h-8 w-8 text-zinc-100 drop-shadow-md" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+                      <path d="M21.8 18.1 13.4 1.8c-.5-1-1.9-.9-2.4.1L2.3 19.2c-.5 1 .4 2.1 1.5 1.8l16.9-2.4c1-.2 1.5-1.4 1.1-2.5Zm-3.5-1.4-11.7 1.7 6-11.9 5.7 10.2Z" />
+                    </svg>
+                  </div>
+                  <span className="text-xs font-medium text-sub">Prisma</span>
                 </div>
 
                 {/* TanStack Query */}
@@ -466,7 +542,7 @@ function App() {
                 {/* Bootstrap */}
                 <div className="tech-icon flex flex-col items-center gap-2">
                   <div className="w-10 h-10 flex items-center justify-center">
-                    <i className="fab fa-bootstrap text-3xl text-purple-500 drop-shadow-md"></i>
+                    <TechBadge className="h-8 w-8 rounded-lg bg-purple-500 text-xl text-white drop-shadow-md">B</TechBadge>
                   </div>
                   <span className="text-xs font-medium text-sub">Bootstrap</span>
                 </div>
@@ -502,7 +578,7 @@ function App() {
             <div className="bento-card md:col-span-3 rounded-[2rem] p-6 reveal flex flex-col">
               <h3 className="font-bold text-xl mb-5 flex items-center gap-3">
                 <span className="text-accent text-2xl">
-                  <i className="fas fa-briefcase"></i>
+                  <BriefcaseBusiness className="h-7 w-7" aria-hidden="true" />
                 </span>
                 <span className="text-gradient">{L.experienceSectionTitle}</span>
               </h3>
@@ -520,19 +596,19 @@ function App() {
                       </div>
                       <div className="flex flex-col gap-1.5 text-sm text-sub">
                         <div className="flex items-center gap-2">
-                          <i className="fas fa-building text-xs text-accent w-4"></i>
+                          <Building2 className="h-4 w-4 text-accent" aria-hidden="true" />
                           <span>{exp.company}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <i className="fas fa-map-marker-alt text-xs text-accent w-4"></i>
+                          <MapPin className="h-4 w-4 text-accent" aria-hidden="true" />
                           <span>{exp.location}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <i className="fas fa-id-badge text-xs text-accent w-4"></i>
+                          <IdCard className="h-4 w-4 text-accent" aria-hidden="true" />
                           <span>{exp.experienceType || "Job"}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <i className="fas fa-laptop-code text-xs text-accent w-4"></i>
+                          <Laptop className="h-4 w-4 text-accent" aria-hidden="true" />
                           <span>{exp.type}</span>
                         </div>
                       </div>
@@ -548,7 +624,7 @@ function App() {
             <div className="bento-card md:col-span-3 rounded-[2rem] p-4 reveal flex flex-col">
               <h3 className="font-bold text-xl mb-1 flex items-center gap-3">
                 <span className="text-accent text-2xl">
-                  <i className="fab fa-github"></i>
+                  <GithubLogo className="h-7 w-7" />
                 </span>
                 <span className="text-gradient">{L.githubStatsSectionTitle}</span>
                 {socials?.github && (
@@ -558,7 +634,7 @@ function App() {
                     rel="noopener noreferrer"
                     className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-accent/10 text-accent border border-accent/30 hover:bg-accent hover:text-zinc-900 hover:border-zinc-300 transition-all duration-200 shrink-0"
                   >
-                    <i className="fas fa-external-link-alt text-[10px]"></i>
+                    <ExternalLink className="h-3 w-3" aria-hidden="true" />
                     {L.viewProfileBtn}
                   </a>
                 )}
@@ -614,7 +690,7 @@ function App() {
             <div className="bento-card md:col-span-3 rounded-[2rem] p-6 reveal flex flex-col">
               <h3 className="font-bold text-xl mb-5 flex items-center gap-3">
                 <span className="text-accent text-2xl">
-                  <i className="fas fa-code"></i>
+                  <Code2 className="h-7 w-7" aria-hidden="true" />
                 </span>
                 <span className="text-gradient">{L.projectsSectionTitle}</span>
               </h3>
@@ -629,7 +705,7 @@ function App() {
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center">
-                            <i className="fas fa-rocket text-accent text-lg"></i>
+                            <Rocket className="h-5 w-5 text-accent" aria-hidden="true" />
                           </div>
                           <div className="min-w-0">
                             <h4 className="text-base font-bold text-txt break-words">{project.title}</h4>
@@ -645,7 +721,7 @@ function App() {
                             rel="noopener noreferrer"
                             className="self-start sm:self-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-accent/10 text-accent border border-accent/30 hover:bg-accent hover:text-zinc-900 hover:border-zinc-300 transition-all duration-200 shrink-0"
                           >
-                            <i className="fas fa-external-link-alt text-[10px]"></i>
+                            <ExternalLink className="h-3 w-3" aria-hidden="true" />
                             {L.viewProjectBtn}
                           </a>
                         )}
@@ -679,7 +755,7 @@ function App() {
             <div className="bento-card md:col-span-3 rounded-[2rem] p-6 reveal flex flex-col">
               <h3 className="font-bold text-xl mb-5 flex items-center gap-3">
                 <span className="text-accent text-2xl">
-                  <i className="fas fa-code-branch"></i>
+                  <GitBranch className="h-7 w-7" aria-hidden="true" />
                 </span>
                 <span className="text-gradient">Open Source Contributions</span>
               </h3>
@@ -693,7 +769,7 @@ function App() {
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center shrink-0">
-                          <i className="fas fa-building text-accent text-lg"></i>
+                          <Building2 className="h-5 w-5 text-accent" aria-hidden="true" />
                         </div>
                         <h4 className="text-base font-bold text-txt truncate">{item.companyName}</h4>
                       </div>
@@ -704,7 +780,7 @@ function App() {
                           rel="noopener noreferrer"
                           className="self-start sm:self-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-accent/10 text-accent border border-accent/30 hover:bg-accent hover:text-zinc-900 hover:border-zinc-300 transition-all duration-200 shrink-0"
                         >
-                          <i className="fas fa-external-link-alt text-[10px]"></i>
+                          <ExternalLink className="h-3 w-3" aria-hidden="true" />
                           View Contribution
                         </a>
                       )}
@@ -720,7 +796,7 @@ function App() {
             <div className="bento-card md:col-span-3 rounded-[2rem] p-6 reveal">
               <h3 className="font-bold text-xl mb-5 flex items-center gap-3">
                 <span className="text-accent text-2xl">
-                  <i className="fas fa-share-nodes"></i>
+                  <Share2 className="h-7 w-7" aria-hidden="true" />
                 </span>
                 <span className="text-gradient">{L.connectSectionTitle}</span>
               </h3>
@@ -732,7 +808,7 @@ function App() {
                     className="flex flex-col items-center gap-3 p-5 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-red-500 dark:hover:border-red-500 group transition-all duration-300"
                   >
                     <div className="w-12 h-12 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center text-2xl group-hover:scale-110 group-hover:bg-red-500 group-hover:text-white transition-all duration-300">
-                      <i className="fas fa-envelope"></i>
+                      <Mail className="h-7 w-7" aria-hidden="true" />
                     </div>
                     <div className="text-center">
                       <span className="block font-bold text-sm text-txt">Email</span>
@@ -749,7 +825,7 @@ function App() {
                     className="flex flex-col items-center gap-3 p-5 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-blue-600 dark:hover:border-blue-600 group transition-all duration-300"
                   >
                     <div className="w-12 h-12 rounded-xl bg-blue-600/10 text-blue-600 flex items-center justify-center text-2xl group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
-                      <i className="fab fa-linkedin-in"></i>
+                      <LinkedinLogo className="h-7 w-7" />
                     </div>
                     <div className="text-center">
                       <span className="block font-bold text-sm text-txt">LinkedIn</span>
@@ -766,7 +842,7 @@ function App() {
                     className="flex flex-col items-center gap-3 p-5 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-600 dark:hover:border-zinc-400 group transition-all duration-300"
                   >
                     <div className="w-12 h-12 rounded-xl bg-icon-bg text-icon-txt flex items-center justify-center text-2xl group-hover:scale-110 group-hover:bg-black group-hover:text-white transition-all duration-300">
-                      <i className="fab fa-github"></i>
+                      <GithubLogo className="h-7 w-7" />
                     </div>
                     <div className="text-center">
                       <span className="block font-bold text-sm text-txt">GitHub</span>
@@ -783,7 +859,7 @@ function App() {
                     className="flex flex-col items-center gap-3 p-5 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-600 dark:hover:border-zinc-400 group transition-all duration-300"
                   >
                     <div className="w-12 h-12 rounded-xl bg-icon-bg text-icon-txt flex items-center justify-center text-2xl group-hover:scale-110 group-hover:bg-black group-hover:text-white transition-all duration-300">
-                      <i className="fa-brands fa-x-twitter"></i>
+                      <XLogo className="h-7 w-7" />
                     </div>
                     <div className="text-center">
                       <span className="block font-bold text-sm text-txt">Twitter</span>
