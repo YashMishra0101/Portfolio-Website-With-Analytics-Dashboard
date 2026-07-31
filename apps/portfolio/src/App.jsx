@@ -10,14 +10,14 @@ const DEFAULT_CONFIG = {
   name: "Yash.RK.Mishra",
   specialization: "Full Stack Developer",
   location: "Based in India",
-  bio: "Full Stack Developer ready to build scalable web applications using the MERN Stack and TypeScript.",
+  bio: "Full Stack Developer ready to build scalable web applications using TypeScript and MERN-PERN Stack.",
   status: "Actively seeking new job opportunities",
   resumeUrl: "/resume.pdf",
   resumeAvailable: false,
   githubUsername: "YashMishra0101",
   tagline: "Learning · Building · Improving",
   githubStatsSubtitle: "Proof I am a Developer",
-  bioHighlightKeywords: "MERN Stack,TypeScript",
+  bioHighlightKeywords: "TypeScript,MERN-PERN",
   // All UI labels — fully controllable from dashboard
   labels: {
     resumeCardTitle: "Resume",
