@@ -515,28 +515,47 @@ function App() {
                   <span className="text-xs font-medium text-sub">Docker</span>
                 </div>
 
-                {/* Firebase */}
+                {/* Redis */}
                 <div className="tech-icon flex flex-col items-center gap-2">
                   <div className="w-10 h-10 flex items-center justify-center">
-                    <svg className="w-8 h-8 drop-shadow-md" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M3.89 15.67L6.23 3.08L9.23 9.08L3.89 15.67Z" fill="#FFA000" />
-                      <path d="M16.71 14.5L14.47 2L12 6.5L9.23 9.08L16.71 14.5Z" fill="#F57C00" />
-                      <path d="M16.71 14.5L12 18.5L3.89 15.67L12 6.5L16.71 14.5Z" fill="#FFCA28" />
-                      <path d="M12 18.5L16.71 14.5L18.35 15.5L12 22L5.65 15.5L3.89 15.67L12 18.5Z" fill="#FFA000" />
+                    <svg className="w-9 h-9 drop-shadow-md" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <ellipse cx="16" cy="26" rx="13" ry="3.5" fill="#A41E11" />
+                      <ellipse cx="16" cy="26" rx="13" ry="3.5" fill="url(#redis_shadow)" />
+                      <ellipse cx="16" cy="8" rx="13" ry="4.5" fill="#D92B3A" />
+                      <rect x="3" y="8" width="26" height="18" fill="#D92B3A" />
+                      <ellipse cx="16" cy="8" rx="13" ry="4.5" fill="#FF6B6B" />
+                      <text x="16" y="19" fontFamily="monospace" fontWeight="bold" fontSize="6.5px" fill="white" textAnchor="middle" dominantBaseline="middle" letterSpacing="0.5">redis</text>
+                      <defs>
+                        <linearGradient id="redis_shadow" x1="3" y1="26" x2="29" y2="26" gradientUnits="userSpaceOnUse">
+                          <stop stopColor="#7A1510" />
+                          <stop offset="1" stopColor="#A41E11" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
                     </svg>
                   </div>
-                  <span className="text-xs font-medium text-sub">Firebase</span>
+                  <span className="text-xs font-medium text-sub">Redis</span>
                 </div>
 
-                {/* Supabase */}
+                {/* Zustand */}
                 <div className="tech-icon flex flex-col items-center gap-2">
                   <div className="w-10 h-10 flex items-center justify-center">
-                    <svg className="w-8 h-8 drop-shadow-md" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M13.3 21.88C12.77 22.47 11.77 22.1 11.77 21.31V12.76H18.87C19.87 12.76 20.42 13.96 19.77 14.67L13.3 21.88Z" fill="#3ECF8E" />
-                      <path d="M10.7 2.12C11.23 1.53 12.23 1.9 12.23 2.69V11.24H5.13C4.13 11.24 3.58 10.04 4.23 9.33L10.7 2.12Z" fill="#3ECF8E" opacity="0.6" />
+                    <svg className="w-9 h-9 drop-shadow-md" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="32" height="32" rx="8" fill="#433E6E" />
+                      {/* Bear head */}
+                      <circle cx="16" cy="15" r="8" fill="#C8A97A" />
+                      {/* Bear ears */}
+                      <circle cx="9.5" cy="9" r="3" fill="#C8A97A" />
+                      <circle cx="22.5" cy="9" r="3" fill="#C8A97A" />
+                      <circle cx="9.5" cy="9" r="1.6" fill="#A07850" />
+                      <circle cx="22.5" cy="9" r="1.6" fill="#A07850" />
+                      {/* Face */}
+                      <circle cx="13" cy="14" r="1.2" fill="#3D2B1A" />
+                      <circle cx="19" cy="14" r="1.2" fill="#3D2B1A" />
+                      <ellipse cx="16" cy="17.5" rx="3" ry="2" fill="#A07850" />
+                      <ellipse cx="16" cy="18" rx="1.5" ry="0.8" fill="#3D2B1A" />
                     </svg>
                   </div>
-                  <span className="text-xs font-medium text-sub">Supabase</span>
+                  <span className="text-xs font-medium text-sub">Zustand</span>
                 </div>
 
                 {/* Tailwind */}
@@ -547,14 +566,6 @@ function App() {
                     </svg>
                   </div>
                   <span className="text-xs font-medium text-sub">Tailwind</span>
-                </div>
-
-                {/* Bootstrap */}
-                <div className="tech-icon flex flex-col items-center gap-2">
-                  <div className="w-10 h-10 flex items-center justify-center">
-                    <TechBadge className="h-8 w-8 rounded-lg bg-purple-500 text-xl text-white drop-shadow-md">B</TechBadge>
-                  </div>
-                  <span className="text-xs font-medium text-sub">Bootstrap</span>
                 </div>
 
                 {/* shadcn/ui */}
@@ -578,6 +589,30 @@ function App() {
                     </svg>
                   </div>
                   <span className="text-xs font-medium text-sub">Ant Design</span>
+                </div>
+
+                {/* Firebase */}
+                <div className="tech-icon flex flex-col items-center gap-2">
+                  <div className="w-10 h-10 flex items-center justify-center">
+                    <svg className="w-8 h-8 drop-shadow-md" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M3.89 15.67L6.23 3.08L9.23 9.08L3.89 15.67Z" fill="#FFA000" />
+                      <path d="M16.71 14.5L14.47 2L12 6.5L9.23 9.08L16.71 14.5Z" fill="#F57C00" />
+                      <path d="M16.71 14.5L12 18.5L3.89 15.67L12 6.5L16.71 14.5Z" fill="#FFCA28" />
+                      <path d="M12 18.5L16.71 14.5L18.35 15.5L12 22L5.65 15.5L3.89 15.67L12 18.5Z" fill="#FFA000" />
+                    </svg>
+                  </div>
+                  <span className="text-xs font-medium text-sub">Firebase</span>
+                </div>
+
+                {/* Supabase */}
+                <div className="tech-icon flex flex-col items-center gap-2">
+                  <div className="w-10 h-10 flex items-center justify-center">
+                    <svg className="w-8 h-8 drop-shadow-md" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M13.3 21.88C12.77 22.47 11.77 22.1 11.77 21.31V12.76H18.87C19.87 12.76 20.42 13.96 19.77 14.67L13.3 21.88Z" fill="#3ECF8E" />
+                      <path d="M10.7 2.12C11.23 1.53 12.23 1.9 12.23 2.69V11.24H5.13C4.13 11.24 3.58 10.04 4.23 9.33L10.7 2.12Z" fill="#3ECF8E" opacity="0.6" />
+                    </svg>
+                  </div>
+                  <span className="text-xs font-medium text-sub">Supabase</span>
                 </div>
 
               </div>
@@ -660,7 +695,7 @@ function App() {
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                <div className="group relative bg-zinc-50 dark:bg-zinc-900/50 rounded-xl p-2 border border-zinc-200 dark:border-zinc-800 hover:border-accent dark:hover:border-accent transition-all duration-300 flex items-center justify-center overflow-hidden h-[165px]">
+                <div className="group relative bg-zinc-50 dark:bg-zinc-900/50 rounded-xl p-2 border border-zinc-200 dark:border-zinc-800 hover:border-accent dark:hover:border-accent transition-all duration-300 flex items-center justify-center overflow-hidden h-[190px]">
                   <div className="absolute inset-0 bg-gradient-to-r from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 animate-pulse"></div>
                   <img
                     src={`https://github-readme-stats-eight-theta.vercel.app/api?username=${githubUsername}&show_icons=true&theme=tokyonight&hide_border=true&include_all_commits=true&count_private=true`}
@@ -671,7 +706,7 @@ function App() {
                   />
                 </div>
 
-                <div className="group relative bg-zinc-50 dark:bg-zinc-900/50 rounded-xl p-2 border border-zinc-200 dark:border-zinc-800 hover:border-accent dark:hover:border-accent transition-all duration-300 flex items-center justify-center overflow-hidden  h-[165px]">
+                <div className="group relative bg-zinc-50 dark:bg-zinc-900/50 rounded-xl p-2 border border-zinc-200 dark:border-zinc-800 hover:border-accent dark:hover:border-accent transition-all duration-300 flex items-center justify-center overflow-hidden h-[190px]">
                   <div className="absolute inset-0 bg-gradient-to-r from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 animate-pulse"></div>
                   <img
                     src={`https://github-readme-stats-eight-theta.vercel.app/api/top-langs/?username=${githubUsername}&layout=compact&langs_count=8&theme=tokyonight&hide_border=true`}
@@ -683,10 +718,10 @@ function App() {
                 </div>
               </div>
 
-              <div className="group relative bg-zinc-50 dark:bg-zinc-900/50 rounded-xl p-2 border border-zinc-200 dark:border-zinc-800 hover:border-accent dark:hover:border-accent transition-all duration-300 flex items-center justify-center overflow-hidden h-[165px]">
+              <div className="group relative bg-zinc-50 dark:bg-zinc-900/50 rounded-xl p-2 border border-zinc-200 dark:border-zinc-800 hover:border-accent dark:hover:border-accent transition-all duration-300 flex items-center justify-center overflow-hidden h-[190px]">
                 <div className="absolute inset-0 bg-gradient-to-r from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 animate-pulse"></div>
                 <img
-                  src={`https://streak-stats.demolab.com?user=${githubUsername}&hide_border=true&background=00000000&theme=${theme === "dark" ? "tokyonight" : "default"}`}
+                  src={`https://github-readme-streak-stats-nnqf.vercel.app?user=${githubUsername}&theme=tokyonight&hide_border=true`}
                   alt="GitHub Streak"
                   className="w-full h-full object-contain transition-all duration-500 group-hover:scale-105 relative z-10"
                   loading="lazy"
@@ -697,7 +732,7 @@ function App() {
           )}
 
           {/* ── Projects Card ── */}
-          {sections.showProjects && (
+          {sections.showProjects && projects.filter(p => p.title && p.title.trim() !== "").length > 0 && (
             <div className="bento-card md:col-span-3 rounded-[2rem] p-6 reveal flex flex-col">
               <h3 className="font-bold text-xl mb-5 flex items-center gap-3">
                 <span className="text-accent text-2xl">
