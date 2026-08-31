@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { doc, setDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import {
   Save, User, Link as LinkIcon, AlertCircle, CheckCircle,
   Briefcase, Code, Plus, Trash2, ImageOff, ArrowUp, ArrowDown,
-  Eye, EyeOff, Settings, GitFork, Lock, Tag, Type, GitBranch,
+  Eye, EyeOff, Settings, GitFork, Lock, Tag, Type, GitBranch, Image,
+  Upload, X, CloudUpload,
 } from "lucide-react";
 
 const CONTENT_DOC_COLLECTION = "portfolio";
@@ -23,6 +24,8 @@ const DEFAULT_CONTENT = {
   // Resume
   resumeUrl: "/resume.pdf",
   resumeAvailable: false,
+  // Profile photo (Cloudinary URL)
+  profilePhotoUrl: "",
   // GitHub
   githubUsername: "YashMishra0101",
   githubStatsSubtitle: "Proof I am a Developer",
@@ -73,6 +76,7 @@ function normalizeContent(data) {
   return {
     ...DEFAULT_CONTENT,
     ...data,
+    profilePhotoUrl: typeof data.profilePhotoUrl === "string" ? data.profilePhotoUrl : "",
     labels: { ...DEFAULT_CONTENT.labels, ...(data.labels || {}) },
     socials: { ...DEFAULT_CONTENT.socials, ...(data.socials || {}) },
     sections: { ...DEFAULT_CONTENT.sections, ...(data.sections || {}) },
@@ -190,6 +194,242 @@ function SaveSnackbar({ notification, onClose }) {
       >
         {isSuccess ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
         <span className="uppercase tracking-wide">{notification.text}</span>
+      </div>
+    </div>
+  );
+}
+
+// ─── Cloudinary direct-upload component ───────────────────────────────────────
+const CLOUD_NAME  = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+const CLOUDINARY_CONFIGURED = Boolean(CLOUD_NAME && UPLOAD_PRESET);
+
+function ProfilePhotoUploader({ url, onChange, readOnly }) {
+  const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState("");
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const uploadToCloudinary = useCallback(async (file) => {
+    if (!file) return;
+    if (!CLOUDINARY_CONFIGURED) {
+      setUploadError("Cloudinary env vars not set. See .env.example for setup.");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Only image files are supported.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError("File too large. Max size is 10 MB.");
+      return;
+    }
+
+    setUploadError("");
+    setUploading(true);
+    setUploadProgress(0);
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", UPLOAD_PRESET);
+    formData.append("folder", "portfolio");
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
+    };
+
+    xhr.onload = () => {
+      setUploading(false);
+      if (xhr.status === 200) {
+        const res = JSON.parse(xhr.responseText);
+        onChange(res.secure_url);
+        setUploadProgress(100);
+      } else {
+        setUploadError("Upload failed. Check your cloud name and upload preset.");
+        setUploadProgress(0);
+      }
+    };
+
+    xhr.onerror = () => {
+      setUploading(false);
+      setUploadError("Network error during upload. Please try again.");
+      setUploadProgress(0);
+    };
+
+    xhr.send(formData);
+  }, [onChange]);
+
+  const handleFileChange = (e) => uploadToCloudinary(e.target.files?.[0]);
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    uploadToCloudinary(e.dataTransfer.files?.[0]);
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+      {/* Left: Uploader + fallback URL */}
+      <div className="space-y-4">
+
+        {/* Cloudinary not configured warning */}
+        {!CLOUDINARY_CONFIGURED && (
+          <div className="flex items-start gap-2 p-3 bg-amber-950/20 border border-amber-900/40 rounded-sm">
+            <AlertCircle size={13} className="text-amber-500 shrink-0 mt-0.5" />
+            <div className="space-y-1.5">
+              <p className="text-[9px] text-amber-400 font-mono font-bold uppercase tracking-wider">
+                Cloudinary Not Configured
+              </p>
+              <p className="text-[9px] text-amber-500/80 font-mono leading-relaxed">
+                Add <span className="text-amber-300">VITE_CLOUDINARY_CLOUD_NAME</span> and{" "}
+                <span className="text-amber-300">VITE_CLOUDINARY_UPLOAD_PRESET</span> to your{" "}
+                <span className="text-amber-300">.env</span> file to enable direct uploads.
+              </p>
+              <p className="text-[9px] text-amber-600 font-mono">
+                See <span className="text-amber-400">.env.example</span> for setup instructions.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Drop zone */}
+        <div
+          className={`relative border-2 border-dashed rounded-sm transition-all duration-200 cursor-pointer ${
+            isDragOver
+              ? "border-emerald-500 bg-emerald-950/20"
+              : "border-zinc-700 bg-zinc-900/40 hover:border-zinc-500 hover:bg-zinc-900/60"
+          } ${!CLOUDINARY_CONFIGURED || readOnly || uploading ? "opacity-50 cursor-not-allowed pointer-events-none" : ""}`}
+          onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+          onDragLeave={() => setIsDragOver(false)}
+          onDrop={handleDrop}
+          onClick={() => !readOnly && !uploading && CLOUDINARY_CONFIGURED && fileInputRef.current?.click()}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
+            disabled={readOnly || uploading || !CLOUDINARY_CONFIGURED}
+          />
+
+          <div className="flex flex-col items-center gap-2 py-8 px-4">
+            {uploading ? (
+              <CloudUpload size={28} className="text-emerald-500 animate-pulse" />
+            ) : (
+              <Upload size={28} className={isDragOver ? "text-emerald-400" : "text-zinc-600"} />
+            )}
+            <div className="text-center">
+              <p className="text-[10px] font-mono font-bold text-zinc-300 uppercase tracking-wider">
+                {uploading ? "Uploading to Cloudinary…" : isDragOver ? "Drop to upload" : "Drag & drop or click to upload"}
+              </p>
+              <p className="text-[9px] text-zinc-600 font-mono mt-0.5">
+                JPG, PNG, WebP, GIF — max 10 MB
+              </p>
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          {uploading && (
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-800 rounded-b-sm overflow-hidden">
+              <div
+                className="h-full bg-emerald-500 transition-all duration-300"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+          )}
+          {uploading && (
+            <p className="absolute bottom-1.5 right-3 text-[9px] text-emerald-500 font-mono">
+              {uploadProgress}%
+            </p>
+          )}
+        </div>
+
+        {/* Upload error */}
+        {uploadError && (
+          <div className="flex items-center gap-2 p-2.5 bg-red-950/20 border border-red-900/40 rounded-sm">
+            <AlertCircle size={11} className="text-red-400 shrink-0" />
+            <p className="text-[9px] text-red-400 font-mono">{uploadError}</p>
+          </div>
+        )}
+
+        {/* Fallback: manual URL input */}
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <label className="text-[10px] text-zinc-500 uppercase font-bold font-mono tracking-wider">
+              Or paste URL manually
+            </label>
+          </div>
+          <input
+            type="url"
+            readOnly={readOnly}
+            className="tactical-input"
+            value={url}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="https://res.cloudinary.com/your-cloud/image/upload/..."
+          />
+        </div>
+
+        {/* Clear button */}
+        {url.trim() && !readOnly && (
+          <button
+            type="button"
+            onClick={() => { onChange(""); setUploadProgress(0); setUploadError(""); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-mono uppercase tracking-wider text-red-400 border border-red-900/40 bg-red-950/20 hover:bg-red-950/40 transition-colors rounded-sm"
+          >
+            <X size={10} /> Clear photo
+          </button>
+        )}
+
+        {!url.trim() && (
+          <div className="flex items-center gap-2 p-2.5 bg-amber-950/20 border border-amber-900/40 rounded-sm">
+            <ImageOff size={11} className="text-amber-500 shrink-0" />
+            <p className="text-[9px] text-amber-500/80 font-mono">
+              No photo set — portfolio shows a blank avatar placeholder.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Right: Live preview */}
+      <div className="flex flex-col items-center gap-3">
+        <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-widest self-start">Live Preview</p>
+        <div className="relative w-36 h-36 rounded-full overflow-hidden border-2 border-zinc-700 bg-zinc-900 flex items-center justify-center">
+          {url.trim() ? (
+            <img
+              key={url}
+              src={url}
+              alt="Profile preview"
+              className="w-full h-full object-cover"
+              onError={(e) => { e.currentTarget.style.display = "none"; }}
+            />
+          ) : (
+            <Image size={36} className="text-zinc-700" />
+          )}
+          {uploading && (
+            <div className="absolute inset-0 bg-zinc-900/70 flex flex-col items-center justify-center gap-1">
+              <CloudUpload size={20} className="text-emerald-500 animate-pulse" />
+              <span className="text-[9px] text-emerald-400 font-mono">{uploadProgress}%</span>
+            </div>
+          )}
+        </div>
+        {url.trim() && !uploading && (
+          <p className="text-[9px] text-emerald-500 font-mono">✓ Active — portfolio using this photo</p>
+        )}
+        {/* Setup guide */}
+        <div className="w-full p-3 bg-zinc-900/60 border border-zinc-800/60 rounded-sm space-y-1.5">
+          <p className="text-[9px] text-zinc-400 font-mono uppercase tracking-widest font-bold">Cloudinary setup</p>
+          <ol className="text-[9px] text-zinc-600 font-mono space-y-1 list-decimal list-inside leading-relaxed">
+            <li>Sign up at <span className="text-zinc-400">cloudinary.com</span></li>
+            <li>Settings → Upload → <span className="text-zinc-400">Add upload preset</span></li>
+            <li>Set <span className="text-zinc-400">Signing Mode = Unsigned</span></li>
+            <li>Copy <span className="text-zinc-400">Cloud Name</span> + <span className="text-zinc-400">Preset Name</span></li>
+            <li>Add both to your <span className="text-zinc-400">.env</span> file</li>
+          </ol>
+        </div>
       </div>
     </div>
   );
@@ -346,21 +586,19 @@ export default function ContentManager() {
         </p>
       </div>
 
-      {/* ── Global notice: Firebase free plan ── */}
-      <div className="flex items-start gap-3 p-3.5 bg-amber-950/20 border border-amber-900/40 rounded-sm">
-        <ImageOff size={15} className="text-amber-500 shrink-0 mt-0.5" />
-        <div>
-          <p className="text-[10px] text-amber-400 font-mono font-bold uppercase tracking-wider">
-            Firebase Free Plan — Image / File Upload Disabled
-          </p>
-          <p className="text-[9px] text-amber-500/70 font-mono leading-relaxed mt-0.5">
-            Profile pictures and tech-stack icons are managed directly in code.
-            Upgrade to Firebase Blaze to enable storage uploads.
-          </p>
-        </div>
-      </div>
-
       <form onSubmit={handleSave} className="flex flex-col gap-5 w-full">
+
+      {/* ══════════════════════════════════════════════════════════════
+          §0  PROFILE PHOTO
+      ══════════════════════════════════════════════════════════════ */}
+      <SectionCard>
+        <SectionHeader icon={<Image size={13} />} label="Profile Photo" color="emerald" badge="cloudinary upload" />
+        <ProfilePhotoUploader
+          url={content.profilePhotoUrl || ""}
+          onChange={(url) => updateField("profilePhotoUrl", url)}
+          readOnly={isReadOnly}
+        />
+      </SectionCard>
 
         {/* ══════════════════════════════════════════════════════════════
             §1  IDENTITY CORE

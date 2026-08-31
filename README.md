@@ -83,10 +83,10 @@ A live feed of visitor information for quick monitoring:
   > **Note:** This location is an estimation based on IP and may not be 100% exact.
 
 #### C. Content Management (Live Edit)
-A simple interface that lets the owner control **~95% of the frontend portfolio** without any coding or new deployments:
+A simple interface that lets the owner control **~100% of the frontend portfolio** without any coding or new deployments:
 - **Text Control:** Quickly update bios, skills, project notes, and work experience.
 - **Section Visibility:** Hide or show entire sections (like Projects or Tech Stack) instantly.
-- **Plan Note:** Due to Firebase Free plan limits, updating images still requires manual changes in the code.
+- **Profile Photo:** Upload your profile photo directly from the dashboard via Cloudinary — no code changes needed.
 
 #### D. Visitor Management (Data Control)
 Tools to manage and clean up your visitor data:
@@ -164,6 +164,29 @@ VITE_FIREBASE_STORAGE_BUCKET="..."
 VITE_FIREBASE_MESSAGING_SENDER_ID="..."
 VITE_FIREBASE_APP_ID="..."
 ```
+
+### 2.5. Set Up Cloudinary (Profile Photo Upload)
+This project uses **Cloudinary** to manage your profile photo from the dashboard — upload once, display everywhere, no code changes needed.
+
+#### Get your credentials:
+1. Sign up for free at [cloudinary.com](https://cloudinary.com)
+2. After login, your **Cloud Name** is displayed on the top-left of the home dashboard (looks like `dab12xyz`)
+
+#### Create an Upload Preset:
+1. Go to **Settings** → **Upload** tab
+2. Scroll to **"Upload presets"** → click **"Add upload preset"**
+3. Set **Signing mode** to **`Unsigned`** — this is required for browser-based uploads
+4. Give it a name (e.g. `portfolio_upload`) → click **Save**
+
+#### Add to your dashboard `.env`:
+```bash
+# apps/dashboard/.env
+VITE_CLOUDINARY_CLOUD_NAME="your_cloud_name"
+VITE_CLOUDINARY_UPLOAD_PRESET="your_preset_name"
+```
+
+> [!NOTE]
+> No API secret is needed. The unsigned upload preset is Cloudinary's designed solution for secure browser-direct uploads. Only the dashboard `.env` needs these — the portfolio reads the photo URL from Firestore automatically.
 
 ### 3. Enable Authentication
 1. Open your Firebase project dashboard in your web browser.
@@ -265,7 +288,13 @@ This project was built primarily for personal use. However, if you find bugs or 
 ## 📜 License
 
 ⚠️ **IMPORTANT NOTICE FOR FORKING:**
-If you choose to fork or clone this repository to use as your own portfolio, you **MUST completely remove all of the original author's personal information, emails, URLs, and images** before deploying to any environment. You will also need to replace the Firestore document structures with your own data schema. Please read the LICENSE carefully.
+If you fork or clone this repository to use as your own portfolio, **most personal content is managed directly from the Dashboard** — minimal code edits required. Simply:
+1. Configure your own **Firebase** project and add your credentials to the `.env` files.
+2. Set up your own **Cloudinary** account and add your Cloud Name + Upload Preset to the dashboard `.env`.
+3. Log into your Dashboard → **Content Manager** and fill in your own name, bio, social links, experience, projects, and upload your profile photo.
+4. Everything else — GitHub stats, section visibility, and all displayed text — updates live from the dashboard.
+
+Please read the LICENSE carefully before using this project.
 
 <br/>
 

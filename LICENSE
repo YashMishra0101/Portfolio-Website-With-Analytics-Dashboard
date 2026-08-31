@@ -22,11 +22,9 @@ By using, forking, or deploying this software in any form, you fully accept sole
 
 IMPORTANT NOTICE — PERSONAL USE & DATA RESPONSIBILITY
 
-This project was built strictly for the author's personal use. If you choose to fork or clone this repository for your own purposes, you MUST completely remove all of the original author's personal information, emails, URLs, and images before deploying to any environment.
+This project was built for the author personal use. If you fork or clone this repository for your own purposes, you must NOT use or deploy any of the original author's personal information — including but not limited to their name, bio, photo, email, social links, GitHub username, or project data. Replace all such content with your own information via the Dashboard → Content Manager before deploying to any environment.
 
-You will also need to replace the Firestore document structures with your own data schema so the Content Manager correctly maps to your information.
-
-Failure to do so is a violation of this license and the author's privacy.
+Failure to do so is a violation of this license and the author privacy.
 
 DISCLAIMER OF WARRANTY
 

@@ -62,6 +62,7 @@ const DEFAULT_CONFIG = {
   status: "Actively seeking new job opportunities",
   resumeUrl: "/resume.pdf",
   resumeAvailable: false,
+  profilePhotoUrl: "",
   githubUsername: "YashMishra0101",
   tagline: "Learning · Building · Improving",
   githubStatsSubtitle: "Proof I am a Developer",
@@ -241,7 +242,7 @@ function App() {
   // Destructure for convenience (all fields guaranteed by mergeConfig)
   const {
     name, specialization, location, bio, status,
-    resumeUrl, resumeAvailable,
+    resumeUrl, resumeAvailable, profilePhotoUrl,
     githubUsername, tagline, githubStatsSubtitle, bioHighlightKeywords,
     labels, socials, sections, experience, projects, openSourceContributions,
   } = config;
@@ -281,11 +282,19 @@ function App() {
             <div className="relative flex-shrink-0">
               <div className="w-36 h-36 relative group-hover:scale-105 transition-all duration-500">
                 <div className="absolute inset-[6px] rounded-full overflow-hidden shadow-lg z-0">
-                  <img
-                    src="/my-profile.png?v=2"
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
+                  {profilePhotoUrl && profilePhotoUrl.trim() !== "" ? (
+                    <img
+                      src={profilePhotoUrl}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-zinc-800 text-zinc-600">
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12 opacity-40">
+                        <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                      </svg>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
