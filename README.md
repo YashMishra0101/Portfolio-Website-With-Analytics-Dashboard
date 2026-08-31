@@ -9,8 +9,6 @@
 [![PNPM](https://img.shields.io/badge/PNPM-Workspaces-F69220?style=for-the-badge&logo=pnpm&logoColor=white)](https://pnpm.io)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![Open Source](https://img.shields.io/badge/Open%20Source-Yes-brightgreen?style=for-the-badge&logo=open-source-initiative&logoColor=white)](https://opensource.org/)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg?style=for-the-badge)](https://github.com/YashMishra0101/Personal-Task-Manager/graphs/commit-activity)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg?style=for-the-badge)](https://github.com/YashMishra0101/Personal-Task-Manager/pulls)
 
 
 *“The goal is to turn data into information, and information into insight.”*
@@ -277,7 +275,5 @@ If you choose to fork or clone this repository to use as your own portfolio, you
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/yash-mishra-356280223/)
 [![X](https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/YashRKMishra1)
-
-**[⭐ Star this repository to show your support](#)**
 
 </div>
