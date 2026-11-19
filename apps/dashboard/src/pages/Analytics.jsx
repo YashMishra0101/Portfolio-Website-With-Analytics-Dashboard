@@ -60,6 +60,20 @@ const PIE_COLORS = [
   COLORS.violet,
 ];
 
+function CustomTooltip({ active, payload, label }) {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-zinc-950 border border-zinc-800 p-2 text-[10px] font-mono shadow-xl">
+        <p className="text-zinc-400 mb-1">{label}</p>
+        <p className="text-emerald-400 font-bold">
+          {payload[0].value} Visits
+        </p>
+      </div>
+    );
+  }
+  return null;
+}
+
 export default function Analytics() {
   const [data, setData] = useState({
     geo: [],
@@ -180,7 +194,7 @@ export default function Analytics() {
         if (r.includes("http"))
           try {
             r = new URL(r).hostname.replace("www.", "");
-          } catch (e) { }
+          } catch (_e) { }
         sources[r] = (sources[r] || 0) + 1;
       });
       const source = Object.entries(sources)
@@ -216,20 +230,6 @@ export default function Analytics() {
     });
     return () => unsub();
   }, [graphFilter]);
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-zinc-950 border border-zinc-800 p-2 text-[10px] font-mono shadow-xl">
-          <p className="text-zinc-400 mb-1">{label}</p>
-          <p className="text-emerald-400 font-bold">
-            {payload[0].value} Visits
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <div className="space-y-6">
@@ -344,11 +344,8 @@ export default function Analytics() {
                     fill="#18181b"
                     stroke="#27272a"
                     strokeWidth={0.5}
-                    style={{
-                      default: { outline: "none" },
-                      hover: { fill: "#1f1f23", outline: "none" },
-                      pressed: { outline: "none" },
-                    }}
+                    style={{ outline: "none" }}
+                    className="hover:fill-[#1f1f23] focus:outline-none"
                   />
                 ))
               }

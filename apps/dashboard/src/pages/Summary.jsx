@@ -24,6 +24,7 @@ import {
 } from "react-simple-maps";
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+
 import {
   ResponsiveContainer,
   AreaChart,
@@ -59,9 +60,9 @@ const PIE_COLORS = [
 
 export default function Summary() {
   const [timeRange, setTimeRange] = useState("Total");
-  const [allTimeTotal, setAllTimeTotal] = useState(0);
+  const [, setAllTimeTotal] = useState(0);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [stats, setStats] = useState({
     total: 0,
     desktop: 0,
@@ -190,7 +191,7 @@ export default function Summary() {
             } else if (r.startsWith("android-app://")) {
               r = r.split("//")[1].split("/")[0]; // extract package name
             }
-          } catch (e) {
+          } catch (_e) {
             // keep original if parse fails
           }
           sources[r] = (sources[r] || 0) + 1;
@@ -504,10 +505,10 @@ export default function Summary() {
                       endAngle={-270}
                       dataKey="value"
                       stroke="none"
-                      label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                      label={({ _name, percent }) => `${(percent * 100).toFixed(0)}%`}
                       labelLine={false}
                     >
-                      {stats.os.map((entry, index) => (
+                      {stats.os.map((_entry, index) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={PIE_COLORS[index % PIE_COLORS.length]}
@@ -534,7 +535,7 @@ export default function Summary() {
                       iconType="rect"
                       iconSize={8}
                       wrapperStyle={{ paddingTop: '10px' }}
-                      formatter={(value, entry) => {
+                      formatter={(value, _entry) => {
                         const total = stats.os.reduce((sum, item) => sum + item.value, 0);
                         const itemData = stats.os.find(item => item.name === value);
                         const percent = total > 0 && itemData ? ((itemData.value / total) * 100).toFixed(0) : 0;

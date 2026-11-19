@@ -190,7 +190,6 @@ function HighlightedBio({ text, keywords }) {
 
 function App() {
   // Theme is always dark
-  const theme = "dark";
 
   const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [configLoaded, setConfigLoaded] = useState(false);
@@ -707,7 +706,7 @@ function App() {
                 <div className="group relative bg-zinc-50 dark:bg-zinc-900/50 rounded-xl p-2 border border-zinc-200 dark:border-zinc-800 hover:border-accent dark:hover:border-accent transition-all duration-300 flex items-center justify-center overflow-hidden h-[190px]">
                   <div className="absolute inset-0 bg-gradient-to-r from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 animate-pulse"></div>
                   <img
-                    src={`https://github-readme-stats-eight-theta.vercel.app/api?username=${githubUsername}&show_icons=true&theme=tokyonight&hide_border=true&include_all_commits=true&count_private=true`}
+                    src={`https://github-readme-stats.vercel.app/api?username=${githubUsername}&show_icons=true&theme=tokyonight&hide_border=true&include_all_commits=true&count_private=true`}
                     alt="GitHub Stats"
                     className="w-full h-full object-contain transition-all duration-500 group-hover:scale-105 relative z-10"
                     loading="lazy"
@@ -718,7 +717,7 @@ function App() {
                 <div className="group relative bg-zinc-50 dark:bg-zinc-900/50 rounded-xl p-2 border border-zinc-200 dark:border-zinc-800 hover:border-accent dark:hover:border-accent transition-all duration-300 flex items-center justify-center overflow-hidden h-[190px]">
                   <div className="absolute inset-0 bg-gradient-to-r from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 animate-pulse"></div>
                   <img
-                    src={`https://github-readme-stats-eight-theta.vercel.app/api/top-langs/?username=${githubUsername}&layout=compact&langs_count=8&theme=tokyonight&hide_border=true`}
+                    src={`https://github-readme-stats.vercel.app/api/top-langs/?username=${githubUsername}&layout=compact&langs_count=8&theme=tokyonight&hide_border=true`}
                     alt="Top Languages"
                     className="w-full h-full object-contain transition-all duration-500 group-hover:scale-105 relative z-10"
                     loading="lazy"

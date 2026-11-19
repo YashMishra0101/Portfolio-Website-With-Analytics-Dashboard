@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { MapPin, Smartphone, Monitor } from "lucide-react";
 import {
   collection,
@@ -46,7 +46,7 @@ export default function Security() {
    */
   const ADMIN_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days in ms
 
-  const activeDeviceCount = (() => {
+  const activeDeviceCount = useMemo(() => {
     const now = Date.now();
     const sessionEvents = logs.filter(
       (log) =>
@@ -100,7 +100,7 @@ export default function Security() {
     }
 
     return activeDevices.size;
-  })();
+  }, [logs]);
 
 
 

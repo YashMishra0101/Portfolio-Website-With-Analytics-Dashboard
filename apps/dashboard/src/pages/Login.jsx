@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useAuth } from "../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import { collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
@@ -53,17 +52,16 @@ export default function Login() {
 
   const processAuthentication = async () => {
     // STEP 1: Verify credentials FIRST (fast)
-    let isMatch = false;
+    let credentialsValid = false;
     try {
       await signInWithEmailAndPassword(auth, formData.email, formData.pass);
-      isMatch = true;
+      credentialsValid = true;
     } catch (authErr) {
-      isMatch = false;
       console.error(authErr);
     }
 
     // If credentials are wrong, fail immediately (no IP fetch needed)
-    if (!isMatch) {
+    if (!credentialsValid) {
       setError("Invalid credentials.");
       setLoading(false);
       setStatus("idle");
@@ -75,17 +73,17 @@ export default function Login() {
       try {
         const res = await fetch("https://ipapi.co/json/");
         return await res.json();
-      } catch (e) {
+      } catch (_e) {
         try {
           const res = await fetch("https://api.db-ip.com/v2/free/self");
           const d = await res.json();
           return { ip: d.ipAddress, city: d.city, country_name: d.countryName };
-        } catch (e2) {
+        } catch (_e2) {
           try {
             const res = await fetch("https://api.ipify.org?format=json");
             const d = await res.json();
             return { ip: d.ip };
-          } catch (e3) {
+          } catch (_e3) {
             return { ip: "unknown" };
           }
         }

@@ -72,7 +72,7 @@ const getGeoInfo = async () => {
     // Fallback 1: freeipapi.com (HTTPS, no key needed)
     try {
       const response = await fetch("https://freeipapi.com/api/json/");
-      if (!response.ok) throw new Error("freeipapi failed");
+      if (!response.ok) throw new Error("freeipapi failed", { cause: e });
       const data = await response.json();
 
       if (data.cityName && data.countryName) {
@@ -84,14 +84,14 @@ const getGeoInfo = async () => {
           isp: data.isp || "Unknown",
         };
       }
-      throw new Error("Incomplete data from freeipapi");
+      throw new Error("Incomplete data from freeipapi", { cause: e });
     } catch (e2) {
       console.warn("Fallback 1 (freeipapi) failed:", e2.message);
 
       // Fallback 2: ipwho.is (HTTPS, reliable)
       try {
         const response = await fetch("https://ipwho.is/");
-        if (!response.ok) throw new Error("ipwho.is failed");
+        if (!response.ok) throw new Error("ipwho.is failed", { cause: e2 });
         const data = await response.json();
 
         if (data.success !== false && data.city && data.country) {
@@ -103,7 +103,7 @@ const getGeoInfo = async () => {
             isp: data.connection?.isp || "Unknown",
           };
         }
-        throw new Error("Incomplete data from ipwho.is");
+        throw new Error("Incomplete data from ipwho.is", { cause: e2 });
       } catch (e3) {
         console.warn("Fallback 2 (ipwho.is) failed:", e3.message);
 
@@ -375,7 +375,7 @@ const getTrafficSource = () => {
       cacheSource(parsedPayload);
       return parsedPayload;
 
-    } catch (e) {
+    } catch {
       // Invalid referrer URL - treat as the raw string
       const rawPayload = {
         source: rawReferrer.substring(0, 50),
@@ -472,7 +472,7 @@ export const logVisit = async () => {
   const trafficSource = getTrafficSource();
 
   // Determine device type for owner visits
-  const getDeviceType = () => {
+  const _getDeviceType = () => {
     if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
       return "Mobile";
     }

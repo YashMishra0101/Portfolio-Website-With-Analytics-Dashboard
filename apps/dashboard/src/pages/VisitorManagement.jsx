@@ -134,7 +134,7 @@ export default function VisitorManagement() {
             setDeleteResult({ success: true, message: "Visitor deleted successfully" });
             setConfirmDelete(null);
             setSelectedVisitors((prev) => prev.filter((id) => id !== visitorId));
-        } catch (error) {
+        } catch (_error) {
             setDeleteResult({ success: false, message: "Failed to delete visitor" });
         } finally {
             setIsDeleting(false);
@@ -153,7 +153,7 @@ export default function VisitorManagement() {
             setDeleteResult({ success: true, message: `${selectedVisitors.length} visitor(s) deleted` });
             setSelectedVisitors([]);
             setBulkConfirm(false);
-        } catch (error) {
+        } catch (_error) {
             setDeleteResult({ success: false, message: "Failed to delete visitors" });
         } finally {
             setIsDeleting(false);
@@ -167,7 +167,7 @@ export default function VisitorManagement() {
         );
     };
 
-    const toggleSelectAll = () => {
+    const _toggleSelectAll = () => {
         if (selectedVisitors.length === filteredVisits.length) {
             setSelectedVisitors([]);
         } else {

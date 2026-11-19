@@ -77,7 +77,7 @@ export default function OwnerActivity() {
         return () => unsub();
     }, []);
 
-    const deleteActivity = async (id) => {
+    const _deleteActivity = async (id) => {
         if (window.confirm("Delete this activity record?")) {
             try {
                 await deleteDoc(doc(db, "owner_activity", id));
