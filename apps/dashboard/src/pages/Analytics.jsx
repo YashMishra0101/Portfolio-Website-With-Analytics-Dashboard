@@ -475,23 +475,25 @@ export default function Analytics() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="tactical-card p-6 lg:col-span-1 flex flex-col">
+      <div className="space-y-6">
+        <div className="tactical-card p-6 flex flex-col">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-2">
               <Monitor size={14} className="text-blue-500" /> Operating Systems
             </h3>
           </div>
-          <div className="flex-1 min-h-[320px] relative">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="min-h-[360px] relative">
+            <ResponsiveContainer width="100%" height={360}>
               <PieChart>
                 <Pie
                   data={data.os}
-                  innerRadius={60}
-                  outerRadius={80}
+                  innerRadius={75}
+                  outerRadius={105}
                   paddingAngle={5}
                   dataKey="value"
                   stroke="none"
+                  label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                  labelLine={false}
                 >
                   {data.os.map((entry, index) => (
                     <Cell
@@ -505,10 +507,10 @@ export default function Analytics() {
                   verticalAlign="bottom"
                   height={70}
                   iconType="rect"
-                  iconSize={8}
-                  wrapperStyle={{ paddingTop: '10px' }}
+                  iconSize={12}
+                  wrapperStyle={{ paddingTop: '16px' }}
                   formatter={(value) => (
-                    <span className="text-[10px] font-mono text-zinc-500 uppercase ml-1">
+                    <span className="text-xs sm:text-sm font-mono text-zinc-400 font-medium uppercase ml-1.5 mr-3">
                       {value}
                     </span>
                   )}
@@ -516,14 +518,14 @@ export default function Analytics() {
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none pb-16">
-              <span className="text-xs font-mono text-zinc-600 uppercase">
+              <span className="text-sm font-bold font-mono text-zinc-400 tracking-wider uppercase">
                 Systems
               </span>
             </div>
           </div>
         </div>
 
-        <div className="tactical-card p-6 lg:col-span-2">
+        <div className="tactical-card p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-2">
               <Globe size={14} className="text-emerald-500" /> Top Locations
@@ -572,66 +574,68 @@ export default function Analytics() {
           </div>
         </div>
 
-        <div className="tactical-card p-6 lg:col-span-2">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-2">
-              <Activity size={14} className="text-amber-500" /> Traffic Sources
-            </h3>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="tactical-card p-6 lg:col-span-2">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                <Activity size={14} className="text-amber-500" /> Traffic Sources
+              </h3>
+            </div>
+            <div className="h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={data.source}
+                  layout="vertical"
+                  margin={{ left: 20 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#27272a"
+                    horizontal={false}
+                  />
+                  <XAxis type="number" hide />
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    tick={{
+                      fill: "#a1a1aa",
+                      fontSize: 10,
+                      fontFamily: "monospace",
+                      width: 100,
+                    }}
+                    width={100}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "#27272a", opacity: 0.4 }}
+                    content={<CustomTooltip />}
+                  />
+                  <Bar
+                    dataKey="value"
+                    fill={COLORS.amber}
+                    barSize={20}
+                    radius={[0, 4, 4, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-          <div className="h-[250px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={data.source}
-                layout="vertical"
-                margin={{ left: 20 }}
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="#27272a"
-                  horizontal={false}
-                />
-                <XAxis type="number" hide />
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  tick={{
-                    fill: "#a1a1aa",
-                    fontSize: 10,
-                    fontFamily: "monospace",
-                    width: 100,
-                  }}
-                  width={100}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  cursor={{ fill: "#27272a", opacity: 0.4 }}
-                  content={<CustomTooltip />}
-                />
-                <Bar
-                  dataKey="value"
-                  fill={COLORS.amber}
-                  barSize={20}
-                  radius={[0, 4, 4, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
 
-        <div className="tactical-card p-6 lg:col-span-1 bg-zinc-900/50 flex flex-col justify-center text-center">
-          <div className="text-emerald-900 mb-4 flex justify-center">
-            <Activity size={48} className="animate-pulse" />
+          <div className="tactical-card p-6 lg:col-span-1 bg-zinc-900/50 flex flex-col justify-center text-center">
+            <div className="text-emerald-900 mb-4 flex justify-center">
+              <Activity size={48} className="animate-pulse" />
+            </div>
+            <h4 className="text-zinc-400 font-mono text-xs uppercase tracking-widest mb-2">
+              Status
+            </h4>
+            <p className="text-emerald-500 font-bold uppercase tracking-wider text-sm">
+              Tracking Active
+            </p>
+            <p className="text-zinc-600 text-[10px] mt-4 font-mono">
+              Data is logged in real-time.
+            </p>
           </div>
-          <h4 className="text-zinc-400 font-mono text-xs uppercase tracking-widest mb-2">
-            Status
-          </h4>
-          <p className="text-emerald-500 font-bold uppercase tracking-wider text-sm">
-            Tracking Active
-          </p>
-          <p className="text-zinc-600 text-[10px] mt-4 font-mono">
-            Data is logged in real-time.
-          </p>
         </div>
       </div>
     </div>

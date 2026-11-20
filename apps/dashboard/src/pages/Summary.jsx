@@ -480,9 +480,9 @@ export default function Summary() {
       </div>
 
       {/* Analytics Drill-Down Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="space-y-6">
         {/* OS Ecosystem (Donut) */}
-        <div className="tactical-card p-6 lg:col-span-1 flex flex-col hover:border-emerald-500/30 transition-colors duration-300">
+        <div className="tactical-card p-6 flex flex-col hover:border-emerald-500/30 transition-colors duration-300">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-2">
               <Monitor size={14} className="text-blue-500" /> Operating Systems
@@ -491,15 +491,15 @@ export default function Summary() {
               {timeRangeLabel}
             </span>
           </div>
-          <div className="flex-1 min-h-[320px] relative">
+          <div className="min-h-[360px] relative">
             {stats.os.length > 0 ? (
               <>
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height={360}>
                   <PieChart>
                     <Pie
                       data={stats.os}
-                      innerRadius={60}
-                      outerRadius={80}
+                      innerRadius={75}
+                      outerRadius={105}
                       paddingAngle={5}
                       startAngle={90}
                       endAngle={-270}
@@ -522,7 +522,7 @@ export default function Summary() {
                         borderRadius: "0px",
                         fontFamily: "monospace",
                       }}
-                      itemStyle={{ color: "#d4d4d8", fontSize: "12px" }}
+                      itemStyle={{ color: "#d4d4d8", fontSize: "14px" }}
                       formatter={(value, name) => {
                         const total = stats.os.reduce((sum, item) => sum + item.value, 0);
                         const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
@@ -533,14 +533,14 @@ export default function Summary() {
                       verticalAlign="bottom"
                       height={70}
                       iconType="rect"
-                      iconSize={8}
-                      wrapperStyle={{ paddingTop: '10px' }}
+                      iconSize={12}
+                      wrapperStyle={{ paddingTop: '16px' }}
                       formatter={(value, _entry) => {
                         const total = stats.os.reduce((sum, item) => sum + item.value, 0);
                         const itemData = stats.os.find(item => item.name === value);
                         const percent = total > 0 && itemData ? ((itemData.value / total) * 100).toFixed(0) : 0;
                         return (
-                          <span className="text-[10px] font-mono text-zinc-500 uppercase ml-1">
+                          <span className="text-xs sm:text-sm font-mono text-zinc-400 font-medium uppercase ml-1.5 mr-3">
                             {value} ({percent}%)
                           </span>
                         );
@@ -549,7 +549,7 @@ export default function Summary() {
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none pb-16">
-                  <span className="text-xs font-mono text-zinc-600 uppercase">
+                  <span className="text-sm font-bold font-mono text-zinc-400 tracking-wider uppercase">
                     Systems
                   </span>
                 </div>
@@ -564,7 +564,7 @@ export default function Summary() {
         </div>
 
         {/* Geo Distribution (Bar) */}
-        <div className="tactical-card p-6 lg:col-span-2 hover:border-emerald-500/30 transition-colors duration-300">
+        <div className="tactical-card p-6 hover:border-emerald-500/30 transition-colors duration-300">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-2">
               <Globe size={14} className="text-emerald-500" /> Top Locations
@@ -631,7 +631,7 @@ export default function Summary() {
         </div>
 
         {/* Traffic Sources (Horizontal Bar) */}
-        <div className="tactical-card p-6 lg:col-span-3 hover:border-emerald-500/30 transition-colors duration-300">
+        <div className="tactical-card p-6 hover:border-emerald-500/30 transition-colors duration-300">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-2">
               <Activity size={14} className="text-amber-500" /> Traffic Sources
